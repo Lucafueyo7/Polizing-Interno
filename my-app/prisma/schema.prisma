@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model clientes {
+  id                       Int                       @id @default(autoincrement())
+  email                    String?
+  telefono                 String?
+  direccion                String?
+  fecha_alta               DateTime?                 @default(now()) @db.Timestamptz(6)
+  estado                   String?
+  clientes_corporativos    clientes_corporativos?
+  clientes_no_corporativos clientes_no_corporativos?
+  poliza_cliente           poliza_cliente[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model clientes_corporativos {
+  cliente_id   Int      @id
+  cuit         String   @unique
+  razon_social String?
+  clientes     clientes @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model clientes_no_corporativos {
+  cliente_id Int      @id
+  dni        String
+  nombre     String?
+  apellido   String?
+  clientes   clientes @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model cobertura_poliza {
+  id_poliza    Int         @id
+  cobertura_id Int?
+  coberturas   coberturas? @relation(fields: [cobertura_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  polizas      polizas     @relation(fields: [id_poliza], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model coberturas {
+  id               Int                @id @default(autoincrement())
+  nombre           String?
+  detalle          String?
+  cobertura_poliza cobertura_poliza[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model empresas_aseguradoras {
+  id             Int              @id @default(autoincrement())
+  razon_social   String?
+  cuit           String           @unique
+  telefono       String?
+  email          String?
+  poliza_empresa poliza_empresa[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model pagos {
+  id            Int             @id @default(autoincrement())
+  monto         Decimal?        @db.Decimal(15, 2)
+  fecha_pago    DateTime?       @db.Timestamptz(6)
+  metodo_pago   String?
+  pagos_polizas pagos_polizas[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model pagos_polizas {
+  id_poliza Int     @id
+  id_pago   Int?
+  pagos     pagos?  @relation(fields: [id_pago], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  polizas   polizas @relation(fields: [id_poliza], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model poliza_cliente {
+  poliza_id  Int       @id
+  cliente_id Int?
+  clientes   clientes? @relation(fields: [cliente_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  polizas    polizas   @relation(fields: [poliza_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model poliza_empresa {
+  id_poliza             Int                    @id
+  aseguradora_id        Int?
+  empresas_aseguradoras empresas_aseguradoras? @relation(fields: [aseguradora_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  polizas               polizas                @relation(fields: [id_poliza], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model polizas {
+  id                         Int                @id @default(autoincrement())
+  numero_poliza              String?
+  fecha_emision              DateTime?          @db.Timestamptz(6)
+  fecha_inicio_vigencia      DateTime?          @db.Timestamptz(6)
+  fecha_fin_vigencia         DateTime?          @db.Timestamptz(6)
+  estado                     String?
+  suma_asegurada             Decimal?           @db.Decimal(15, 2)
+  tarjeta_circulacion_poliza String?
+  numero_cuota               Int?
+  cobertura_poliza           cobertura_poliza?
+  pagos_polizas              pagos_polizas?
+  poliza_cliente             poliza_cliente?
+  poliza_empresa             poliza_empresa?
+  siniestros_poliza          siniestros_poliza?
+  tipo_poliza                tipo_poliza?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model roles {
+  id       Int        @id @default(autoincrement())
+  rol      String
+  usuarios usuarios[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model siniestros {
+  id                  Int                 @id @default(autoincrement())
+  fecha_ocurrencia    DateTime?           @db.Timestamptz(6)
+  descripcion_hechos  String?
+  estado              String?
+  documentos_adjuntos String[]
+  siniestros_poliza   siniestros_poliza[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model siniestros_poliza {
+  id_poliza    Int         @id
+  id_siniestro Int?
+  polizas      polizas     @relation(fields: [id_poliza], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  siniestros   siniestros? @relation(fields: [id_siniestro], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tipo_poliza {
+  id_poliza      Int           @id
+  tipo_seguro_id String?
+  polizas        polizas       @relation(fields: [id_poliza], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tipos_seguro   tipos_seguro? @relation(fields: [tipo_seguro_id], references: [nombre], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tipos_seguro {
+  nombre      String        @id
+  descripcion String?
+  tipo_poliza tipo_poliza[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model usuarios {
+  dni             String  @id
+  rol_id          Int?
+  email           String  @unique
+  password_hash   String
+  nombre_completo String?
+  roles           roles?  @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
