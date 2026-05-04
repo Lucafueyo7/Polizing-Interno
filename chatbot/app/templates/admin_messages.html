@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mensajes Chatbot</title>
+    <style>
+      body { font-family: system-ui, sans-serif; background: #f5f5f2; margin: 0; color: #1d1d1b; }
+      header { background: #174c3c; color: white; padding: 22px; }
+      main { max-width: 1100px; margin: 28px auto; padding: 0 18px; }
+      .bar { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+      .card { background: white; padding: 18px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 8px 28px rgba(0,0,0,.06); }
+      label { display: block; font-weight: 700; margin-bottom: 6px; }
+      input, textarea { width: 100%; box-sizing: border-box; border: 1px solid #d0d0cc; border-radius: 10px; padding: 10px; font: inherit; }
+      textarea { min-height: 120px; resize: vertical; }
+      code { color: #174c3c; font-weight: 700; }
+      button { padding: 12px 18px; border: 0; border-radius: 10px; background: #174c3c; color: white; font-weight: 700; cursor: pointer; }
+      .logout { background: transparent; border: 1px solid rgba(255,255,255,.6); }
+      .saved { background: #e3f4ea; color: #174c3c; padding: 12px; border-radius: 12px; }
+      .actions { position: sticky; bottom: 0; background: rgba(245,245,242,.92); padding: 16px 0; backdrop-filter: blur(8px); }
+      @media (max-width: 700px) { header .bar { align-items: flex-start; flex-direction: column; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="bar">
+        <div>
+          <h1>Mensajes y opciones</h1>
+          <p>Edite textos, menus y respuestas del chatbot.</p>
+        </div>
+        <form method="post" action="/admin/logout"><button class="logout">Salir</button></form>
+      </div>
+    </header>
+    <main>
+      {% if saved %}<p class="saved">Cambios guardados correctamente.</p>{% endif %}
+      <form method="post" action="/admin/messages">
+        {% for message in messages %}
+          <section class="card">
+            <p><code>{{ message.key }}</code></p>
+            <label>Etiqueta</label>
+            <input name="label:{{ message.id }}" value="{{ message.label }}">
+            <label>Contenido</label>
+            <textarea name="content:{{ message.id }}">{{ message.content }}</textarea>
+          </section>
+        {% endfor %}
+        <div class="actions"><button>Guardar cambios</button></div>
+      </form>
+    </main>
+  </body>
+</html>

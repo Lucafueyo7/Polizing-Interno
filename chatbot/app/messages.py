@@ -1,0 +1,69 @@
+from sqlalchemy.orm import Session
+
+from app.models import EditableMessage
+
+
+DEFAULT_MESSAGES = {
+    "welcome_menu": (
+        "Menu principal",
+        "Bienvenido. Seleccione una opcion:\n\n1. Solicitar poliza\n2. Obtener tarjeta de circulacion\n3. Adjuntar comprobante de pago\n4. Registrar siniestro\n\nResponda con el numero de la opcion.",
+    ),
+    "invalid_option": ("Opcion invalida", "No pudimos interpretar su respuesta. Por favor seleccione una opcion valida."),
+    "client_not_found": (
+        "Cliente no encontrado",
+        "No encontramos su numero registrado en nuestro sistema. Por favor comuniquese con su productor de seguros.",
+    ),
+    "session_expired": (
+        "Sesion expirada",
+        "La conversacion anterior fue descartada por superar la ventana permitida. Iniciaremos una nueva solicitud.",
+    ),
+    "cancelled": ("Solicitud cancelada", "La solicitud fue cancelada. Puede iniciar una nueva operacion desde el menu principal."),
+    "type_cancel": ("Ayuda cancelar", "Puede responder 0 en cualquier momento para cancelar y volver al menu principal."),
+    "policy_type_prompt": ("Tipo poliza", "Indique el tipo de poliza que desea solicitar:\n\n1. Auto\n2. Moto"),
+    "policy_domain_prompt": ("Dominio poliza", "Indique el dominio/patente del vehiculo. Si aun no lo tiene, responda SIN DOMINIO."),
+    "policy_brand_prompt": ("Marca poliza", "Indique la marca del vehiculo."),
+    "policy_model_prompt": ("Modelo poliza", "Indique el modelo del vehiculo."),
+    "policy_year_prompt": ("Anio poliza", "Indique el anio del vehiculo."),
+    "policy_use_prompt": ("Uso poliza", "Indique el uso del vehiculo:\n\n1. Particular\n2. Comercial"),
+    "policy_notes_prompt": ("Observaciones poliza", "Indique observaciones adicionales o responda NO."),
+    "policy_success": ("Poliza creada", "Su solicitud de poliza fue registrada correctamente. Numero de solicitud: {reference}."),
+    "policy_list_prompt": ("Seleccion poliza", "Seleccione una poliza:\n\n{policies}"),
+    "policy_list_empty": ("Sin polizas", "No encontramos polizas activas asociadas a su numero."),
+    "card_success": ("Tarjeta enviada", "Encontramos la tarjeta de circulacion. Se la enviaremos por este medio."),
+    "card_not_found": ("Tarjeta no encontrada", "No se pudo obtener la tarjeta de circulacion solicitada."),
+    "payment_policy_prompt": ("Poliza pago", "Seleccione la poliza a la que corresponde el comprobante:\n\n{policies}"),
+    "payment_file_prompt": ("Archivo pago", "Adjunte el comprobante de pago en imagen o PDF."),
+    "payment_invalid_file": ("Archivo pago invalido", "El archivo recibido no es valido. Envie una imagen o PDF."),
+    "payment_success": ("Pago recibido", "El comprobante fue recibido correctamente. Numero de recepcion: {reference}."),
+    "claim_policy_prompt": ("Poliza siniestro", "Seleccione la poliza asociada al siniestro:\n\n{policies}"),
+    "claim_date_prompt": ("Fecha siniestro", "Indique la fecha del siniestro con formato DD/MM/AAAA."),
+    "claim_time_prompt": ("Hora siniestro", "Indique la hora aproximada del siniestro con formato HH:MM."),
+    "claim_place_prompt": ("Lugar siniestro", "Indique el lugar donde ocurrio el siniestro."),
+    "claim_description_prompt": ("Descripcion siniestro", "Describa brevemente lo ocurrido."),
+    "claim_license_prompt": ("Carnet siniestro", "Adjunte una imagen o PDF del carnet de conducir."),
+    "claim_vehicle_card_prompt": ("Cedula siniestro", "Adjunte una imagen o PDF de la cedula verde."),
+    "claim_third_parties_prompt": ("Terceros siniestro", "Indique datos de terceros involucrados o responda NO."),
+    "claim_police_report_prompt": ("Denuncia siniestro", "Adjunte denuncia policial si corresponde, o responda NO."),
+    "claim_photos_prompt": ("Fotos siniestro", "Adjunte fotos/documentos adicionales o responda FINALIZAR."),
+    "claim_success": ("Siniestro registrado", "El siniestro fue registrado correctamente. Numero de siniestro: {reference}."),
+    "outbound_sent": ("Mensaje externo", "{message}"),
+}
+
+
+def seed_messages(db: Session) -> None:
+    for key, (label, content) in DEFAULT_MESSAGES.items():
+        exists = db.query(EditableMessage).filter(EditableMessage.key == key).first()
+        if not exists:
+            db.add(EditableMessage(key=key, label=label, content=content))
+    db.commit()
+
+
+def get_message(db: Session, key: str, **kwargs: object) -> str:
+    row = db.query(EditableMessage).filter(EditableMessage.key == key).first()
+    content = row.content if row else DEFAULT_MESSAGES.get(key, (key, key))[1]
+    if not kwargs:
+        return content
+    try:
+        return content.format(**kwargs)
+    except KeyError:
+        return content
