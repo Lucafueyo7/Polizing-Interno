@@ -4,11 +4,11 @@ import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
   clienteIdent,
   clienteLabel,
-  type ClienteCore,
 } from "@/lib/domain/cliente-helpers";
 import { fmtBytes } from "@/lib/format/bytes";
 import {
   aseguradoraRefFromRow,
+  clienteCoreFromRow,
   clienteRefFromRow,
   isoDate,
   isoDateTime,
@@ -199,28 +199,6 @@ export async function getSiniestroById(
   const row = await findSiniestroById(id);
   if (!row) return null;
   return toFull(row);
-}
-
-function clienteCoreFromRow(row: {
-  clientes_corporativos: { razon_social: string; cuit: string } | null;
-  clientes_no_corporativos: { nombre: string; apellido: string; dni: string } | null;
-}): ClienteCore | null {
-  if (row.clientes_corporativos) {
-    return {
-      tipo: "corp",
-      razonSocial: row.clientes_corporativos.razon_social,
-      cuit: row.clientes_corporativos.cuit,
-    };
-  }
-  if (row.clientes_no_corporativos) {
-    return {
-      tipo: "normal",
-      nombre: row.clientes_no_corporativos.nombre,
-      apellido: row.clientes_no_corporativos.apellido,
-      dni: row.clientes_no_corporativos.dni,
-    };
-  }
-  return null;
 }
 
 export async function getSiniestroFormRefs(): Promise<SiniestroFormRefs> {

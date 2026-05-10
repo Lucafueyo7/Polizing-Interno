@@ -1,21 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { Controller, useForm, type SubmitHandler } from "react-hook-form";
+import { Building, User as UserIcon } from "@/components/icons";
 import {
-  Building,
-  Check,
-  User as UserIcon,
-} from "@/components/icons";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+  Field,
+  FormFooter,
+  FormModalShell,
+  SectionLabel,
+} from "@/components/shared/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,9 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { useUrlModal } from "@/lib/hooks/use-url-modal";
 import { toastError, toastSuccess } from "@/lib/ui/toast";
 import type { ClienteFull, ClienteTipo } from "@/lib/data/types";
+import { ClienteTipoCard } from "./cliente-tipo-card";
 import { createCliente } from "../_actions/create-cliente";
 import { updateCliente } from "../_actions/update-cliente";
 import type {
@@ -40,23 +35,32 @@ type Mode =
   | { mode: "create" }
   | { mode: "edit"; cliente: ClienteFull };
 
-type ClienteFormModalProps = Mode;
-
 type FormShape = {
   tipo: ClienteTipo;
-  // corp
   razonSocial?: string;
   cuit?: string;
   contactoNombre?: string;
-  // normal
   nombre?: string;
   apellido?: string;
   dni?: string;
-  // shared
   email: string;
   telefono?: string;
   direccion?: string;
   estado: "activo" | "baja";
+};
+
+const EMPTY_FORM: FormShape = {
+  tipo: "normal",
+  razonSocial: "",
+  cuit: "",
+  contactoNombre: "",
+  nombre: "",
+  apellido: "",
+  dni: "",
+  email: "",
+  telefono: "",
+  direccion: "",
+  estado: "activo",
 };
 
 function defaultsFromCliente(c: ClienteFull): FormShape {
@@ -74,20 +78,6 @@ function defaultsFromCliente(c: ClienteFull): FormShape {
     estado: c.estado,
   };
 }
-
-const EMPTY_FORM: FormShape = {
-  tipo: "normal",
-  razonSocial: "",
-  cuit: "",
-  contactoNombre: "",
-  nombre: "",
-  apellido: "",
-  dni: "",
-  email: "",
-  telefono: "",
-  direccion: "",
-  estado: "activo",
-};
 
 function toInput(values: FormShape): ClienteInput {
   if (values.tipo === "corp") {
@@ -114,26 +104,18 @@ function toInput(values: FormShape): ClienteInput {
   } satisfies ClienteNormalInput;
 }
 
-export function ClienteFormModal(props: ClienteFormModalProps) {
+export function ClienteFormModal(props: Mode) {
   const router = useRouter();
   const isEdit = props.mode === "edit";
   const [isPending, startTransition] = useTransition();
-  const [open, setOpen] = useState(true);
+  const closeTo = isEdit ? `/clientes/${props.cliente.id}` : "/clientes";
+  const { open, setOpen, close, onOpenChange } = useUrlModal({ closeTo });
 
   const form = useForm<FormShape>({
     defaultValues: isEdit ? defaultsFromCliente(props.cliente) : EMPTY_FORM,
   });
 
   const tipo = form.watch("tipo");
-
-  const close = () => {
-    setOpen(false);
-    // Da tiempo a la animación de cierre antes de navegar.
-    startTransition(() => {
-      const target = isEdit ? `/clientes/${props.cliente.id}` : "/clientes";
-      router.push(target);
-    });
-  };
 
   const onSubmit: SubmitHandler<FormShape> = (values) => {
     const input = toInput(values);
@@ -165,314 +147,195 @@ export function ClienteFormModal(props: ClienteFormModalProps) {
   };
 
   return (
-    <Dialog
+    <FormModalShell
       open={open}
-      onOpenChange={(next) => {
-        if (!next) close();
-      }}
+      onOpenChange={onOpenChange}
+      title={isEdit ? "Editar cliente" : "Registrar cliente"}
+      description="Los campos varían según el tipo de cliente."
+      maxWidthClass="sm:max-w-[640px]"
     >
-      <DialogContent className="sm:max-w-[640px] max-w-[calc(100%-2rem)]">
-        <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Editar cliente" : "Registrar cliente"}
-          </DialogTitle>
-          <DialogDescription>
-            Los campos varían según el tipo de cliente.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid gap-4 mt-2"
-          noValidate
-        >
-          {!isEdit && (
-            <div>
-              <Label className="text-[12.5px] mb-2 block">
-                Tipo de cliente <span className="text-destructive">*</span>
-              </Label>
-              <div className="grid grid-cols-2 gap-2.5">
-                <TipoCard
-                  selected={tipo === "normal"}
-                  icon={UserIcon}
-                  title="Particular"
-                  desc="Persona física · DNI"
-                  onClick={() =>
-                    form.setValue("tipo", "normal", { shouldDirty: true })
-                  }
-                />
-                <TipoCard
-                  selected={tipo === "corp"}
-                  icon={Building}
-                  title="Corporativo"
-                  desc="Persona jurídica · CUIT"
-                  onClick={() =>
-                    form.setValue("tipo", "corp", { shouldDirty: true })
-                  }
-                />
-              </div>
-            </div>
-          )}
-
-          <SectionLabel>
-            Datos {tipo === "corp" ? "de la empresa" : "personales"}
-          </SectionLabel>
-
-          <div className="grid grid-cols-2 gap-3">
-            {tipo === "normal" ? (
-              <>
-                <Field
-                  label="Nombre"
-                  required
-                  error={form.formState.errors.nombre?.message}
-                >
-                  <Input
-                    {...form.register("nombre")}
-                    placeholder="Juan"
-                    autoFocus={!isEdit}
-                  />
-                </Field>
-                <Field
-                  label="Apellido"
-                  required
-                  error={form.formState.errors.apellido?.message}
-                >
-                  <Input {...form.register("apellido")} placeholder="Pérez" />
-                </Field>
-                <Field
-                  label="DNI"
-                  required
-                  error={form.formState.errors.dni?.message}
-                >
-                  <Input
-                    {...form.register("dni")}
-                    placeholder="33123456"
-                    className="font-mono"
-                  />
-                </Field>
-                <Field
-                  label="Estado"
-                  required
-                  error={form.formState.errors.estado?.message}
-                >
-                  <Controller
-                    control={form.control}
-                    name="estado"
-                    render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={(v) => field.onChange(v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="activo">Activo</SelectItem>
-                          <SelectItem value="baja">Baja</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </Field>
-              </>
-            ) : (
-              <>
-                <Field
-                  label="Razón social"
-                  required
-                  className="col-span-2"
-                  error={form.formState.errors.razonSocial?.message}
-                >
-                  <Input
-                    {...form.register("razonSocial")}
-                    placeholder="Constructora Andina S.A."
-                    autoFocus={!isEdit}
-                  />
-                </Field>
-                <Field
-                  label="CUIT"
-                  required
-                  error={form.formState.errors.cuit?.message}
-                >
-                  <Input
-                    {...form.register("cuit")}
-                    placeholder="30710458927"
-                    className="font-mono"
-                  />
-                </Field>
-                <Field
-                  label="Persona de contacto"
-                  error={form.formState.errors.contactoNombre?.message}
-                >
-                  <Input
-                    {...form.register("contactoNombre")}
-                    placeholder="Mariano Pereyra"
-                  />
-                </Field>
-                <Field
-                  label="Estado"
-                  required
-                  className="col-span-2"
-                  error={form.formState.errors.estado?.message}
-                >
-                  <Controller
-                    control={form.control}
-                    name="estado"
-                    render={({ field }) => (
-                      <Select
-                        value={field.value}
-                        onValueChange={(v) => field.onChange(v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="activo">Activo</SelectItem>
-                          <SelectItem value="baja">Baja</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                </Field>
-              </>
-            )}
-          </div>
-
-          <SectionLabel>Contacto</SectionLabel>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field
-              label="Email"
-              required
-              error={form.formState.errors.email?.message}
-            >
-              <Input
-                type="email"
-                {...form.register("email")}
-                placeholder="cliente@dominio.com"
-              />
-            </Field>
-            <Field
-              label="Teléfono"
-              error={form.formState.errors.telefono?.message}
-            >
-              <Input
-                {...form.register("telefono")}
-                placeholder="+54 11 ..."
-                className="font-mono"
-              />
-            </Field>
-            <Field
-              label="Dirección"
-              className="col-span-2"
-              error={form.formState.errors.direccion?.message}
-            >
-              <Input
-                {...form.register("direccion")}
-                placeholder="Calle 123, Ciudad"
-              />
-            </Field>
-          </div>
-
-          <div className="-mx-4 -mb-4 mt-2 flex justify-end gap-2 border-t bg-muted/50 p-4 rounded-b-xl">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={close}
-              disabled={isPending}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              <Check className="w-3.5 h-3.5" />
-              {isEdit ? "Guardar cambios" : "Crear cliente"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function TipoCard({
-  selected,
-  icon: Icon,
-  title,
-  desc,
-  onClick,
-}: {
-  selected: boolean;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  title: string;
-  desc: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-3 px-3.5 py-3 rounded-lg border text-left transition-colors",
-        selected
-          ? "border-primary bg-brand-primary-soft"
-          : "border-border bg-card hover:bg-brand-surface-hover",
-      )}
-    >
-      <span
-        className={cn(
-          "w-8 h-8 grid place-items-center rounded-md shrink-0",
-          selected
-            ? "bg-primary text-primary-foreground"
-            : "bg-secondary text-muted-foreground",
-        )}
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="grid gap-4 mt-2"
+        noValidate
       >
-        <Icon className="w-4 h-4" />
-      </span>
-      <span className="flex flex-col">
-        <span
-          className={cn(
-            "text-[13px] font-semibold",
-            selected ? "text-primary" : "text-foreground",
+        {!isEdit && (
+          <div>
+            <Label className="text-[12.5px] mb-2 block">
+              Tipo de cliente <span className="text-destructive">*</span>
+            </Label>
+            <div className="grid grid-cols-2 gap-2.5">
+              <ClienteTipoCard
+                selected={tipo === "normal"}
+                icon={UserIcon}
+                title="Particular"
+                desc="Persona física · DNI"
+                onClick={() =>
+                  form.setValue("tipo", "normal", { shouldDirty: true })
+                }
+              />
+              <ClienteTipoCard
+                selected={tipo === "corp"}
+                icon={Building}
+                title="Corporativo"
+                desc="Persona jurídica · CUIT"
+                onClick={() =>
+                  form.setValue("tipo", "corp", { shouldDirty: true })
+                }
+              />
+            </div>
+          </div>
+        )}
+
+        <SectionLabel>
+          Datos {tipo === "corp" ? "de la empresa" : "personales"}
+        </SectionLabel>
+
+        <div className="grid grid-cols-2 gap-3">
+          {tipo === "normal" ? (
+            <>
+              <Field
+                label="Nombre"
+                required
+                error={form.formState.errors.nombre?.message}
+              >
+                <Input
+                  {...form.register("nombre")}
+                  placeholder="Juan"
+                  autoFocus={!isEdit}
+                />
+              </Field>
+              <Field
+                label="Apellido"
+                required
+                error={form.formState.errors.apellido?.message}
+              >
+                <Input {...form.register("apellido")} placeholder="Pérez" />
+              </Field>
+              <Field
+                label="DNI"
+                required
+                error={form.formState.errors.dni?.message}
+              >
+                <Input
+                  {...form.register("dni")}
+                  placeholder="33123456"
+                  className="font-mono"
+                />
+              </Field>
+              <EstadoSelect form={form} />
+            </>
+          ) : (
+            <>
+              <Field
+                label="Razón social"
+                required
+                className="col-span-2"
+                error={form.formState.errors.razonSocial?.message}
+              >
+                <Input
+                  {...form.register("razonSocial")}
+                  placeholder="Constructora Andina S.A."
+                  autoFocus={!isEdit}
+                />
+              </Field>
+              <Field
+                label="CUIT"
+                required
+                error={form.formState.errors.cuit?.message}
+              >
+                <Input
+                  {...form.register("cuit")}
+                  placeholder="30710458927"
+                  className="font-mono"
+                />
+              </Field>
+              <Field
+                label="Persona de contacto"
+                error={form.formState.errors.contactoNombre?.message}
+              >
+                <Input
+                  {...form.register("contactoNombre")}
+                  placeholder="Mariano Pereyra"
+                />
+              </Field>
+              <EstadoSelect form={form} className="col-span-2" />
+            </>
           )}
-        >
-          {title}
-        </span>
-        <span className="text-[11.5px] text-muted-foreground">{desc}</span>
-      </span>
-    </button>
+        </div>
+
+        <SectionLabel>Contacto</SectionLabel>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field
+            label="Email"
+            required
+            error={form.formState.errors.email?.message}
+          >
+            <Input
+              type="email"
+              {...form.register("email")}
+              placeholder="cliente@dominio.com"
+            />
+          </Field>
+          <Field label="Teléfono" error={form.formState.errors.telefono?.message}>
+            <Input
+              {...form.register("telefono")}
+              placeholder="+54 11 ..."
+              className="font-mono"
+            />
+          </Field>
+          <Field
+            label="Dirección"
+            className="col-span-2"
+            error={form.formState.errors.direccion?.message}
+          >
+            <Input
+              {...form.register("direccion")}
+              placeholder="Calle 123, Ciudad"
+            />
+          </Field>
+        </div>
+
+        <FormFooter
+          onCancel={close}
+          submitLabel={isEdit ? "Guardar cambios" : "Crear cliente"}
+          pending={isPending}
+        />
+      </form>
+    </FormModalShell>
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-[10.5px] font-semibold tracking-[0.06em] uppercase text-muted-foreground border-b border-border pb-1.5">
-      {children}
-    </div>
-  );
-}
-
-function Field({
-  label,
-  required,
-  error,
+function EstadoSelect({
+  form,
   className,
-  children,
 }: {
-  label: string;
-  required?: boolean;
-  error?: string;
+  form: ReturnType<typeof useForm<FormShape>>;
   className?: string;
-  children: React.ReactNode;
 }) {
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
-      <Label className="text-[12.5px] font-medium">
-        {label}
-        {required && <span className="text-destructive ml-0.5">*</span>}
-      </Label>
-      {children}
-      {error && <span className="text-[11.5px] text-destructive">{error}</span>}
-    </div>
+    <Field
+      label="Estado"
+      required
+      className={className}
+      error={form.formState.errors.estado?.message}
+    >
+      <Controller
+        control={form.control}
+        name="estado"
+        render={({ field }) => (
+          <Select value={field.value} onValueChange={field.onChange}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="activo">Activo</SelectItem>
+              <SelectItem value="baja">Baja</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+      />
+    </Field>
   );
 }
-

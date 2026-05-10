@@ -1,13 +1,19 @@
+import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
   aseguradoraRefFromRow,
   clienteRefFromRow,
   isoDate,
 } from "./_mappers";
 import type {
+  PagoCounts,
   PagoFull,
   PagoListItem,
   PagoPolizaRef,
+  PagoTab,
+  PagosFilters,
+  PagosSummary,
 } from "./types";
 
 const LIST_INCLUDE = {
@@ -40,7 +46,7 @@ type PagoFullRow = NonNullable<Awaited<ReturnType<typeof findPagoById>>>;
 
 function findPagos() {
   return prisma.pagos.findMany({
-    orderBy: { id: "desc" },
+    orderBy: [{ fecha_pago: { sort: "desc", nulls: "first" } }, { id: "desc" }],
     include: LIST_INCLUDE,
   });
 }
@@ -69,17 +75,77 @@ function toPolizaRef(p: PagoFullRow["polizas"][number]): PagoPolizaRef {
     id: p.id,
     numero: p.numero_poliza,
     tipo: p.tipo_seguro.nombre,
+    cobertura: p.cobertura,
+    concepto: `Prima mensual · ${p.tipo_seguro.nombre}`,
     prima: Number(p.prima_mensual),
     aseguradora: aseguradoraRefFromRow(p.aseguradora),
   };
 }
 
-export async function getPagos(): Promise<PagoListItem[]> {
+async function getAllPagos(): Promise<PagoListItem[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.pagos);
   const rows = await findPagos();
   return rows.map(toListItem);
 }
 
+function matchesTab(p: PagoListItem, tab: PagoTab | undefined): boolean {
+  if (!tab || tab === "all") return true;
+  return p.estado === tab;
+}
+
+export async function getPagos(
+  filters: PagosFilters = {},
+): Promise<PagoListItem[]> {
+  const all = await getAllPagos();
+  if (!filters.tab || filters.tab === "all") return all;
+  return all.filter((p) => matchesTab(p, filters.tab));
+}
+
+export async function getPagoCounts(): Promise<PagoCounts> {
+  const all = await getAllPagos();
+  return {
+    all: all.length,
+    pendiente: all.filter((p) => p.estado === "pendiente").length,
+    validado: all.filter((p) => p.estado === "validado").length,
+    rechazado: all.filter((p) => p.estado === "rechazado").length,
+  };
+}
+
+export async function getPagosSummary(): Promise<PagosSummary> {
+  const all = await getAllPagos();
+  const pendientes = all.filter((p) => p.estado === "pendiente");
+  const validados = all.filter((p) => p.estado === "validado");
+  const empresas = new Set(all.map((p) => p.cliente.id));
+  return {
+    pendienteTotal: pendientes.reduce((s, p) => s + p.monto, 0),
+    pendienteCount: pendientes.length,
+    validadoTotal: validados.reduce((s, p) => s + p.monto, 0),
+    polizasAlcanzadas: all.reduce((s, p) => s + p.polizasCount, 0),
+    comprobantes: all.length,
+    empresas: empresas.size,
+  };
+}
+
+const PAGO_PRIORITY: Record<PagoListItem["estado"], number> = {
+  pendiente: 0,
+  validado: 1,
+  rechazado: 2,
+};
+
+export async function getPrimerPago(): Promise<PagoListItem | null> {
+  const all = await getAllPagos();
+  if (all.length === 0) return null;
+  return [...all].sort(
+    (a, b) => PAGO_PRIORITY[a.estado] - PAGO_PRIORITY[b.estado],
+  )[0];
+}
+
 export async function getPagoById(id: number): Promise<PagoFull | null> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.pagos);
   const row = await findPagoById(id);
   if (!row) return null;
   const base: PagoListItem = {

@@ -198,6 +198,8 @@ export type PagoPolizaRef = {
   id: number;
   numero: string;
   tipo: string;
+  cobertura: CoberturaTipo;
+  concepto: string;
   prima: number;
   aseguradora: PolizaAseguradoraRef;
 };
@@ -206,6 +208,23 @@ export type PagoFull = PagoListItem & {
   comprobante: string | null;
   cbu: string | null;
   polizas: PagoPolizaRef[];
+};
+
+export type PagoTab = "all" | "pendiente" | "validado" | "rechazado";
+
+export type PagosFilters = {
+  tab?: PagoTab;
+};
+
+export type PagoCounts = Record<PagoTab, number>;
+
+export type PagosSummary = {
+  pendienteTotal: number;
+  pendienteCount: number;
+  validadoTotal: number;
+  polizasAlcanzadas: number;
+  comprobantes: number;
+  empresas: number;
 };
 
 export type DashboardKPIs = {

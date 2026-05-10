@@ -1,13 +1,10 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { CACHE_TAGS } from "@/lib/cache/tags";
-import {
-  clienteIdent,
-  clienteLabel,
-  type ClienteCore,
-} from "@/lib/domain/cliente-helpers";
+import { clienteIdent, clienteLabel } from "@/lib/domain/cliente-helpers";
 import {
   aseguradoraRefFromRow,
+  clienteCoreFromRow,
   clienteRefFromRow,
   isoDate,
   vencimientoDays,
@@ -137,28 +134,6 @@ export async function getPolizaById(id: number): Promise<PolizaFull | null> {
     emision: isoDate(row.fecha_emision),
     tipoSeguroId: row.tipo_seguro_id,
   };
-}
-
-function clienteCoreFromRow(row: {
-  clientes_corporativos: { razon_social: string; cuit: string } | null;
-  clientes_no_corporativos: { nombre: string; apellido: string; dni: string } | null;
-}): ClienteCore | null {
-  if (row.clientes_corporativos) {
-    return {
-      tipo: "corp",
-      razonSocial: row.clientes_corporativos.razon_social,
-      cuit: row.clientes_corporativos.cuit,
-    };
-  }
-  if (row.clientes_no_corporativos) {
-    return {
-      tipo: "normal",
-      nombre: row.clientes_no_corporativos.nombre,
-      apellido: row.clientes_no_corporativos.apellido,
-      dni: row.clientes_no_corporativos.dni,
-    };
-  }
-  return null;
 }
 
 export async function getPolizaFormRefs(): Promise<PolizaFormRefs> {

@@ -66,6 +66,33 @@ export function aseguradoraRefFromRow(
   };
 }
 
+/** Convierte el shape Prisma del cliente a `ClienteCore` (corp | normal). */
+export function clienteCoreFromRow(row: {
+  clientes_corporativos: { razon_social: string; cuit: string } | null;
+  clientes_no_corporativos: {
+    nombre: string;
+    apellido: string;
+    dni: string;
+  } | null;
+}): ClienteCore | null {
+  if (row.clientes_corporativos) {
+    return {
+      tipo: "corp",
+      razonSocial: row.clientes_corporativos.razon_social,
+      cuit: row.clientes_corporativos.cuit,
+    };
+  }
+  if (row.clientes_no_corporativos) {
+    return {
+      tipo: "normal",
+      nombre: row.clientes_no_corporativos.nombre,
+      apellido: row.clientes_no_corporativos.apellido,
+      dni: row.clientes_no_corporativos.dni,
+    };
+  }
+  return null;
+}
+
 export function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
