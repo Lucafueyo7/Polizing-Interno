@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
+import { THEME_INIT_SCRIPT } from "@/lib/theme/theme-script";
 
 const sans = Inter({
   variable: "--font-sans",
@@ -31,7 +33,13 @@ export default function RootLayout({
       className={`${sans.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
-        <ThemeProvider>{children}</ThemeProvider>
+        <script
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+          suppressHydrationWarning
+        />
+        <ThemeProvider>
+          <Suspense>{children}</Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );

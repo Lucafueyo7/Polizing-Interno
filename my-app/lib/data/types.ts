@@ -137,6 +137,23 @@ export type DashboardKPIs = {
   primaMensual: number;
 };
 
+export type SiniestroPendiente = {
+  id: number;
+  titulo: string;
+  cliente: PolizaClienteRef;
+  fechaReporte: string;
+  docsCount: number;
+  iaProcesada: boolean;
+};
+
+export type DistribucionAseguradora = {
+  id: number;
+  razonSocial: string;
+  color: string;
+  polizasActivas: number;
+  pct: number;
+};
+
 export type SidebarBadges = {
   siniestrosNuevos: number;
   polizasPorVencer: number;

@@ -1,11 +1,25 @@
+import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { TODAY_ISO } from "@/lib/format/date";
-import type { DashboardKPIs, SidebarBadges } from "./types";
+import { CACHE_TAGS } from "@/lib/cache/tags";
+import { aseguradoraColor } from "@/lib/domain/aseguradora-color";
+import { clienteRefFromRow, isoDateTime } from "./_mappers";
+import type {
+  DashboardKPIs,
+  DistribucionAseguradora,
+  SidebarBadges,
+  SiniestroPendiente,
+} from "./types";
 
 const ACTIVE_POLIZAS = ["vigente", "proxima"] as const;
 const PENDING_SINIESTROS = ["nuevo", "tramite"] as const;
+const COMPUTABLE_POLIZAS = ["vigente", "proxima", "renovada"] as const;
 
 export async function getDashboardKPIs(): Promise<DashboardKPIs> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.dashboard, CACHE_TAGS.clientes, CACHE_TAGS.polizas, CACHE_TAGS.siniestros);
+
   const [clientesActivos, polizasVigentes, siniestrosTramite, primaAgg] =
     await Promise.all([
       prisma.clientes.count({ where: { estado: "activo" } }),
@@ -18,6 +32,7 @@ export async function getDashboardKPIs(): Promise<DashboardKPIs> {
         _sum: { prima_mensual: true },
       }),
     ]);
+
   return {
     clientesActivos,
     polizasVigentes,
@@ -27,6 +42,10 @@ export async function getDashboardKPIs(): Promise<DashboardKPIs> {
 }
 
 export async function getSidebarBadges(): Promise<SidebarBadges> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.siniestros, CACHE_TAGS.polizas);
+
   const today = new Date(TODAY_ISO);
   const limit = new Date(TODAY_ISO);
   limit.setDate(limit.getDate() + 30);
@@ -41,4 +60,78 @@ export async function getSidebarBadges(): Promise<SidebarBadges> {
     }),
   ]);
   return { siniestrosNuevos, polizasPorVencer };
+}
+
+export async function getSiniestrosPendientes(
+  limit = 5,
+): Promise<SiniestroPendiente[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.siniestros);
+
+  const rows = await prisma.siniestros.findMany({
+    where: { estado: "nuevo" },
+    orderBy: { fecha_reporte: "desc" },
+    take: limit,
+    include: {
+      documentos: { select: { id: true } },
+      poliza: {
+        include: {
+          cliente: {
+            include: {
+              clientes_corporativos: true,
+              clientes_no_corporativos: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    titulo: row.titulo,
+    cliente: clienteRefFromRow(row.poliza.cliente),
+    fechaReporte: isoDateTime(row.fecha_reporte),
+    docsCount: row.documentos.length,
+    iaProcesada: row.ai_summary !== null,
+  }));
+}
+
+export async function getDistribucionAseguradoras(): Promise<
+  DistribucionAseguradora[]
+> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.aseguradoras, CACHE_TAGS.polizas);
+
+  const aseguradoras = await prisma.empresas_aseguradoras.findMany({
+    orderBy: { id: "asc" },
+    include: {
+      polizas: { select: { estado: true } },
+    },
+  });
+
+  const totalActivas = aseguradoras.reduce(
+    (sum, a) =>
+      sum +
+      a.polizas.filter((p) =>
+        (COMPUTABLE_POLIZAS as readonly string[]).includes(p.estado),
+      ).length,
+    0,
+  );
+  const denom = totalActivas || 1;
+
+  return aseguradoras.map((a) => {
+    const polizasActivas = a.polizas.filter((p) =>
+      (COMPUTABLE_POLIZAS as readonly string[]).includes(p.estado),
+    ).length;
+    return {
+      id: a.id,
+      razonSocial: a.razon_social,
+      color: aseguradoraColor(a.id),
+      polizasActivas,
+      pct: (polizasActivas / denom) * 100,
+    };
+  });
 }
