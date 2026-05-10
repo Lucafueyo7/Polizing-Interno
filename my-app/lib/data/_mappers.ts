@@ -4,6 +4,7 @@ import {
   clienteLabel,
   type ClienteCore,
 } from "@/lib/domain/cliente-helpers";
+import { aseguradoraColor } from "@/lib/domain/aseguradora-color";
 import { daysUntilExpiry } from "@/lib/format/date";
 import type {
   ClienteTipo,
@@ -61,6 +62,7 @@ export function aseguradoraRefFromRow(
   return {
     id: row.id,
     razonSocial: row.razon_social,
+    color: aseguradoraColor(row.id),
   };
 }
 

@@ -62,6 +62,47 @@ export type PolizaClienteRef = {
 export type PolizaAseguradoraRef = {
   id: number;
   razonSocial: string;
+  color: string;
+};
+
+export type PolizaTab =
+  | "all"
+  | "vigente"
+  | "proxima"
+  | "porVencer"
+  | "renovada"
+  | "vencida"
+  | "anulada";
+
+export type PolizasFilters = {
+  q?: string;
+  tab?: PolizaTab;
+  tipo?: string;
+  aseguradoraId?: number;
+};
+
+export type PolizaCounts = Record<PolizaTab, number>;
+
+export type FormCliente = {
+  id: number;
+  label: string;
+  ident: string;
+};
+
+export type FormAseguradora = {
+  id: number;
+  razonSocial: string;
+};
+
+export type FormTipoSeguro = {
+  id: number;
+  nombre: string;
+};
+
+export type PolizaFormRefs = {
+  clientes: FormCliente[];
+  aseguradoras: FormAseguradora[];
+  tiposSeguro: FormTipoSeguro[];
 };
 
 export type PolizaListItem = {
@@ -81,12 +122,38 @@ export type PolizaListItem = {
 
 export type PolizaFull = PolizaListItem & {
   emision: string;
+  tipoSeguroId: number;
 };
 
 export type SiniestroDoc = {
+  id: number;
   tipo: "img" | "pdf";
   nombre: string;
   url: string;
+  tamano: string | null;
+  procesadoIA: boolean;
+};
+
+export type SiniestroTab = "all" | "nuevo" | "tramite" | "cerrado";
+
+export type SiniestrosFilters = {
+  q?: string;
+  tab?: SiniestroTab;
+};
+
+export type SiniestroCounts = Record<SiniestroTab, number>;
+
+export type FormPolizaRef = {
+  id: number;
+  numero: string;
+  clienteId: number;
+  tipo: string;
+  cobertura: CoberturaTipo;
+};
+
+export type SiniestroFormRefs = {
+  clientes: FormCliente[];
+  polizas: FormPolizaRef[];
 };
 
 export type SiniestroListItem = {
