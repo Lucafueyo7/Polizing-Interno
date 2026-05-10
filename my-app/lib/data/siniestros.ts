@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import type { SiniestroEstado } from "@/lib/domain/poliza-status";
 import {
   aseguradoraRefFromRow,
   clienteRefFromRow,
@@ -10,20 +9,12 @@ import type { SiniestroDoc, SiniestroFull, SiniestroListItem } from "./types";
 
 const LIST_INCLUDE = {
   documentos: { select: { id: true } },
-  siniestros_poliza: {
+  poliza: {
     include: {
-      polizas: {
+      cliente: {
         include: {
-          poliza_cliente: {
-            include: {
-              clientes: {
-                include: {
-                  clientes_corporativos: true,
-                  clientes_no_corporativos: true,
-                },
-              },
-            },
-          },
+          clientes_corporativos: true,
+          clientes_no_corporativos: true,
         },
       },
     },
@@ -32,24 +23,16 @@ const LIST_INCLUDE = {
 
 const FULL_INCLUDE = {
   documentos: true,
-  siniestros_poliza: {
+  poliza: {
     include: {
-      polizas: {
+      cliente: {
         include: {
-          poliza_cliente: {
-            include: {
-              clientes: {
-                include: {
-                  clientes_corporativos: true,
-                  clientes_no_corporativos: true,
-                },
-              },
-            },
-          },
-          poliza_empresa: { include: { empresas_aseguradoras: true } },
-          tipo_poliza: true,
+          clientes_corporativos: true,
+          clientes_no_corporativos: true,
         },
       },
+      aseguradora: true,
+      tipo_seguro: true,
     },
   },
 } as const;
@@ -73,86 +56,52 @@ function findSiniestroById(id: number) {
   });
 }
 
-function toEstado(s: string | null): SiniestroEstado {
-  return s === "tramite" || s === "cerrado" ? s : "nuevo";
-}
-
-function toFuente(s: string | null): "whatsapp" | "email" | null {
-  return s === "whatsapp" || s === "email" ? s : null;
-}
-
-function clienteRef(row: SiniestroListRow) {
-  const cliente = row.siniestros_poliza[0]?.polizas?.poliza_cliente?.clientes;
-  if (!cliente) return null;
-  return clienteRefFromRow(cliente);
-}
-
-function toListItem(row: SiniestroListRow): SiniestroListItem | null {
-  const cliente = clienteRef(row);
-  if (!cliente) return null;
+function toListItem(row: SiniestroListRow): SiniestroListItem {
   return {
     id: row.id,
     numero: row.numero,
     titulo: row.titulo,
     descripcion: row.descripcion_hechos,
-    cliente,
+    cliente: clienteRefFromRow(row.poliza.cliente),
     fechaReporte: isoDateTime(row.fecha_reporte),
-    estado: toEstado(row.estado),
-    fuente: toFuente(row.fuente),
+    estado: row.estado,
     leido: row.leido,
     docsCount: row.documentos.length,
   };
 }
 
-function toDoc(d: { tipo: string; nombre: string; tamano: string | null; procesado_ia: boolean }): SiniestroDoc {
-  return {
-    tipo: d.tipo === "img" ? "img" : "pdf",
-    nombre: d.nombre,
-    tamano: d.tamano,
-    procesadoIA: d.procesado_ia,
-  };
+function toDoc(d: { tipo: "img" | "pdf"; nombre: string; url: string }): SiniestroDoc {
+  return { tipo: d.tipo, nombre: d.nombre, url: d.url };
 }
 
-function toFull(row: SiniestroFullRow): SiniestroFull | null {
-  const polizaRow = row.siniestros_poliza[0]?.polizas;
-  const cliente = polizaRow?.poliza_cliente?.clientes;
-  if (!cliente) return null;
-  const aseguradora = polizaRow.poliza_empresa?.empresas_aseguradoras;
-  const base: SiniestroListItem = {
+function toFull(row: SiniestroFullRow): SiniestroFull {
+  return {
     id: row.id,
     numero: row.numero,
     titulo: row.titulo,
     descripcion: row.descripcion_hechos,
-    cliente: clienteRefFromRow(cliente),
+    cliente: clienteRefFromRow(row.poliza.cliente),
     fechaReporte: isoDateTime(row.fecha_reporte),
-    estado: toEstado(row.estado),
-    fuente: toFuente(row.fuente),
+    estado: row.estado,
     leido: row.leido,
     docsCount: row.documentos.length,
-  };
-  return {
-    ...base,
     fechaOcurrencia: isoDate(row.fecha_ocurrencia),
     aiSummary: row.ai_summary,
     docs: row.documentos.map(toDoc),
-    poliza: aseguradora
-      ? {
-          id: polizaRow.id,
-          numero: polizaRow.numero_poliza,
-          tipo: polizaRow.tipo_poliza?.tipo_seguro_id ?? null,
-          cobertura: polizaRow.cobertura,
-          suma: Number(polizaRow.suma_asegurada ?? 0),
-          aseguradora: aseguradoraRefFromRow(aseguradora),
-        }
-      : null,
+    poliza: {
+      id: row.poliza.id,
+      numero: row.poliza.numero_poliza,
+      tipo: row.poliza.tipo_seguro.nombre,
+      cobertura: row.poliza.cobertura,
+      suma: Number(row.poliza.suma_asegurada),
+      aseguradora: aseguradoraRefFromRow(row.poliza.aseguradora),
+    },
   };
 }
 
 export async function getSiniestros(): Promise<SiniestroListItem[]> {
   const rows = await findSiniestros();
-  return rows
-    .map(toListItem)
-    .filter((s): s is SiniestroListItem => s !== null);
+  return rows.map(toListItem);
 }
 
 export async function getSiniestroById(id: number): Promise<SiniestroFull | null> {

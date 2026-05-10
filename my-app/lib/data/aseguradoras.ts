@@ -8,11 +8,7 @@ export async function getAseguradoras(): Promise<AseguradoraListItem[]> {
     prisma.empresas_aseguradoras.findMany({
       orderBy: { id: "asc" },
       include: {
-        poliza_empresa: {
-          include: {
-            polizas: { select: { estado: true, prima_mensual: true } },
-          },
-        },
+        polizas: { select: { estado: true, prima_mensual: true } },
       },
     }),
     prisma.polizas.count({
@@ -23,26 +19,18 @@ export async function getAseguradoras(): Promise<AseguradoraListItem[]> {
   const denom = totalCarteraActiva || 1;
 
   return aseguradoras.map((a) => {
-    const polizas = a.poliza_empresa
-      .map((pe) => pe.polizas)
-      .filter((p): p is NonNullable<typeof p> => Boolean(p));
-    const activas = polizas.filter(
-      (p) => p.estado && (ACTIVE_ESTADOS as readonly string[]).includes(p.estado),
+    const activas = a.polizas.filter((p) =>
+      (ACTIVE_ESTADOS as readonly string[]).includes(p.estado),
     );
-    const primaMensual = polizas
-      .filter(
-        (p) => p.estado && p.estado !== "anulada" && p.estado !== "vencida",
-      )
-      .reduce((s, p) => s + Number(p.prima_mensual ?? 0), 0);
+    const primaMensual = a.polizas
+      .filter((p) => p.estado !== "anulada" && p.estado !== "vencida")
+      .reduce((s, p) => s + Number(p.prima_mensual), 0);
     return {
       id: a.id,
-      razonSocial: a.razon_social ?? "",
+      razonSocial: a.razon_social,
       cuit: a.cuit,
-      contacto: a.contacto_nombre,
       email: a.email,
       telefono: a.telefono,
-      direccion: a.direccion,
-      color: a.color_hex ?? "#5b6677",
       polizasActivas: activas.length,
       primaMensual,
       pctCartera: (activas.length / denom) * 100,

@@ -5,37 +5,32 @@ import {
   isoDate,
 } from "./_mappers";
 import type {
-  PagoEstado,
   PagoFull,
-  PagoItemDetail,
   PagoListItem,
+  PagoPolizaRef,
 } from "./types";
 
 const LIST_INCLUDE = {
-  clientes: {
+  cliente: {
     include: {
       clientes_corporativos: true,
       clientes_no_corporativos: true,
     },
   },
-  items: { select: { id: true } },
+  polizas: { select: { id: true } },
 } as const;
 
 const FULL_INCLUDE = {
-  clientes: {
+  cliente: {
     include: {
       clientes_corporativos: true,
       clientes_no_corporativos: true,
     },
   },
-  items: {
+  polizas: {
     include: {
-      polizas: {
-        include: {
-          poliza_empresa: { include: { empresas_aseguradoras: true } },
-          tipo_poliza: true,
-        },
-      },
+      aseguradora: true,
+      tipo_seguro: true,
     },
   },
 } as const;
@@ -57,66 +52,49 @@ function findPagoById(id: number) {
   });
 }
 
-function toEstado(s: string | null): PagoEstado {
-  return s === "validado" || s === "rechazado" ? s : "pendiente";
-}
-
-function toListItem(row: PagoListRow): PagoListItem | null {
-  if (!row.clientes) return null;
+function toListItem(row: PagoListRow): PagoListItem {
   return {
     id: row.id,
-    cliente: clienteRefFromRow(row.clientes),
-    fechaEmision: isoDate(row.fecha_emision),
-    periodo: row.periodo,
-    estado: toEstado(row.estado),
+    cliente: clienteRefFromRow(row.cliente),
+    fechaPago: row.fecha_pago ? isoDate(row.fecha_pago) : null,
+    estado: row.estado,
     metodoPago: row.metodo_pago,
-    montoTotal: Number(row.monto_total ?? 0),
-    itemsCount: row.items.length,
+    monto: Number(row.monto),
+    polizasCount: row.polizas.length,
   };
 }
 
-function toItemDetail(item: PagoFullRow["items"][number]): PagoItemDetail | null {
-  const aseguradora = item.polizas.poliza_empresa?.empresas_aseguradoras;
-  if (!aseguradora) return null;
+function toPolizaRef(p: PagoFullRow["polizas"][number]): PagoPolizaRef {
   return {
-    id: item.id,
-    concepto: item.concepto,
-    monto: Number(item.monto ?? 0),
-    poliza: {
-      id: item.polizas.id,
-      numero: item.polizas.numero_poliza,
-      tipo: item.polizas.tipo_poliza?.tipo_seguro_id ?? null,
-      aseguradora: aseguradoraRefFromRow(aseguradora),
-    },
+    id: p.id,
+    numero: p.numero_poliza,
+    tipo: p.tipo_seguro.nombre,
+    prima: Number(p.prima_mensual),
+    aseguradora: aseguradoraRefFromRow(p.aseguradora),
   };
 }
 
 export async function getPagos(): Promise<PagoListItem[]> {
   const rows = await findPagos();
-  return rows
-    .map(toListItem)
-    .filter((p): p is PagoListItem => p !== null);
+  return rows.map(toListItem);
 }
 
 export async function getPagoById(id: number): Promise<PagoFull | null> {
   const row = await findPagoById(id);
-  if (!row || !row.clientes) return null;
+  if (!row) return null;
   const base: PagoListItem = {
     id: row.id,
-    cliente: clienteRefFromRow(row.clientes),
-    fechaEmision: isoDate(row.fecha_emision),
-    periodo: row.periodo,
-    estado: toEstado(row.estado),
+    cliente: clienteRefFromRow(row.cliente),
+    fechaPago: row.fecha_pago ? isoDate(row.fecha_pago) : null,
+    estado: row.estado,
     metodoPago: row.metodo_pago,
-    montoTotal: Number(row.monto_total ?? 0),
-    itemsCount: row.items.length,
+    monto: Number(row.monto),
+    polizasCount: row.polizas.length,
   };
   return {
     ...base,
     comprobante: row.comprobante,
     cbu: row.cbu,
-    items: row.items
-      .map(toItemDetail)
-      .filter((i): i is PagoItemDetail => i !== null),
+    polizas: row.polizas.map(toPolizaRef),
   };
 }

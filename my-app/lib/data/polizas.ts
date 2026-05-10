@@ -3,26 +3,19 @@ import {
   aseguradoraRefFromRow,
   clienteRefFromRow,
   isoDate,
-  toPolizaEstado,
   vencimientoDays,
 } from "./_mappers";
 import type { PolizaFull, PolizaListItem } from "./types";
 
 const POLIZA_INCLUDE = {
-  poliza_cliente: {
+  cliente: {
     include: {
-      clientes: {
-        include: {
-          clientes_corporativos: true,
-          clientes_no_corporativos: true,
-        },
-      },
+      clientes_corporativos: true,
+      clientes_no_corporativos: true,
     },
   },
-  poliza_empresa: {
-    include: { empresas_aseguradoras: true },
-  },
-  tipo_poliza: true,
+  aseguradora: true,
+  tipo_seguro: true,
 } as const;
 
 type PolizaRow = Awaited<ReturnType<typeof findPolizas>>[number];
@@ -34,31 +27,26 @@ function findPolizas() {
   });
 }
 
-function toListItem(row: PolizaRow): PolizaListItem | null {
-  const cliente = row.poliza_cliente?.clientes;
-  const aseguradora = row.poliza_empresa?.empresas_aseguradoras;
-  if (!cliente || !aseguradora) return null;
+function toListItem(row: PolizaRow): PolizaListItem {
   return {
     id: row.id,
     numero: row.numero_poliza,
-    tipo: row.tipo_poliza?.tipo_seguro_id ?? null,
+    tipo: row.tipo_seguro.nombre,
     cobertura: row.cobertura,
     inicio: isoDate(row.fecha_inicio_vigencia),
     fin: isoDate(row.fecha_fin_vigencia),
-    suma: Number(row.suma_asegurada ?? 0),
-    prima: Number(row.prima_mensual ?? 0),
-    estado: toPolizaEstado(row.estado),
+    suma: Number(row.suma_asegurada),
+    prima: Number(row.prima_mensual),
+    estado: row.estado,
     diasHastaVencimiento: vencimientoDays(row.fecha_fin_vigencia),
-    cliente: clienteRefFromRow(cliente),
-    aseguradora: aseguradoraRefFromRow(aseguradora),
+    cliente: clienteRefFromRow(row.cliente),
+    aseguradora: aseguradoraRefFromRow(row.aseguradora),
   };
 }
 
 export async function getPolizas(): Promise<PolizaListItem[]> {
   const rows = await findPolizas();
-  return rows
-    .map(toListItem)
-    .filter((p): p is PolizaListItem => p !== null);
+  return rows.map(toListItem);
 }
 
 export async function getPolizaById(id: number): Promise<PolizaFull | null> {
@@ -67,10 +55,8 @@ export async function getPolizaById(id: number): Promise<PolizaFull | null> {
     include: POLIZA_INCLUDE,
   });
   if (!row) return null;
-  const base = toListItem(row);
-  if (!base) return null;
   return {
-    ...base,
+    ...toListItem(row),
     emision: isoDate(row.fecha_emision),
   };
 }

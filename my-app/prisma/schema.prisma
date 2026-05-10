@@ -8,27 +8,85 @@ datasource db {
 }
 
 // =============================================================================
+// ENUMS
+// =============================================================================
+
+enum ClienteTipo {
+  corporativo
+  persona
+}
+
+enum ClienteEstado {
+  activo
+  baja
+}
+
+enum PolizaEstado {
+  vigente
+  proxima
+  vencida
+  anulada
+  renovada
+}
+
+enum CoberturaTipo {
+  responsabilidad_civil
+  terceros_completo
+  todo_riesgo
+  basica
+  integral
+}
+
+enum SiniestroEstado {
+  nuevo
+  tramite
+  cerrado
+}
+
+enum DocumentoTipo {
+  img
+  pdf
+}
+
+enum PagoEstado {
+  pendiente
+  validado
+  rechazado
+}
+
+enum Rol {
+  productor
+  administrativo
+}
+
+// =============================================================================
 // CLIENTES
 // =============================================================================
 
 model clientes {
-  id         Int       @id @default(autoincrement())
+  id         Int           @id @default(autoincrement())
+  tipo       ClienteTipo
   email      String?
   telefono   String?
   direccion  String?
-  fecha_alta DateTime? @default(now()) @db.Timestamptz(6)
-  estado     String?
+  estado     ClienteEstado @default(activo)
+  fecha_alta DateTime      @default(now()) @db.Timestamptz(6)
+  created_at DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at DateTime      @updatedAt @db.Timestamptz(6)
 
   clientes_corporativos    clientes_corporativos?
   clientes_no_corporativos clientes_no_corporativos?
-  poliza_cliente           poliza_cliente[]
+  polizas                  polizas[]
   pagos                    pagos[]
+
+  @@index([tipo])
+  @@index([estado])
 }
 
 model clientes_corporativos {
   cliente_id      Int      @id
   cuit            String   @unique
-  razon_social    String?
+  razon_social    String
   contacto_nombre String?
   clientes        clientes @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
 }
@@ -36,8 +94,8 @@ model clientes_corporativos {
 model clientes_no_corporativos {
   cliente_id Int      @id
   dni        String   @unique
-  nombre     String?
-  apellido   String?
+  nombre     String
+  apellido   String
   clientes   clientes @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
 }
 
@@ -46,16 +104,27 @@ model clientes_no_corporativos {
 // =============================================================================
 
 model empresas_aseguradoras {
-  id              Int     @id @default(autoincrement())
-  razon_social    String?
-  cuit            String  @unique
-  telefono        String?
-  email           String?
-  direccion       String?
-  contacto_nombre String?
-  color_hex       String? // marca visual (#0d8a5f, #1e5fc7, ...)
+  id           Int      @id @default(autoincrement())
+  razon_social String
+  cuit         String   @unique
+  telefono     String?
+  email        String?
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @updatedAt @db.Timestamptz(6)
 
-  poliza_empresa poliza_empresa[]
+  polizas polizas[]
+}
+
+// =============================================================================
+// TIPOS DE SEGURO
+// =============================================================================
+
+model tipos_seguro {
+  id          Int     @id @default(autoincrement())
+  nombre      String  @unique
+  descripcion String?
+
+  polizas polizas[]
 }
 
 // =============================================================================
@@ -63,67 +132,38 @@ model empresas_aseguradoras {
 // =============================================================================
 
 model polizas {
-  id                         Int       @id @default(autoincrement())
-  numero_poliza              String    @unique
-  fecha_emision              DateTime? @db.Timestamptz(6)
-  fecha_inicio_vigencia      DateTime? @db.Timestamptz(6)
-  fecha_fin_vigencia         DateTime? @db.Timestamptz(6)
-  estado                     String?   // 'vigente' | 'proxima' | 'vencida' | 'anulada' | 'renovada'
-  suma_asegurada             Decimal?  @db.Decimal(15, 2)
-  prima_mensual              Decimal?  @db.Decimal(15, 2)
-  cobertura                  String?
+  id                         Int           @id @default(autoincrement())
+  numero_poliza              String        @unique
+  cliente_id                 Int
+  aseguradora_id             Int
+  tipo_seguro_id             Int
+  cobertura                  CoberturaTipo
+  estado                     PolizaEstado
+  fecha_emision              DateTime      @db.Timestamptz(6)
+  fecha_inicio_vigencia      DateTime      @db.Timestamptz(6)
+  fecha_fin_vigencia         DateTime      @db.Timestamptz(6)
+  suma_asegurada             Decimal       @db.Decimal(15, 2)
+  prima_mensual              Decimal       @db.Decimal(15, 2)
+  moneda                     String        @default("ARS") @db.Char(3)
   tarjeta_circulacion_poliza String?
   numero_cuota               Int?
+  pago_id                    Int?
+  created_at                 DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime      @updatedAt @db.Timestamptz(6)
 
-  cobertura_poliza   cobertura_poliza?
-  pagos_polizas      pagos_polizas[]
-  poliza_cliente     poliza_cliente?
-  poliza_empresa     poliza_empresa?
-  siniestros_poliza  siniestros_poliza[]
-  tipo_poliza        tipo_poliza?
-}
+  cliente     clientes              @relation(fields: [cliente_id], references: [id])
+  aseguradora empresas_aseguradoras @relation(fields: [aseguradora_id], references: [id])
+  tipo_seguro tipos_seguro          @relation(fields: [tipo_seguro_id], references: [id])
+  pago        pagos?                @relation(fields: [pago_id], references: [id], onDelete: SetNull)
+  siniestros  siniestros[]
 
-model poliza_cliente {
-  poliza_id  Int       @id
-  cliente_id Int?
-  clientes   clientes? @relation(fields: [cliente_id], references: [id], onDelete: SetNull)
-  polizas    polizas   @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
-}
-
-model poliza_empresa {
-  id_poliza             Int                    @id
-  aseguradora_id        Int?
-  empresas_aseguradoras empresas_aseguradoras? @relation(fields: [aseguradora_id], references: [id], onDelete: SetNull)
-  polizas               polizas                @relation(fields: [id_poliza], references: [id], onDelete: Cascade)
-}
-
-model tipo_poliza {
-  id_poliza      Int           @id
-  tipo_seguro_id String?
-  polizas        polizas       @relation(fields: [id_poliza], references: [id], onDelete: Cascade)
-  tipos_seguro   tipos_seguro? @relation(fields: [tipo_seguro_id], references: [nombre], onDelete: SetNull)
-}
-
-model tipos_seguro {
-  nombre      String        @id
-  descripcion String?
-  tipo_poliza tipo_poliza[]
-}
-
-// Catálogo de coberturas (heredado del schema original; queda disponible pero
-// no se usa en el seed actual — el texto descriptivo vive en `polizas.cobertura`).
-model coberturas {
-  id               Int                @id @default(autoincrement())
-  nombre           String?
-  detalle          String?
-  cobertura_poliza cobertura_poliza[]
-}
-
-model cobertura_poliza {
-  id_poliza    Int         @id
-  cobertura_id Int?
-  coberturas   coberturas? @relation(fields: [cobertura_id], references: [id], onDelete: SetNull)
-  polizas      polizas     @relation(fields: [id_poliza], references: [id], onDelete: Cascade)
+  @@index([cliente_id])
+  @@index([aseguradora_id])
+  @@index([tipo_seguro_id])
+  @@index([estado])
+  @@index([fecha_fin_vigencia])
+  @@index([pago_id])
+  @@index([estado, fecha_fin_vigencia])
 }
 
 // =============================================================================
@@ -131,88 +171,81 @@ model cobertura_poliza {
 // =============================================================================
 
 model siniestros {
-  id                  Int       @id @default(autoincrement())
-  numero              String?   @unique
-  titulo              String?
-  fecha_ocurrencia    DateTime? @db.Timestamptz(6)
-  fecha_reporte       DateTime? @db.Timestamptz(6)
-  descripcion_hechos  String?
-  estado              String?   // 'nuevo' | 'tramite' | 'cerrado'
-  fuente              String?   // 'whatsapp' | 'email'
-  leido               Boolean   @default(false)
-  ai_summary          String?
+  id                 Int             @id @default(autoincrement())
+  poliza_id          Int
+  numero             String          @unique
+  titulo             String
+  fecha_ocurrencia   DateTime        @db.Timestamptz(6)
+  fecha_reporte      DateTime        @db.Timestamptz(6)
+  descripcion_hechos String?
+  estado             SiniestroEstado @default(nuevo)
+  leido              Boolean         @default(false)
+  ai_summary         String?
+  created_at         DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime        @updatedAt @db.Timestamptz(6)
 
-  siniestros_poliza   siniestros_poliza[]
-  documentos          siniestro_documentos[]
-}
+  poliza     polizas                @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
+  documentos siniestro_documentos[]
 
-model siniestros_poliza {
-  id           Int         @id @default(autoincrement())
-  id_poliza    Int
-  id_siniestro Int
-  polizas      polizas     @relation(fields: [id_poliza], references: [id], onDelete: Cascade)
-  siniestros   siniestros  @relation(fields: [id_siniestro], references: [id], onDelete: Cascade)
-
-  @@unique([id_poliza, id_siniestro])
+  @@index([poliza_id])
+  @@index([estado])
+  @@index([leido])
+  @@index([fecha_reporte(sort: Desc)])
+  @@index([estado, leido])
 }
 
 model siniestro_documentos {
-  id            Int        @id @default(autoincrement())
-  siniestro_id  Int
-  tipo          String     // 'img' | 'pdf'
-  nombre        String
-  tamano        String?
-  procesado_ia  Boolean    @default(false)
-  siniestros    siniestros @relation(fields: [siniestro_id], references: [id], onDelete: Cascade)
+  id           Int           @id @default(autoincrement())
+  siniestro_id Int
+  tipo         DocumentoTipo
+  nombre       String
+  url          String
+  mime_type    String
+  hash         String?
+  tamano_bytes Int?
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+
+  siniestro siniestros @relation(fields: [siniestro_id], references: [id], onDelete: Cascade)
+
+  @@index([siniestro_id])
 }
 
 // =============================================================================
-// PAGOS MASIVOS (corporativos)
+// PAGOS (un pago agrupa N pólizas)
 // =============================================================================
 
 model pagos {
-  id              Int             @id @default(autoincrement())
-  cliente_id      Int?
-  fecha_emision   DateTime?       @db.Timestamptz(6)
-  fecha_pago      DateTime?       @db.Timestamptz(6)
-  periodo         String?         // "Mayo 2026"
-  estado          String?         // 'pendiente' | 'validado' | 'rechazado'
-  metodo_pago     String?
-  comprobante     String?
-  cbu             String?
-  monto_total     Decimal?        @db.Decimal(15, 2)
+  id          Int        @id @default(autoincrement())
+  cliente_id  Int
+  monto       Decimal    @db.Decimal(15, 2)
+  fecha_pago  DateTime?  @db.Timestamptz(6)
+  estado      PagoEstado @default(pendiente)
+  metodo_pago String?
+  comprobante String?
+  cbu         String?
+  moneda      String     @default("ARS") @db.Char(3)
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime   @updatedAt @db.Timestamptz(6)
 
-  clientes        clientes?       @relation(fields: [cliente_id], references: [id], onDelete: SetNull)
-  items           pagos_polizas[]
-}
+  cliente clientes  @relation(fields: [cliente_id], references: [id])
+  polizas polizas[]
 
-model pagos_polizas {
-  id        Int      @id @default(autoincrement())
-  id_pago   Int
-  id_poliza Int
-  concepto  String?
-  monto     Decimal? @db.Decimal(15, 2)
-  pagos     pagos    @relation(fields: [id_pago], references: [id], onDelete: Cascade)
-  polizas   polizas  @relation(fields: [id_poliza], references: [id], onDelete: Cascade)
-
-  @@unique([id_pago, id_poliza])
+  @@index([cliente_id])
+  @@index([estado])
+  @@index([fecha_pago(sort: Desc)])
+  @@index([cliente_id, estado])
 }
 
 // =============================================================================
-// USUARIOS / ROLES
+// USUARIOS
 // =============================================================================
-
-model roles {
-  id       Int        @id @default(autoincrement())
-  rol      String
-  usuarios usuarios[]
-}
 
 model usuarios {
-  dni             String  @id
-  rol_id          Int?
-  email           String  @unique
+  id              Int      @id @default(autoincrement())
+  dni             String   @unique
+  email           String   @unique
   password_hash   String
-  nombre_completo String?
-  roles           roles?  @relation(fields: [rol_id], references: [id], onDelete: SetNull)
+  nombre_completo String
+  rol             Rol
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
 }

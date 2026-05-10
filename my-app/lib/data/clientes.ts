@@ -4,8 +4,8 @@ import {
   clienteLabel,
   type ClienteCore,
 } from "@/lib/domain/cliente-helpers";
+import { isoDate } from "./_mappers";
 import type {
-  ClienteEstado,
   ClienteFull,
   ClienteListItem,
   ClienteTipo,
@@ -21,11 +21,7 @@ function findClientes() {
     include: {
       clientes_corporativos: true,
       clientes_no_corporativos: true,
-      poliza_cliente: {
-        include: {
-          polizas: { select: { estado: true, prima_mensual: true } },
-        },
-      },
+      polizas: { select: { estado: true, prima_mensual: true } },
     },
   });
 }
@@ -34,15 +30,15 @@ function asCore(row: ClienteRow): ClienteCore | null {
   if (row.clientes_corporativos) {
     return {
       tipo: "corp",
-      razonSocial: row.clientes_corporativos.razon_social ?? "",
+      razonSocial: row.clientes_corporativos.razon_social,
       cuit: row.clientes_corporativos.cuit,
     };
   }
   if (row.clientes_no_corporativos) {
     return {
       tipo: "normal",
-      nombre: row.clientes_no_corporativos.nombre ?? "",
-      apellido: row.clientes_no_corporativos.apellido ?? "",
+      nombre: row.clientes_no_corporativos.nombre,
+      apellido: row.clientes_no_corporativos.apellido,
       dni: row.clientes_no_corporativos.dni,
     };
   }
@@ -50,20 +46,13 @@ function asCore(row: ClienteRow): ClienteCore | null {
 }
 
 function tipoOf(row: ClienteRow): ClienteTipo {
-  return row.clientes_corporativos ? "corp" : "normal";
-}
-
-function isoDate(d: Date | null | undefined): string | null {
-  return d ? d.toISOString().slice(0, 10) : null;
+  return row.tipo === "corporativo" ? "corp" : "normal";
 }
 
 function toListItem(row: ClienteRow): ClienteListItem {
   const core = asCore(row);
-  const polizas = row.poliza_cliente
-    .map((pc) => pc.polizas)
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
-  const polizasActivas = polizas.filter(
-    (p) => p.estado && (POLIZA_VIGENTES as readonly string[]).includes(p.estado),
+  const polizasActivas = row.polizas.filter((p) =>
+    (POLIZA_VIGENTES as readonly string[]).includes(p.estado),
   );
   return {
     id: row.id,
@@ -72,11 +61,11 @@ function toListItem(row: ClienteRow): ClienteListItem {
     ident: core ? clienteIdent(core) : "",
     email: row.email,
     telefono: row.telefono,
-    estado: (row.estado as ClienteEstado | null) ?? null,
+    estado: row.estado,
     desde: isoDate(row.fecha_alta),
     polizasActivas: polizasActivas.length,
     primaMensual: polizasActivas.reduce(
-      (s, p) => s + Number(p.prima_mensual ?? 0),
+      (s, p) => s + Number(p.prima_mensual),
       0,
     ),
   };
@@ -93,27 +82,26 @@ export async function getClienteById(id: number): Promise<ClienteFull | null> {
     include: {
       clientes_corporativos: true,
       clientes_no_corporativos: true,
-      poliza_cliente: {
-        include: {
-          polizas: { select: { estado: true, prima_mensual: true } },
+      polizas: {
+        select: {
+          id: true,
+          estado: true,
+          prima_mensual: true,
         },
       },
     },
   });
   if (!row) return null;
 
+  const polizaIds = row.polizas.map((p) => p.id);
+  const siniestrosCount = polizaIds.length
+    ? await prisma.siniestros.count({ where: { poliza_id: { in: polizaIds } } })
+    : 0;
+
   const base = toListItem(row);
-  const siniestrosCount = await prisma.siniestros_poliza.count({
-    where: { polizas: { poliza_cliente: { cliente_id: id } } },
-  });
-  const polizas = row.poliza_cliente
-    .map((pc) => pc.polizas)
-    .filter((p): p is NonNullable<typeof p> => Boolean(p));
-  const primaAnualizada = polizas
-    .filter(
-      (p) => p.estado && p.estado !== "anulada" && p.estado !== "vencida",
-    )
-    .reduce((s, p) => s + Number(p.prima_mensual ?? 0) * 12, 0);
+  const primaAnualizada = row.polizas
+    .filter((p) => p.estado !== "anulada" && p.estado !== "vencida")
+    .reduce((s, p) => s + Number(p.prima_mensual) * 12, 0);
 
   return {
     ...base,

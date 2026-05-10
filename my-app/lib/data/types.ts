@@ -2,6 +2,12 @@ import type { PolizaEstado, SiniestroEstado } from "@/lib/domain/poliza-status";
 
 export type ClienteTipo = "corp" | "normal";
 export type ClienteEstado = "activo" | "baja";
+export type CoberturaTipo =
+  | "responsabilidad_civil"
+  | "terceros_completo"
+  | "todo_riesgo"
+  | "basica"
+  | "integral";
 
 export type ClienteListItem = {
   id: number;
@@ -10,8 +16,8 @@ export type ClienteListItem = {
   ident: string;
   email: string | null;
   telefono: string | null;
-  estado: ClienteEstado | null;
-  desde: string | null;
+  estado: ClienteEstado;
+  desde: string;
   polizasActivas: number;
   primaMensual: number;
 };
@@ -27,11 +33,8 @@ export type AseguradoraListItem = {
   id: number;
   razonSocial: string;
   cuit: string;
-  contacto: string | null;
   email: string | null;
   telefono: string | null;
-  direccion: string | null;
-  color: string;
   polizasActivas: number;
   primaMensual: number;
   pctCartera: number;
@@ -48,16 +51,15 @@ export type PolizaClienteRef = {
 export type PolizaAseguradoraRef = {
   id: number;
   razonSocial: string;
-  color: string;
 };
 
 export type PolizaListItem = {
   id: number;
   numero: string;
-  tipo: string | null;
-  cobertura: string | null;
-  inicio: string | null;
-  fin: string | null;
+  tipo: string;
+  cobertura: CoberturaTipo;
+  inicio: string;
+  fin: string;
   suma: number;
   prima: number;
   estado: PolizaEstado;
@@ -67,49 +69,39 @@ export type PolizaListItem = {
 };
 
 export type PolizaFull = PolizaListItem & {
-  emision: string | null;
+  emision: string;
 };
 
 export type SiniestroDoc = {
   tipo: "img" | "pdf";
   nombre: string;
-  tamano: string | null;
-  procesadoIA: boolean;
-};
-
-export type SiniestroClienteRef = {
-  id: number;
-  tipo: ClienteTipo;
-  label: string;
-  ident: string;
-  avatarLetters: string;
+  url: string;
 };
 
 export type SiniestroListItem = {
   id: number;
-  numero: string | null;
-  titulo: string | null;
+  numero: string;
+  titulo: string;
   descripcion: string | null;
-  cliente: SiniestroClienteRef;
-  fechaReporte: string | null;
+  cliente: PolizaClienteRef;
+  fechaReporte: string;
   estado: SiniestroEstado;
-  fuente: "whatsapp" | "email" | null;
   leido: boolean;
   docsCount: number;
 };
 
 export type SiniestroFull = SiniestroListItem & {
-  fechaOcurrencia: string | null;
+  fechaOcurrencia: string;
   aiSummary: string | null;
   docs: SiniestroDoc[];
   poliza: {
     id: number;
     numero: string;
-    tipo: string | null;
-    cobertura: string | null;
+    tipo: string;
+    cobertura: CoberturaTipo;
     suma: number;
-    aseguradora: { id: number; razonSocial: string; color: string };
-  } | null;
+    aseguradora: PolizaAseguradoraRef;
+  };
 };
 
 export type PagoEstado = "pendiente" | "validado" | "rechazado";
@@ -117,30 +109,25 @@ export type PagoEstado = "pendiente" | "validado" | "rechazado";
 export type PagoListItem = {
   id: number;
   cliente: PolizaClienteRef;
-  fechaEmision: string | null;
-  periodo: string | null;
+  fechaPago: string | null;
   estado: PagoEstado;
   metodoPago: string | null;
-  montoTotal: number;
-  itemsCount: number;
+  monto: number;
+  polizasCount: number;
 };
 
-export type PagoItemDetail = {
+export type PagoPolizaRef = {
   id: number;
-  concepto: string | null;
-  monto: number;
-  poliza: {
-    id: number;
-    numero: string;
-    tipo: string | null;
-    aseguradora: { id: number; razonSocial: string; color: string };
-  };
+  numero: string;
+  tipo: string;
+  prima: number;
+  aseguradora: PolizaAseguradoraRef;
 };
 
 export type PagoFull = PagoListItem & {
   comprobante: string | null;
   cbu: string | null;
-  items: PagoItemDetail[];
+  polizas: PagoPolizaRef[];
 };
 
 export type DashboardKPIs = {

@@ -4,7 +4,6 @@ import {
   clienteLabel,
   type ClienteCore,
 } from "@/lib/domain/cliente-helpers";
-import type { PolizaEstado } from "@/lib/domain/poliza-status";
 import { daysUntilExpiry } from "@/lib/format/date";
 import type {
   ClienteTipo,
@@ -14,30 +13,31 @@ import type {
 
 type ClienteRowMin = {
   id: number;
+  tipo: "corporativo" | "persona";
   clientes_corporativos: {
     cuit: string;
-    razon_social: string | null;
+    razon_social: string;
   } | null;
   clientes_no_corporativos: {
     dni: string;
-    nombre: string | null;
-    apellido: string | null;
+    nombre: string;
+    apellido: string;
   } | null;
 };
 
 export function clienteRefFromRow(row: ClienteRowMin): PolizaClienteRef {
-  const tipo: ClienteTipo = row.clientes_corporativos ? "corp" : "normal";
+  const tipo: ClienteTipo = row.tipo === "corporativo" ? "corp" : "normal";
   const core: ClienteCore | null = row.clientes_corporativos
     ? {
         tipo: "corp",
-        razonSocial: row.clientes_corporativos.razon_social ?? "",
+        razonSocial: row.clientes_corporativos.razon_social,
         cuit: row.clientes_corporativos.cuit,
       }
     : row.clientes_no_corporativos
       ? {
           tipo: "normal",
-          nombre: row.clientes_no_corporativos.nombre ?? "",
-          apellido: row.clientes_no_corporativos.apellido ?? "",
+          nombre: row.clientes_no_corporativos.nombre,
+          apellido: row.clientes_no_corporativos.apellido,
           dni: row.clientes_no_corporativos.dni,
         }
       : null;
@@ -52,8 +52,7 @@ export function clienteRefFromRow(row: ClienteRowMin): PolizaClienteRef {
 
 type AseguradoraRowMin = {
   id: number;
-  razon_social: string | null;
-  color_hex: string | null;
+  razon_social: string;
 };
 
 export function aseguradoraRefFromRow(
@@ -61,33 +60,18 @@ export function aseguradoraRefFromRow(
 ): PolizaAseguradoraRef {
   return {
     id: row.id,
-    razonSocial: row.razon_social ?? "",
-    color: row.color_hex ?? "#5b6677",
+    razonSocial: row.razon_social,
   };
 }
 
-export function isoDate(d: Date | null | undefined): string | null {
-  return d ? d.toISOString().slice(0, 10) : null;
+export function isoDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
 }
 
-export function isoDateTime(d: Date | null | undefined): string | null {
-  return d ? d.toISOString() : null;
+export function isoDateTime(d: Date): string {
+  return d.toISOString();
 }
 
-export function toPolizaEstado(s: string | null): PolizaEstado {
-  switch (s) {
-    case "vigente":
-    case "proxima":
-    case "vencida":
-    case "anulada":
-    case "renovada":
-      return s;
-    default:
-      return "vigente";
-  }
-}
-
-export function vencimientoDays(fin: Date | null): number | null {
-  if (!fin) return null;
+export function vencimientoDays(fin: Date): number | null {
   return daysUntilExpiry(fin.toISOString().slice(0, 10));
 }
