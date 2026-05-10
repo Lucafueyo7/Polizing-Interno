@@ -1,14 +1,25 @@
+import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
+  clienteAvatarLetters,
   clienteIdent,
   clienteLabel,
   type ClienteCore,
 } from "@/lib/domain/cliente-helpers";
-import { isoDate } from "./_mappers";
+import {
+  aseguradoraRefFromRow,
+  clienteRefFromRow,
+  isoDate,
+  isoDateTime,
+  vencimientoDays,
+} from "./_mappers";
 import type {
   ClienteFull,
   ClienteListItem,
   ClienteTipo,
+  PolizaListItem,
+  SiniestroListItem,
 } from "./types";
 
 const POLIZA_VIGENTES = ["vigente", "proxima"] as const;
@@ -59,6 +70,7 @@ function toListItem(row: ClienteRow): ClienteListItem {
     tipo: tipoOf(row),
     label: core ? clienteLabel(core) : `Cliente #${row.id}`,
     ident: core ? clienteIdent(core) : "",
+    avatarLetters: core ? clienteAvatarLetters(core) : "?",
     email: row.email,
     telefono: row.telefono,
     estado: row.estado,
@@ -71,23 +83,52 @@ function toListItem(row: ClienteRow): ClienteListItem {
   };
 }
 
-export async function getClientes(): Promise<ClienteListItem[]> {
+async function getAllClientes(): Promise<ClienteListItem[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.clientes);
   const rows = await findClientes();
   return rows.map(toListItem);
 }
 
+export type ClientesFilters = {
+  q?: string;
+  tipo?: ClienteTipo;
+  estado?: ClienteListItem["estado"];
+};
+
+function matchesFilters(c: ClienteListItem, f: ClientesFilters): boolean {
+  if (f.tipo && c.tipo !== f.tipo) return false;
+  if (f.estado && c.estado !== f.estado) return false;
+  if (f.q) {
+    const q = f.q.toLowerCase();
+    const haystack =
+      `${c.label} ${c.ident} ${c.email ?? ""} ${c.telefono ?? ""}`.toLowerCase();
+    if (!haystack.includes(q)) return false;
+  }
+  return true;
+}
+
+export async function getClientes(
+  filters: ClientesFilters = {},
+): Promise<ClienteListItem[]> {
+  const all = await getAllClientes();
+  const isEmpty = !filters.q && !filters.tipo && !filters.estado;
+  return isEmpty ? all : all.filter((c) => matchesFilters(c, filters));
+}
+
 export async function getClienteById(id: number): Promise<ClienteFull | null> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.clientes);
+
   const row = await prisma.clientes.findUnique({
     where: { id },
     include: {
       clientes_corporativos: true,
       clientes_no_corporativos: true,
       polizas: {
-        select: {
-          id: true,
-          estado: true,
-          prima_mensual: true,
-        },
+        select: { id: true, estado: true, prima_mensual: true },
       },
     },
   });
@@ -109,5 +150,86 @@ export async function getClienteById(id: number): Promise<ClienteFull | null> {
     contactoNombre: row.clientes_corporativos?.contacto_nombre ?? null,
     primaAnualizada,
     siniestrosCount,
+    razonSocial: row.clientes_corporativos?.razon_social ?? null,
+    cuit: row.clientes_corporativos?.cuit ?? null,
+    nombre: row.clientes_no_corporativos?.nombre ?? null,
+    apellido: row.clientes_no_corporativos?.apellido ?? null,
+    dni: row.clientes_no_corporativos?.dni ?? null,
   };
+}
+
+export async function getClienteContrataciones(
+  clienteId: number,
+): Promise<PolizaListItem[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.clientes, CACHE_TAGS.polizas);
+
+  const rows = await prisma.polizas.findMany({
+    where: { cliente_id: clienteId },
+    orderBy: { fecha_inicio_vigencia: "desc" },
+    include: {
+      cliente: {
+        include: {
+          clientes_corporativos: true,
+          clientes_no_corporativos: true,
+        },
+      },
+      aseguradora: true,
+      tipo_seguro: true,
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    numero: row.numero_poliza,
+    tipo: row.tipo_seguro.nombre,
+    cobertura: row.cobertura,
+    inicio: isoDate(row.fecha_inicio_vigencia),
+    fin: isoDate(row.fecha_fin_vigencia),
+    suma: Number(row.suma_asegurada),
+    prima: Number(row.prima_mensual),
+    estado: row.estado,
+    diasHastaVencimiento: vencimientoDays(row.fecha_fin_vigencia),
+    cliente: clienteRefFromRow(row.cliente),
+    aseguradora: aseguradoraRefFromRow(row.aseguradora),
+  }));
+}
+
+export async function getClienteSiniestros(
+  clienteId: number,
+): Promise<SiniestroListItem[]> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(CACHE_TAGS.clientes, CACHE_TAGS.siniestros);
+
+  const rows = await prisma.siniestros.findMany({
+    where: { poliza: { cliente_id: clienteId } },
+    orderBy: { fecha_reporte: "desc" },
+    include: {
+      documentos: { select: { id: true } },
+      poliza: {
+        include: {
+          cliente: {
+            include: {
+              clientes_corporativos: true,
+              clientes_no_corporativos: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    numero: row.numero,
+    titulo: row.titulo,
+    descripcion: row.descripcion_hechos,
+    cliente: clienteRefFromRow(row.poliza.cliente),
+    fechaReporte: isoDateTime(row.fecha_reporte),
+    estado: row.estado,
+    leido: row.leido,
+    docsCount: row.documentos.length,
+  }));
 }

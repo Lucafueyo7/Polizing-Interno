@@ -14,6 +14,7 @@ export type ClienteListItem = {
   tipo: ClienteTipo;
   label: string;
   ident: string;
+  avatarLetters: string;
   email: string | null;
   telefono: string | null;
   estado: ClienteEstado;
@@ -27,6 +28,12 @@ export type ClienteFull = ClienteListItem & {
   contactoNombre: string | null;
   primaAnualizada: number;
   siniestrosCount: number;
+  /** Campos crudos del child para prefill de formularios. */
+  razonSocial: string | null;
+  cuit: string | null;
+  nombre: string | null;
+  apellido: string | null;
+  dni: string | null;
 };
 
 export type AseguradoraListItem = {

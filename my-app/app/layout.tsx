@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/theme-script";
 
@@ -39,6 +40,7 @@ export default function RootLayout({
         />
         <ThemeProvider>
           <Suspense>{children}</Suspense>
+          <Toaster position="bottom-right" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>
