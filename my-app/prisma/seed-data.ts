@@ -35,6 +35,8 @@ export type AseguradoraSeed = {
   cuit: string;
   email: string;
   telefono: string;
+  contactoNombre: string;
+  direccion: string;
 };
 
 export type CoberturaSeed =
@@ -115,11 +117,11 @@ export const CLIENTES: ClienteSeed[] = [
 // =============================================================================
 
 export const ASEGURADORAS: AseguradoraSeed[] = [
-  { id: "A01", razonSocial: "La Federal Seguros S.A.",       cuit: "30-50001234-1", email: "productores@lafederal.com.ar",      telefono: "+54 11 4339-9000" },
-  { id: "A02", razonSocial: "Sancor Cooperativa de Seguros", cuit: "30-50002378-8", email: "canales@sancor.com.ar",             telefono: "+54 3493 42-8000" },
-  { id: "A03", razonSocial: "Provincia ART",                 cuit: "30-50091344-2", email: "convenios@provinciaart.com.ar",     telefono: "+54 11 4378-3300" },
-  { id: "A04", razonSocial: "Galicia Seguros S.A.",          cuit: "30-66891022-5", email: "productores@galiciaseguros.com.ar", telefono: "+54 11 6329-0000" },
-  { id: "A05", razonSocial: "Mercantil Andina",              cuit: "30-50001876-3", email: "lerner@mercantilandina.com.ar",     telefono: "+54 261 405-9000" },
+  { id: "A01", razonSocial: "La Federal Seguros S.A.",       cuit: "30-50001234-1", email: "productores@lafederal.com.ar",      telefono: "+54 11 4339-9000", contactoNombre: "Sergio Brizuela",  direccion: "Av. Corrientes 1234, CABA" },
+  { id: "A02", razonSocial: "Sancor Cooperativa de Seguros", cuit: "30-50002378-8", email: "canales@sancor.com.ar",             telefono: "+54 3493 42-8000", contactoNombre: "Patricia Lemos",   direccion: "Ruta 91 km 11.5, Sunchales, Santa Fe" },
+  { id: "A03", razonSocial: "Provincia ART",                 cuit: "30-50091344-2", email: "convenios@provinciaart.com.ar",     telefono: "+54 11 4378-3300", contactoNombre: "Diego Quiroga",    direccion: "Carlos Pellegrini 91, CABA" },
+  { id: "A04", razonSocial: "Galicia Seguros S.A.",          cuit: "30-66891022-5", email: "productores@galiciaseguros.com.ar", telefono: "+54 11 6329-0000", contactoNombre: "María Belén Ortiz", direccion: "Av. Pte. R.S. Peña 525, CABA" },
+  { id: "A05", razonSocial: "Mercantil Andina",              cuit: "30-50001876-3", email: "lerner@mercantilandina.com.ar",     telefono: "+54 261 405-9000", contactoNombre: "Cecilia Lerner",   direccion: "Av. España 1336, Mendoza" },
 ];
 
 // =============================================================================

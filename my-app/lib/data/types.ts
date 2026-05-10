@@ -42,6 +42,10 @@ export type AseguradoraListItem = {
   cuit: string;
   email: string | null;
   telefono: string | null;
+  contactoNombre: string | null;
+  direccion: string | null;
+  color: string;
+  initials: string;
   polizasActivas: number;
   primaMensual: number;
   pctCartera: number;

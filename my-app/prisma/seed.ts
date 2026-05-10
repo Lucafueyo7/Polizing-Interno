@@ -110,6 +110,8 @@ async function seedAseguradoras(prisma: PrismaClient): Promise<Map<string, numbe
         cuit: a.cuit,
         telefono: a.telefono,
         email: a.email,
+        contacto_nombre: a.contactoNombre,
+        direccion: a.direccion,
       },
     });
     map.set(a.id, created.id);

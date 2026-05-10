@@ -104,13 +104,15 @@ model clientes_no_corporativos {
 // =============================================================================
 
 model empresas_aseguradoras {
-  id           Int      @id @default(autoincrement())
-  razon_social String
-  cuit         String   @unique
-  telefono     String?
-  email        String?
-  created_at   DateTime @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime @updatedAt @db.Timestamptz(6)
+  id              Int      @id @default(autoincrement())
+  razon_social    String
+  cuit            String   @unique
+  telefono        String?
+  email           String?
+  contacto_nombre String?
+  direccion       String?
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
 
   polizas polizas[]
 }
