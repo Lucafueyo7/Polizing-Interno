@@ -3,6 +3,7 @@
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth/session";
 import {
   SiniestroSchema,
   type ActionResult,
@@ -25,9 +26,14 @@ export async function createSiniestro(
   }
 
   const data = parsed.data;
+  const user = await getCurrentUser();
+  const audit = user?.id
+    ? { modificado_por_id: user.id, modificado_en: new Date() }
+    : {};
   try {
     const created = await prisma.siniestros.create({
       data: {
+        ...audit,
         poliza_id: data.polizaId,
         numero: data.numero,
         titulo: data.titulo,

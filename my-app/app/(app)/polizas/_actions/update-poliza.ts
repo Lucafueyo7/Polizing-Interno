@@ -3,6 +3,7 @@
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth/session";
 import {
   PolizaSchema,
   type ActionResult,
@@ -26,10 +27,15 @@ export async function updatePoliza(
   }
 
   const data = parsed.data;
+  const user = await getCurrentUser();
+  const audit = user?.id
+    ? { modificado_por_id: user.id, modificado_en: new Date() }
+    : {};
   try {
     await prisma.polizas.update({
       where: { id },
       data: {
+        ...audit,
         numero_poliza: data.numero,
         cliente_id: data.clienteId,
         aseguradora_id: data.aseguradoraId,

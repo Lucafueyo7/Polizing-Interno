@@ -3,6 +3,7 @@
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth/session";
 import {
   PolizaSchema,
   type ActionResult,
@@ -23,9 +24,14 @@ export async function createPoliza(input: PolizaInput): Promise<ActionResult> {
   }
 
   const data = parsed.data;
+  const user = await getCurrentUser();
+  const audit = user?.id
+    ? { modificado_por_id: user.id, modificado_en: new Date() }
+    : {};
   try {
     const created = await prisma.polizas.create({
       data: {
+        ...audit,
         numero_poliza: data.numero,
         cliente_id: data.clienteId,
         aseguradora_id: data.aseguradoraId,

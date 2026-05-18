@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import { DEMO_USERS } from "./demo-users";
 import type { Role, SessionUser } from "./types";
 
@@ -35,6 +36,18 @@ function decode(value: string): SessionUser | null {
   }
 }
 
+async function resolveUserId(email: string): Promise<number | undefined> {
+  try {
+    const dbUser = await prisma.usuarios.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+    return dbUser?.id;
+  } catch {
+    return undefined;
+  }
+}
+
 async function persistSession(user: SessionUser) {
   const store = await cookies();
   store.set(SESSION_COOKIE, encode(user), {
@@ -64,11 +77,12 @@ export async function loginAction(
     return { error: "Completá todos los campos." };
   }
   const known = DEMO_USERS.find((u) => u.email === email);
-  const session: SessionUser = known ?? {
+  const base: SessionUser = known ?? {
     email,
     name: deriveName(email),
     role: inferRole(email),
   };
+  const session: SessionUser = { ...base, id: await resolveUserId(email) };
   await persistSession(session);
   redirect("/dashboard");
 }
@@ -76,7 +90,8 @@ export async function loginAction(
 export async function loginAsDemoUser(email: string) {
   const known = DEMO_USERS.find((u) => u.email === email);
   if (!known) return;
-  await persistSession(known);
+  const session: SessionUser = { ...known, id: await resolveUserId(email) };
+  await persistSession(session);
   redirect("/dashboard");
 }
 

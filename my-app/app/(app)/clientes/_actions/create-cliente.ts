@@ -3,6 +3,7 @@
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth/session";
 import { ClienteSchema, type ActionResult, type ClienteInput } from "./schemas";
 
 export async function createCliente(input: ClienteInput): Promise<ActionResult> {
@@ -16,6 +17,10 @@ export async function createCliente(input: ClienteInput): Promise<ActionResult> 
   }
 
   const data = parsed.data;
+  const user = await getCurrentUser();
+  const audit = user?.id
+    ? { modificado_por_id: user.id, modificado_en: new Date() }
+    : {};
   try {
     const created = await prisma.clientes.create({
       data: {
@@ -24,6 +29,7 @@ export async function createCliente(input: ClienteInput): Promise<ActionResult> 
         telefono: data.telefono ?? null,
         direccion: data.direccion ?? null,
         estado: data.estado,
+        ...audit,
         ...(data.tipo === "corp"
           ? {
               clientes_corporativos: {

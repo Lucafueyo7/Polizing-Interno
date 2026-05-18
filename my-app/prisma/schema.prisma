@@ -64,20 +64,23 @@ enum Rol {
 // =============================================================================
 
 model clientes {
-  id         Int           @id @default(autoincrement())
-  tipo       ClienteTipo
-  email      String?
-  telefono   String?
-  direccion  String?
-  estado     ClienteEstado @default(activo)
-  fecha_alta DateTime      @default(now()) @db.Timestamptz(6)
-  created_at DateTime      @default(now()) @db.Timestamptz(6)
-  updated_at DateTime      @updatedAt @db.Timestamptz(6)
+  id                Int           @id @default(autoincrement())
+  tipo              ClienteTipo
+  email             String?
+  telefono          String?
+  direccion         String?
+  estado            ClienteEstado @default(activo)
+  fecha_alta        DateTime      @default(now()) @db.Timestamptz(6)
+  created_at        DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime      @updatedAt @db.Timestamptz(6)
+  modificado_por_id Int?
+  modificado_en     DateTime?     @db.Timestamptz(6)
 
   clientes_corporativos    clientes_corporativos?
   clientes_no_corporativos clientes_no_corporativos?
   polizas                  polizas[]
   pagos                    pagos[]
+  modificado_por           usuarios?                 @relation("ClienteModificadoPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
 
   @@index([tipo])
   @@index([estado])
@@ -104,17 +107,20 @@ model clientes_no_corporativos {
 // =============================================================================
 
 model empresas_aseguradoras {
-  id              Int      @id @default(autoincrement())
-  razon_social    String
-  cuit            String   @unique
-  telefono        String?
-  email           String?
-  contacto_nombre String?
-  direccion       String?
-  created_at      DateTime @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+  id                Int       @id @default(autoincrement())
+  razon_social      String
+  cuit              String    @unique
+  telefono          String?
+  email             String?
+  contacto_nombre   String?
+  direccion         String?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
+  modificado_por_id Int?
+  modificado_en     DateTime? @db.Timestamptz(6)
 
-  polizas polizas[]
+  polizas        polizas[]
+  modificado_por usuarios? @relation("AseguradoraModificadaPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
 }
 
 // =============================================================================
@@ -152,12 +158,15 @@ model polizas {
   pago_id                    Int?
   created_at                 DateTime      @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime      @updatedAt @db.Timestamptz(6)
+  modificado_por_id          Int?
+  modificado_en              DateTime?     @db.Timestamptz(6)
 
-  cliente     clientes              @relation(fields: [cliente_id], references: [id])
-  aseguradora empresas_aseguradoras @relation(fields: [aseguradora_id], references: [id])
-  tipo_seguro tipos_seguro          @relation(fields: [tipo_seguro_id], references: [id])
-  pago        pagos?                @relation(fields: [pago_id], references: [id], onDelete: SetNull)
-  siniestros  siniestros[]
+  cliente        clientes              @relation(fields: [cliente_id], references: [id])
+  aseguradora    empresas_aseguradoras @relation(fields: [aseguradora_id], references: [id])
+  tipo_seguro    tipos_seguro          @relation(fields: [tipo_seguro_id], references: [id])
+  pago           pagos?                @relation(fields: [pago_id], references: [id], onDelete: SetNull)
+  siniestros     siniestros[]
+  modificado_por usuarios?             @relation("PolizaModificadaPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
 
   @@index([cliente_id])
   @@index([aseguradora_id])
@@ -185,9 +194,12 @@ model siniestros {
   ai_summary         String?
   created_at         DateTime        @default(now()) @db.Timestamptz(6)
   updated_at         DateTime        @updatedAt @db.Timestamptz(6)
+  modificado_por_id  Int?
+  modificado_en      DateTime?       @db.Timestamptz(6)
 
-  poliza     polizas                @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
-  documentos siniestro_documentos[]
+  poliza         polizas                @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
+  documentos     siniestro_documentos[]
+  modificado_por usuarios?              @relation("SiniestroModificadoPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
 
   @@index([poliza_id])
   @@index([estado])
@@ -217,20 +229,23 @@ model siniestro_documentos {
 // =============================================================================
 
 model pagos {
-  id          Int        @id @default(autoincrement())
-  cliente_id  Int
-  monto       Decimal    @db.Decimal(15, 2)
-  fecha_pago  DateTime?  @db.Timestamptz(6)
-  estado      PagoEstado @default(pendiente)
-  metodo_pago String?
-  comprobante String?
-  cbu         String?
-  moneda      String     @default("ARS") @db.Char(3)
-  created_at  DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime   @updatedAt @db.Timestamptz(6)
+  id                Int        @id @default(autoincrement())
+  cliente_id        Int
+  monto             Decimal    @db.Decimal(15, 2)
+  fecha_pago        DateTime?  @db.Timestamptz(6)
+  estado            PagoEstado @default(pendiente)
+  metodo_pago       String?
+  comprobante       String?
+  cbu               String?
+  moneda            String     @default("ARS") @db.Char(3)
+  created_at        DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime   @updatedAt @db.Timestamptz(6)
+  modificado_por_id Int?
+  modificado_en     DateTime?  @db.Timestamptz(6)
 
-  cliente clientes  @relation(fields: [cliente_id], references: [id])
-  polizas polizas[]
+  cliente        clientes  @relation(fields: [cliente_id], references: [id])
+  polizas        polizas[]
+  modificado_por usuarios? @relation("PagoModificadoPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
 
   @@index([cliente_id])
   @@index([estado])
@@ -250,4 +265,10 @@ model usuarios {
   nombre_completo String
   rol             Rol
   created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  clientes_modificados     clientes[]              @relation("ClienteModificadoPor")
+  polizas_modificadas      polizas[]               @relation("PolizaModificadaPor")
+  siniestros_modificados   siniestros[]            @relation("SiniestroModificadoPor")
+  pagos_modificados        pagos[]                 @relation("PagoModificadoPor")
+  aseguradoras_modificadas empresas_aseguradoras[] @relation("AseguradoraModificadaPor")
 }

@@ -3,6 +3,7 @@
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth/session";
 import {
   AseguradoraSchema,
   type ActionResult,
@@ -25,11 +26,16 @@ export async function updateAseguradora(
     };
   }
   const data = parsed.data;
+  const user = await getCurrentUser();
+  const audit = user?.id
+    ? { modificado_por_id: user.id, modificado_en: new Date() }
+    : {};
 
   try {
     await prisma.empresas_aseguradoras.update({
       where: { id },
       data: {
+        ...audit,
         razon_social: data.razonSocial,
         cuit: data.cuit.replace(/-/g, ""),
         contacto_nombre: data.contactoNombre ?? null,

@@ -3,6 +3,7 @@
 import { updateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth/session";
 import { ClienteSchema, type ActionResult, type ClienteInput } from "./schemas";
 
 export async function updateCliente(
@@ -34,6 +35,10 @@ export async function updateCliente(
     };
   }
 
+  const user = await getCurrentUser();
+  const audit = user?.id
+    ? { modificado_por_id: user.id, modificado_en: new Date() }
+    : {};
   try {
     await prisma.clientes.update({
       where: { id },
@@ -42,6 +47,7 @@ export async function updateCliente(
         telefono: data.telefono ?? null,
         direccion: data.direccion ?? null,
         estado: data.estado,
+        ...audit,
         ...(data.tipo === "corp"
           ? {
               clientes_corporativos: {
