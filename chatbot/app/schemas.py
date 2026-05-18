@@ -13,17 +13,6 @@ class OutboundTemplateRequest(BaseModel):
     components: list = Field(default_factory=list)
 
 
-class PolicyRequestPayload(BaseModel):
-    phone: str
-    insurance_type: str
-    domain: str | None = None
-    brand: str | None = None
-    model: str | None = None
-    year: str | None = None
-    use: str | None = None
-    notes: str | None = None
-
-
 class CirculationCardPayload(BaseModel):
     phone: str
     policy_id: int

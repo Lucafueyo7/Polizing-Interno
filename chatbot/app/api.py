@@ -7,8 +7,8 @@ from app.config import get_settings
 from app.conversation import ConversationEngine
 from app.database import get_db
 from app.main_system_client import MainSystemClient
-from app.mock_system import create_policy_request, get_circulation_card, get_client_by_phone, list_policies, register_claim, register_payment_receipt
-from app.schemas import CirculationCardPayload, ClaimPayload, OutboundMessageRequest, OutboundTemplateRequest, PaymentReceiptPayload, PolicyRequestPayload
+from app.mock_system import get_circulation_card, get_client_by_phone, list_policies, register_claim, register_payment_receipt
+from app.schemas import CirculationCardPayload, ClaimPayload, OutboundMessageRequest, OutboundTemplateRequest, PaymentReceiptPayload
 from app.security import require_outbound_api_key
 from app.whatsapp import WhatsAppClient, extract_messages, parse_inbound_message
 
@@ -80,11 +80,6 @@ def mock_client_by_phone(phone: str, db: Session = Depends(get_db)) -> dict:
 @router.get("/mock/policies")
 def mock_policies(phone: str, db: Session = Depends(get_db)) -> dict:
     return {"items": list_policies(db, phone)}
-
-
-@router.post("/mock/policy-requests")
-def mock_policy_request(payload: PolicyRequestPayload, db: Session = Depends(get_db)) -> dict:
-    return create_policy_request(db, payload.phone, payload.model_dump())
 
 
 @router.post("/mock/circulation-card")

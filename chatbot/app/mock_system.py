@@ -39,10 +39,6 @@ def get_policy_for_phone(db: Session, phone: str, policy_id: int) -> dict | None
     return policy_to_dict(policy) if policy else None
 
 
-def create_policy_request(db: Session, phone: str, payload: dict) -> dict:
-    return create_operation(db, "policy_request", phone, "POL", payload)
-
-
 def get_circulation_card(db: Session, phone: str, policy_id: int) -> dict | None:
     policy = get_policy_for_phone(db, phone, policy_id)
     if not policy:

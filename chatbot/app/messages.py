@@ -6,7 +6,7 @@ from app.models import EditableMessage
 DEFAULT_MESSAGES = {
     "welcome_menu": (
         "Menu principal",
-        "Bienvenido. Seleccione una opcion:\n\n1. Solicitar poliza\n2. Obtener tarjeta de circulacion\n3. Adjuntar comprobante de pago\n4. Registrar siniestro\n\nResponda con el numero de la opcion.",
+        "Bienvenido. Seleccione una opcion:\n\n1. Obtener tarjeta de circulacion\n2. Adjuntar comprobante de pago\n3. Registrar siniestro\n\nResponda con el numero de la opcion.",
     ),
     "invalid_option": ("Opcion invalida", "No pudimos interpretar su respuesta. Por favor seleccione una opcion valida."),
     "client_not_found": (
@@ -19,14 +19,6 @@ DEFAULT_MESSAGES = {
     ),
     "cancelled": ("Solicitud cancelada", "La solicitud fue cancelada. Puede iniciar una nueva operacion desde el menu principal."),
     "type_cancel": ("Ayuda cancelar", "Puede responder 0 en cualquier momento para cancelar y volver al menu principal."),
-    "policy_type_prompt": ("Tipo poliza", "Indique el tipo de poliza que desea solicitar:\n\n1. Auto\n2. Moto"),
-    "policy_domain_prompt": ("Dominio poliza", "Indique el dominio/patente del vehiculo. Si aun no lo tiene, responda SIN DOMINIO."),
-    "policy_brand_prompt": ("Marca poliza", "Indique la marca del vehiculo."),
-    "policy_model_prompt": ("Modelo poliza", "Indique el modelo del vehiculo."),
-    "policy_year_prompt": ("Anio poliza", "Indique el anio del vehiculo."),
-    "policy_use_prompt": ("Uso poliza", "Indique el uso del vehiculo:\n\n1. Particular\n2. Comercial"),
-    "policy_notes_prompt": ("Observaciones poliza", "Indique observaciones adicionales o responda NO."),
-    "policy_success": ("Poliza creada", "Su solicitud de poliza fue registrada correctamente. Numero de solicitud: {reference}."),
     "policy_list_prompt": ("Seleccion poliza", "Seleccione una poliza:\n\n{policies}"),
     "policy_list_empty": ("Sin polizas", "No encontramos polizas activas asociadas a su numero."),
     "card_success": ("Tarjeta enviada", "Encontramos la tarjeta de circulacion. Se la enviaremos por este medio."),
