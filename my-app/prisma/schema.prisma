@@ -7,9 +7,222 @@ datasource db {
   provider = "postgresql"
 }
 
-// =============================================================================
-// ENUMS
-// =============================================================================
+model clientes {
+  id                       Int                       @id @default(autoincrement())
+  tipo                     ClienteTipo
+  email                    String?
+  telefono                 String?
+  direccion                String?
+  estado                   ClienteEstado             @default(activo)
+  fecha_alta               DateTime                  @default(now()) @db.Timestamptz(6)
+  created_at               DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime                  @updatedAt @db.Timestamptz(6)
+  modificado_por_id        Int?
+  modificado_en            DateTime?                 @db.Timestamptz(6)
+  modificado_por           usuarios?                 @relation("ClienteModificadoPor", fields: [modificado_por_id], references: [id])
+  clientes_corporativos    clientes_corporativos?
+  clientes_no_corporativos clientes_no_corporativos?
+  pagos                    pagos[]
+  polizas                  polizas[]
+
+  @@index([tipo])
+  @@index([estado])
+}
+
+model clientes_corporativos {
+  cliente_id      Int      @id
+  cuit            String   @unique
+  razon_social    String
+  contacto_nombre String?
+  clientes        clientes @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+}
+
+model clientes_no_corporativos {
+  cliente_id Int      @id
+  dni        String   @unique
+  nombre     String
+  apellido   String
+  clientes   clientes @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+}
+
+model empresas_aseguradoras {
+  id                Int       @id @default(autoincrement())
+  razon_social      String
+  cuit              String    @unique
+  telefono          String?
+  email             String?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
+  modificado_por_id Int?
+  modificado_en     DateTime? @db.Timestamptz(6)
+  modificado_por    usuarios? @relation("AseguradoraModificadaPor", fields: [modificado_por_id], references: [id])
+  polizas           polizas[]
+}
+
+model tipos_seguro {
+  id          Int             @id @default(autoincrement())
+  nombre      String          @unique
+  categoria   CategoriaSeguro
+  descripcion String?
+  coberturas  coberturas[]
+  polizas     polizas[]
+
+  @@index([categoria])
+}
+
+model coberturas {
+  id             Int          @id @default(autoincrement())
+  tipo_seguro_id Int
+  nombre         String
+  descripcion    String?
+  tipo_seguro    tipos_seguro @relation(fields: [tipo_seguro_id], references: [id], onDelete: Cascade)
+  polizas        polizas[]
+
+  @@unique([tipo_seguro_id, nombre])
+  @@index([tipo_seguro_id])
+}
+
+model polizas {
+  id                    Int                   @id @default(autoincrement())
+  numero_poliza         String                @unique
+  cliente_id            Int
+  aseguradora_id        Int
+  tipo_seguro_id        Int
+  cobertura_id          Int
+  pago_id               Int?
+  estado                PolizaEstado
+  fecha_inicio_vigencia DateTime              @db.Timestamptz(6)
+  fecha_fin_vigencia    DateTime              @db.Timestamptz(6)
+  suma_asegurada        Decimal               @db.Decimal(15, 2)
+  /// Cuota mensual fija que el cliente abona para mantener la póliza vigente.
+  /// Capturada al momento de la emisión.
+  prima_mensual         Decimal               @db.Decimal(15, 2)
+  moneda                String                @default("ARS") @db.Char(3)
+  created_at            DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime              @updatedAt @db.Timestamptz(6)
+  modificado_por_id     Int?
+  modificado_en         DateTime?             @db.Timestamptz(6)
+  aseguradora           empresas_aseguradoras @relation(fields: [aseguradora_id], references: [id])
+  cliente               clientes              @relation(fields: [cliente_id], references: [id])
+  cobertura             coberturas            @relation(fields: [cobertura_id], references: [id])
+  modificado_por        usuarios?             @relation("PolizaModificadaPor", fields: [modificado_por_id], references: [id])
+  pago                  pagos?                @relation(fields: [pago_id], references: [id])
+  tipo_seguro           tipos_seguro          @relation(fields: [tipo_seguro_id], references: [id])
+  siniestros            siniestros[]
+
+  @@index([cliente_id])
+  @@index([aseguradora_id])
+  @@index([tipo_seguro_id])
+  @@index([cobertura_id])
+  @@index([estado])
+  @@index([fecha_fin_vigencia])
+  @@index([pago_id])
+  @@index([estado, fecha_fin_vigencia])
+}
+
+model siniestros {
+  id                Int                    @id @default(autoincrement())
+  poliza_id         Int
+  /// Identificador visible al cliente (formato `SIN-NNNNN`), generado por la
+  /// aplicación con prefijo + secuencia al crear el siniestro. Distinto del id interno.
+  numero            String                 @unique
+  titulo            String
+  fecha_ocurrencia  DateTime               @db.Timestamptz(6)
+  fecha_reporte     DateTime               @db.Timestamptz(6)
+  estado            SiniestroEstado        @default(nuevo)
+  created_at        DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime               @updatedAt @db.Timestamptz(6)
+  modificado_por_id Int?
+  modificado_en     DateTime?              @db.Timestamptz(6)
+  documentos        siniestro_documentos[]
+  lecturas          siniestro_lecturas[]
+  modificado_por    usuarios?              @relation("SiniestroModificadoPor", fields: [modificado_por_id], references: [id])
+  poliza            polizas                @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
+
+  @@index([poliza_id])
+  @@index([estado])
+  @@index([fecha_reporte(sort: Desc)])
+}
+
+model siniestro_documentos {
+  id           Int           @id @default(autoincrement())
+  siniestro_id Int
+  tipo         DocumentoTipo
+  nombre       String
+  url          String
+  mime_type    String
+  tamano_bytes Int?
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  siniestro    siniestros    @relation(fields: [siniestro_id], references: [id], onDelete: Cascade)
+
+  @@index([siniestro_id])
+}
+
+/// Registra qué usuario leyó qué siniestro y cuándo.
+/// Reemplaza al flag `siniestros.leido` (que mezclaba estado de UI con dominio).
+model siniestro_lecturas {
+  siniestro_id Int
+  usuario_id   Int
+  leido_en     DateTime   @default(now()) @db.Timestamptz(6)
+  siniestro    siniestros @relation(fields: [siniestro_id], references: [id], onDelete: Cascade)
+  usuario      usuarios   @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+
+  @@id([siniestro_id, usuario_id])
+  @@index([usuario_id])
+}
+
+model pagos {
+  id                Int         @id @default(autoincrement())
+  cliente_id        Int
+  monto             Decimal     @db.Decimal(15, 2)
+  fecha_pago        DateTime?   @db.Timestamptz(6)
+  estado            PagoEstado  @default(pendiente)
+  metodo_pago       MetodoPago?
+  moneda            String      @default("ARS") @db.Char(3)
+  created_at        DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime    @updatedAt @db.Timestamptz(6)
+  modificado_por_id Int?
+  modificado_en     DateTime?   @db.Timestamptz(6)
+  cliente           clientes    @relation(fields: [cliente_id], references: [id])
+  modificado_por    usuarios?   @relation("PagoModificadoPor", fields: [modificado_por_id], references: [id])
+  polizas           polizas[]
+
+  @@index([cliente_id])
+  @@index([estado])
+  @@index([fecha_pago(sort: Desc)])
+  @@index([cliente_id, estado])
+}
+
+model usuarios {
+  id                       Int                     @id @default(autoincrement())
+  dni                      String                  @unique
+  email                    String                  @unique
+  password_hash            String
+  nombre_completo          String
+  rol                      Rol
+  created_at               DateTime                @default(now()) @db.Timestamptz(6)
+  clientes_modificados     clientes[]              @relation("ClienteModificadoPor")
+  aseguradoras_modificadas empresas_aseguradoras[] @relation("AseguradoraModificadaPor")
+  pagos_modificados        pagos[]                 @relation("PagoModificadoPor")
+  polizas_modificadas      polizas[]               @relation("PolizaModificadaPor")
+  siniestros_leidos        siniestro_lecturas[]
+  siniestros_modificados   siniestros[]            @relation("SiniestroModificadoPor")
+}
+
+model noticias_scrapeadas {
+  id           Int       @id @default(autoincrement())
+  url_origen   String    @unique
+  titulo       String
+  resumen      String?
+  imagen_url   String?
+  publicada_en DateTime? @db.Timestamptz(6)
+  categoria    String?
+  fuente       String    @default("Asegurando Digital")
+  scrapeada_en DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([publicada_en(sort: Desc)])
+  @@index([scrapeada_en(sort: Desc)])
+}
 
 enum ClienteTipo {
   corporativo
@@ -73,263 +286,4 @@ enum PagoEstado {
 enum Rol {
   productor
   administrativo
-}
-
-// =============================================================================
-// CLIENTES
-// =============================================================================
-
-model clientes {
-  id                Int           @id @default(autoincrement())
-  tipo              ClienteTipo
-  email             String?
-  telefono          String?
-  direccion         String?
-  estado            ClienteEstado @default(activo)
-  fecha_alta        DateTime      @default(now()) @db.Timestamptz(6)
-  created_at        DateTime      @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime      @updatedAt @db.Timestamptz(6)
-  modificado_por_id Int?
-  modificado_en     DateTime?     @db.Timestamptz(6)
-
-  clientes_corporativos    clientes_corporativos?
-  clientes_no_corporativos clientes_no_corporativos?
-  polizas                  polizas[]
-  pagos                    pagos[]
-  modificado_por           usuarios?                 @relation("ClienteModificadoPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
-
-  @@index([tipo])
-  @@index([estado])
-}
-
-model clientes_corporativos {
-  cliente_id      Int      @id
-  cuit            String   @unique
-  razon_social    String
-  contacto_nombre String?
-  clientes        clientes @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
-}
-
-model clientes_no_corporativos {
-  cliente_id Int      @id
-  dni        String   @unique
-  nombre     String
-  apellido   String
-  clientes   clientes @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
-}
-
-// =============================================================================
-// ASEGURADORAS
-// =============================================================================
-
-model empresas_aseguradoras {
-  id                Int       @id @default(autoincrement())
-  razon_social      String
-  cuit              String    @unique
-  telefono          String?
-  email             String?
-  created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
-  modificado_por_id Int?
-  modificado_en     DateTime? @db.Timestamptz(6)
-
-  polizas        polizas[]
-  modificado_por usuarios? @relation("AseguradoraModificadaPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
-}
-
-// =============================================================================
-// TIPOS DE SEGURO + CATÁLOGO DE COBERTURAS
-// =============================================================================
-
-model tipos_seguro {
-  id          Int             @id @default(autoincrement())
-  nombre      String          @unique
-  categoria   CategoriaSeguro
-  descripcion String?
-
-  polizas    polizas[]
-  coberturas coberturas[]
-
-  @@index([categoria])
-}
-
-model coberturas {
-  id             Int     @id @default(autoincrement())
-  tipo_seguro_id Int
-  nombre         String
-  descripcion    String?
-
-  tipo_seguro tipos_seguro @relation(fields: [tipo_seguro_id], references: [id], onDelete: Cascade)
-  polizas     polizas[]
-
-  @@unique([tipo_seguro_id, nombre])
-  @@index([tipo_seguro_id])
-}
-
-// =============================================================================
-// PÓLIZAS
-// =============================================================================
-
-model polizas {
-  id                    Int          @id @default(autoincrement())
-  numero_poliza         String       @unique
-  cliente_id            Int
-  aseguradora_id        Int
-  tipo_seguro_id        Int
-  cobertura_id          Int
-  pago_id               Int?
-  estado                PolizaEstado
-  fecha_inicio_vigencia DateTime     @db.Timestamptz(6)
-  fecha_fin_vigencia    DateTime     @db.Timestamptz(6)
-  suma_asegurada        Decimal      @db.Decimal(15, 2)
-  /// Cuota mensual fija que el cliente abona para mantener la póliza vigente.
-  /// Capturada al momento de la emisión.
-  prima_mensual         Decimal      @db.Decimal(15, 2)
-  moneda                String       @default("ARS") @db.Char(3)
-  created_at            DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime     @updatedAt @db.Timestamptz(6)
-  modificado_por_id     Int?
-  modificado_en         DateTime?    @db.Timestamptz(6)
-
-  cliente        clientes              @relation(fields: [cliente_id], references: [id])
-  aseguradora    empresas_aseguradoras @relation(fields: [aseguradora_id], references: [id])
-  tipo_seguro    tipos_seguro          @relation(fields: [tipo_seguro_id], references: [id])
-  cobertura      coberturas            @relation(fields: [cobertura_id], references: [id])
-  pago           pagos?                @relation(fields: [pago_id], references: [id], onDelete: SetNull)
-  siniestros     siniestros[]
-  modificado_por usuarios?             @relation("PolizaModificadaPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
-
-  @@index([cliente_id])
-  @@index([aseguradora_id])
-  @@index([tipo_seguro_id])
-  @@index([cobertura_id])
-  @@index([estado])
-  @@index([fecha_fin_vigencia])
-  @@index([pago_id])
-  @@index([estado, fecha_fin_vigencia])
-}
-
-// =============================================================================
-// SINIESTROS
-// =============================================================================
-
-model siniestros {
-  id                Int             @id @default(autoincrement())
-  poliza_id         Int
-  /// Identificador visible al cliente (formato `SIN-NNNNN`), generado por la
-  /// aplicación con prefijo + secuencia al crear el siniestro. Distinto del id interno.
-  numero            String          @unique
-  titulo            String
-  fecha_ocurrencia  DateTime        @db.Timestamptz(6)
-  fecha_reporte     DateTime        @db.Timestamptz(6)
-  estado            SiniestroEstado @default(nuevo)
-  created_at        DateTime        @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime        @updatedAt @db.Timestamptz(6)
-  modificado_por_id Int?
-  modificado_en     DateTime?       @db.Timestamptz(6)
-
-  poliza         polizas                @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
-  documentos     siniestro_documentos[]
-  lecturas       siniestro_lecturas[]
-  modificado_por usuarios?              @relation("SiniestroModificadoPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
-
-  @@index([poliza_id])
-  @@index([estado])
-  @@index([fecha_reporte(sort: Desc)])
-}
-
-model siniestro_documentos {
-  id           Int           @id @default(autoincrement())
-  siniestro_id Int
-  tipo         DocumentoTipo
-  nombre       String
-  url          String
-  mime_type    String
-  tamano_bytes Int?
-  created_at   DateTime      @default(now()) @db.Timestamptz(6)
-
-  siniestro siniestros @relation(fields: [siniestro_id], references: [id], onDelete: Cascade)
-
-  @@index([siniestro_id])
-}
-
-/// Registra qué usuario leyó qué siniestro y cuándo.
-/// Reemplaza al flag `siniestros.leido` (que mezclaba estado de UI con dominio).
-model siniestro_lecturas {
-  siniestro_id Int
-  usuario_id   Int
-  leido_en     DateTime @default(now()) @db.Timestamptz(6)
-
-  siniestro siniestros @relation(fields: [siniestro_id], references: [id], onDelete: Cascade)
-  usuario   usuarios   @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
-
-  @@id([siniestro_id, usuario_id])
-  @@index([usuario_id])
-}
-
-// =============================================================================
-// PAGOS (un pago agrupa N pólizas)
-// =============================================================================
-
-model pagos {
-  id                Int         @id @default(autoincrement())
-  cliente_id        Int
-  monto             Decimal     @db.Decimal(15, 2)
-  fecha_pago        DateTime?   @db.Timestamptz(6)
-  estado            PagoEstado  @default(pendiente)
-  metodo_pago       MetodoPago?
-  moneda            String      @default("ARS") @db.Char(3)
-  created_at        DateTime    @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime    @updatedAt @db.Timestamptz(6)
-  modificado_por_id Int?
-  modificado_en     DateTime?   @db.Timestamptz(6)
-
-  cliente        clientes  @relation(fields: [cliente_id], references: [id])
-  polizas        polizas[]
-  modificado_por usuarios? @relation("PagoModificadoPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
-
-  @@index([cliente_id])
-  @@index([estado])
-  @@index([fecha_pago(sort: Desc)])
-  @@index([cliente_id, estado])
-}
-
-// =============================================================================
-// USUARIOS
-// =============================================================================
-
-model usuarios {
-  id              Int      @id @default(autoincrement())
-  dni             String   @unique
-  email           String   @unique
-  password_hash   String
-  nombre_completo String
-  rol             Rol
-  created_at      DateTime @default(now()) @db.Timestamptz(6)
-
-  clientes_modificados     clientes[]              @relation("ClienteModificadoPor")
-  polizas_modificadas      polizas[]               @relation("PolizaModificadaPor")
-  siniestros_modificados   siniestros[]            @relation("SiniestroModificadoPor")
-  pagos_modificados        pagos[]                 @relation("PagoModificadoPor")
-  aseguradoras_modificadas empresas_aseguradoras[] @relation("AseguradoraModificadaPor")
-  siniestros_leidos        siniestro_lecturas[]
-}
-
-// =============================================================================
-// NOTICIAS SCRAPEADAS (ETL — snapshot del scraper)
-// =============================================================================
-
-model noticias_scrapeadas {
-  id           Int       @id @default(autoincrement())
-  url_origen   String    @unique
-  titulo       String
-  resumen      String?
-  imagen_url   String?
-  publicada_en DateTime? @db.Timestamptz(6)
-  categoria    String?
-  fuente       String    @default("Asegurando Digital")
-  scrapeada_en DateTime  @default(now()) @db.Timestamptz(6)
-
-  @@index([publicada_en(sort: Desc)])
-  @@index([scrapeada_en(sort: Desc)])
 }

@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(python -m venv .venv)",
+      "PowerShell(py *)",
+      "PowerShell(winget install *)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); python --version; where.exe python)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); python -m venv .venv; if \\($?\\) { \".venv created\" })",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -m pip install --upgrade pip; .\\\\.venv\\\\Scripts\\\\python.exe -m pip install -r requirements.txt)",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\uvicorn.exe app.main:app --reload --host 127.0.0.1 --port 8000)",
+      "PowerShell(Start-Sleep -Seconds 4; try { $r = Invoke-WebRequest -Uri http://127.0.0.1:8000/health -UseBasicParsing -TimeoutSec 5; \"STATUS: $\\($r.StatusCode\\)\"; $r.Content } catch { \"ERROR: $_\" })",
+      "Bash(kill %bgzeckzfl)",
+      "PowerShell(Start-Sleep -Seconds 5; try { $r = Invoke-WebRequest -Uri http://127.0.0.1:8000/health -UseBasicParsing -TimeoutSec 5; \"STATUS: $\\($r.StatusCode\\)\"; $r.Content } catch { \"ERROR: $_\" })",
+      "PowerShell(where.exe ngrok 2>$null; if \\(-not $?\\) { \"ngrok no encontrado\" })",
+      "PowerShell(ngrok version *)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(ngrok config *)",
+      "PowerShell(ngrok http *)",
+      "PowerShell(Start-Sleep -Seconds 4; try { $r = Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels -TimeoutSec 5; $r.tunnels | ForEach-Object { \"$\\($_.proto\\) -> $\\($_.public_url\\) => $\\($_.config.addr\\)\" } } catch { \"ERROR querying ngrok API: $_\" })",
+      "PowerShell(ngrok *)",
+      "PowerShell(Start-Sleep -Seconds 5; try { $r = Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels -TimeoutSec 5; $r.tunnels | ForEach-Object { \"$\\($_.proto\\) -> $\\($_.public_url\\) => $\\($_.config.addr\\)\" } } catch { \"ERROR querying ngrok API: $_\" })",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://penalty-scabbed-amaretto.ngrok-free.dev/health\" -Headers @{ \"ngrok-skip-browser-warning\" = \"true\" } -UseBasicParsing -TimeoutSec 10; \"STATUS: $\\($r.StatusCode\\)\"; $r.Content } catch { \"ERROR: $_\" })",
+      "PowerShell(try { $r = Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels -TimeoutSec 5; $r.tunnels | ForEach-Object { $_.public_url } } catch { \"ngrok no está corriendo\" })",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -c \"from app.database import SessionLocal; from app.models import MockClient, MockPolicy; db = SessionLocal\\(\\); c = MockClient\\(phone='5492915062981', full_name='Marcos Ducos', active=True\\); db.add\\(c\\); db.flush\\(\\); db.add\\(MockPolicy\\(client_id=c.id, policy_number='1231231', insurance_type='auto', domain='pija123', description='maneja una verga con ruedas', active=True\\)\\); db.commit\\(\\); print\\(f'OK cliente_id={c.id}'\\); db.close\\(\\)\")",
+      "PowerShell(.\\\\.venv\\\\Scripts\\\\python.exe -c \"from app.database import SessionLocal; from app.models import MockClient; db = SessionLocal\\(\\); [print\\(f'{c.id} | {c.phone} | {c.full_name} | active={c.active} | polizas={[\\(p.policy_number, p.insurance_type, p.domain\\) for p in c.policies]}'\\) for c in db.query\\(MockClient\\).all\\(\\)]; db.close\\(\\)\")",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(Start-Sleep -Seconds 4; try { $r = Invoke-WebRequest -Uri http://127.0.0.1:8000/health -UseBasicParsing -TimeoutSec 5; \"STATUS: $\\($r.StatusCode\\) - $\\($r.Content\\)\" } catch { \"ERROR: $_\" })"
+    ]
+  }
+}
