@@ -5,6 +5,7 @@ import {
   Shield,
   AlertIcon,
   Wallet,
+  Newspaper,
 } from "@/components/icons";
 import type { ComponentType, SVGProps } from "react";
 
@@ -14,7 +15,8 @@ export type NavItemId =
   | "aseguradoras"
   | "polizas"
   | "siniestros"
-  | "pagos";
+  | "pagos"
+  | "noticias";
 
 export type NavItem = {
   id: NavItemId;
@@ -70,5 +72,12 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     href: "/pagos",
     icon: Wallet,
     matchPrefix: "/pagos",
+  },
+  {
+    id: "noticias",
+    label: "Noticias",
+    href: "/noticias",
+    icon: Newspaper,
+    matchPrefix: "/noticias",
   },
 ];

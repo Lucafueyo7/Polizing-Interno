@@ -1,0 +1,5 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/chatbot/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": ["${workspaceFolder}/chatbot"],
+  "python.terminal.activateEnvironment": true
+}

@@ -37,6 +37,7 @@ export {
   Mail,
   MessageCircle as WhatsApp,
   Moon,
+  Newspaper,
   MoreHorizontal as More,
   Paperclip,
   Pencil as Edit,

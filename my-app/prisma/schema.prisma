@@ -272,3 +272,22 @@ model usuarios {
   pagos_modificados        pagos[]                 @relation("PagoModificadoPor")
   aseguradoras_modificadas empresas_aseguradoras[] @relation("AseguradoraModificadaPor")
 }
+
+// =============================================================================
+// NOTICIAS SCRAPEADAS (ETL — snapshot del scraper)
+// =============================================================================
+
+model noticias_scrapeadas {
+  id           Int       @id @default(autoincrement())
+  url_origen   String    @unique
+  titulo       String
+  resumen      String?
+  imagen_url   String?
+  publicada_en DateTime? @db.Timestamptz(6)
+  categoria    String?
+  fuente       String    @default("Asegurando Digital")
+  scrapeada_en DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([publicada_en(sort: Desc)])
+  @@index([scrapeada_en(sort: Desc)])
+}

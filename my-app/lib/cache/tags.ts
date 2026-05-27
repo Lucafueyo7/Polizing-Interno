@@ -5,6 +5,7 @@ export const CACHE_TAGS = {
   aseguradoras: "aseguradoras",
   pagos: "pagos",
   dashboard: "dashboard",
+  noticias: "noticias",
 } as const;
 
 export type CacheTag = (typeof CACHE_TAGS)[keyof typeof CACHE_TAGS];
