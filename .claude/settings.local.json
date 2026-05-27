@@ -1,26 +1,16 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(py -0 2>&1)",
-      "PowerShell(Get-Command python -ErrorAction SilentlyContinue)",
-      "PowerShell(Get-Command python3 -ErrorAction SilentlyContinue)",
-      "PowerShell(Get-Command uv -ErrorAction SilentlyContinue)",
-      "Bash(Get-ChildItem -Path \"c:\\\\Polizing-Interno\\\\chatbot\" -Recurse -File)",
-      "Bash(Select-Object FullName)",
-      "Bash(Get-ChildItem -Path \"C:\\\\Polizing-Interno\" -Directory)",
-      "Bash(Select-Object Name)",
-      "Bash(Get-ChildItem -Path \"C:\\\\Polizing-Interno\")",
-      "Bash(Select-Object Name, PSIsContainer)",
-      "Bash(npm install *)",
-      "Bash(npx prisma *)",
-      "Bash(curl -s -L -A \"Polizing-Interno-Bot/1.0\" --max-time 15 \"https://asegurandodigital.com.ar/\" -o /tmp/asegurando.html)",
+      "Bash(xargs ls -lh)",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(file *.pdf)",
+      "Bash(open *)",
+      "Read(//private/tmp/docx_extract/**)",
+      "Read(//private/tmp/docx_extract/word/**)",
+      "Bash(textutil -convert txt -output /tmp/plantilla.txt \"/Users/manuelducos/Desktop/Polizing-Interno/Entregables/Entregable Integral/Plantilla-Documentacion-Proyecto.docx\")",
       "Read(//tmp/**)",
-      "Bash(curl -s -L -A \"Polizing-Interno-Bot/1.0\" --max-time 10 \"https://asegurandodigital.com.ar/feed/\" -o /tmp/asegurando-feed.xml)",
-      "Bash(node *)",
-      "Bash(npx tsc *)",
-      "Bash(pnpm install *)",
-      "Bash(pnpm list *)",
-      "Bash(pnpm exec *)"
+      "Bash(PUPPETEER_SKIP_DOWNLOAD=true npx --yes md-to-pdf Documentacion-Integral.md --launch-options '{\"executablePath\":\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"}')",
+      "Bash(file *.pdf *.docx)"
     ]
   }
 }
