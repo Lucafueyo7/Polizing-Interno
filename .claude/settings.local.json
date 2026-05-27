@@ -11,7 +11,15 @@
       "Read(//tmp/**)",
       "Bash(PUPPETEER_SKIP_DOWNLOAD=true npx --yes md-to-pdf Documentacion-Integral.md --launch-options '{\"executablePath\":\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"}')",
       "Bash(file *.pdf *.docx)",
-      "Bash(grep \"~\\\\$\")"
+      "Bash(grep \"~\\\\$\")",
+      "Bash(python3 /tmp/generate_erd.py)",
+      "Bash(PUPPETEER_SKIP_DOWNLOAD=true npx --yes md-to-pdf modelo-datos.md --launch-options '{\"executablePath\":\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"}')",
+      "Bash(npx prisma *)",
+      "Bash(npx tsc *)",
+      "Bash(python3 -c \"from app.models import MockPolicy; from app.mock_system import policy_to_dict; from app.seed import seed_mock_data; print\\('chatbot OK'\\)\")",
+      "Bash(python3 -m py_compile app/models.py app/mock_system.py app/seed.py)",
+      "Bash(npx tsx *)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"si hace todo\" npx prisma db push --force-reset)"
     ]
   }
 }

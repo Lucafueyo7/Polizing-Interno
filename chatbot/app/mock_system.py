@@ -77,6 +77,10 @@ def policy_to_dict(policy: MockPolicy) -> dict:
         "id": policy.id,
         "policy_number": policy.policy_number,
         "insurance_type": policy.insurance_type,
+        # Categoría de la rama del seguro (categoria enum del panel).
+        "category": policy.category,
+        # Cobertura del catálogo del tipo de seguro (coberturas.nombre del panel).
+        "coverage": policy.coverage_name,
         "domain": policy.domain,
         "description": policy.description,
     }

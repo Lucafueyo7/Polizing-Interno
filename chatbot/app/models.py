@@ -73,7 +73,12 @@ class MockPolicy(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     client_id: Mapped[int] = mapped_column(ForeignKey("mock_clients.id"))
     policy_number: Mapped[str] = mapped_column(String(80), index=True)
-    insurance_type: Mapped[str] = mapped_column(String(20))
+    # Mantiene el nombre histórico; mapea al `tipos_seguro.nombre` del panel.
+    insurance_type: Mapped[str] = mapped_column(String(60))
+    # Categoría de la rama del seguro (enum del panel `CategoriaSeguro`).
+    category: Mapped[str] = mapped_column(String(20), default="auto")
+    # Nombre de la cobertura del catálogo del panel (`coberturas.nombre`).
+    coverage_name: Mapped[str] = mapped_column(String(60), default="todo_riesgo")
     domain: Mapped[str] = mapped_column(String(20), index=True)
     description: Mapped[str] = mapped_column(String(180))
     active: Mapped[bool] = mapped_column(Boolean, default=True)

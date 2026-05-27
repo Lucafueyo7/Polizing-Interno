@@ -21,7 +21,9 @@ def seed_mock_data(db: Session) -> None:
             MockPolicy(
                 client_id=client.id,
                 policy_number="AUTO-1001",
-                insurance_type="auto",
+                insurance_type="Automotor",
+                category="auto",
+                coverage_name="todo_riesgo",
                 domain="AB123CD",
                 description="Auto demo AB123CD",
                 active=True,
@@ -29,7 +31,9 @@ def seed_mock_data(db: Session) -> None:
             MockPolicy(
                 client_id=client.id,
                 policy_number="MOTO-2001",
-                insurance_type="moto",
+                insurance_type="Automotor",
+                category="auto",
+                coverage_name="terceros_completo",
                 domain="A123BCD",
                 description="Moto demo A123BCD",
                 active=True,
