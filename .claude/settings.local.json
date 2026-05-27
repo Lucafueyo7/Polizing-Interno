@@ -10,7 +10,8 @@
       "Bash(textutil -convert txt -output /tmp/plantilla.txt \"/Users/manuelducos/Desktop/Polizing-Interno/Entregables/Entregable Integral/Plantilla-Documentacion-Proyecto.docx\")",
       "Read(//tmp/**)",
       "Bash(PUPPETEER_SKIP_DOWNLOAD=true npx --yes md-to-pdf Documentacion-Integral.md --launch-options '{\"executablePath\":\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"}')",
-      "Bash(file *.pdf *.docx)"
+      "Bash(file *.pdf *.docx)",
+      "Bash(grep \"~\\\\$\")"
     ]
   }
 }

@@ -1,8 +1,19 @@
-# Polizing — Documentación del Proyecto
+# Universidad Nacional del Sur
 
-**Universidad Nacional del Sur — Arquitectura y Diseño de Sistemas, 2026**
-**Diagramas de Arquitectura — Documentación del Proyecto**
-**Grupo 6** · David Felder · Manuel Ducos · Gonzalo Ferraro · Luca Fueyo · Marcos Kravetz · Agustín Echavarría
+## Arquitectura y Diseño de Sistemas — 2026
+
+# Polizing
+
+## Diagramas de Arquitectura
+
+## Documentación del Proyecto
+
+Práctica de Arquitectura y Diseño de Sistemas 2026
+
+**Grupo 6**
+
+David Felder · Manuel Ducos · Gonzalo Ferraro · Luca Fueyo · Marcos Kravetz · Agustín Echavarría
+
 Fecha: 27/05/2026
 
 ---
@@ -48,7 +59,7 @@ El valor concreto que aporta el sistema es doble. Para el productor: menos tiemp
 - **RNF-05 — Mantenibilidad:** el mercado asegurador cambia (nuevas normativas, nuevas coberturas, nuevas integraciones). El código debe ser modular para que el equipo pueda evolucionar el sistema sin romper lo existente.
 - **RNF-06 — Trazabilidad:** cada cambio sobre datos críticos (pólizas, siniestros, pagos) debe quedar registrado con su autor y su fecha. La trazabilidad protege legal y comercialmente al productor.
 
-### 1.4 Casos de Uso / Historias de Usuario
+### 1.4 Casos de Uso – Historias de Usuarios
 
 Los casos de uso completos están en `Entregables/Entrega 1/Casos de uso/`. El diagrama general se encuentra en `Entregables/Entrega 1/Casos de uso/Diagrama de casos de uso/`. La lista de casos de uso identificados es:
 
@@ -77,13 +88,13 @@ Los casos de uso completos están en `Entregables/Entrega 1/Casos de uso/`. El d
 
 Todos los casos fueron actualizados según las devoluciones del corrector (ver `Entregables/Entrega 3/correcciones-grupo-6.txt`).
 
-### 1.5 Modelo de Entidad–Relación
+### 1.5 Modelo de Entidad Relación o Diagrama de Clases
 
 La última versión depurada del modelo de datos vive en `Entregables/Entrega 3/erd.svg` (diagrama) y `Entregables/Entrega 3/modelo-datos.md` (descripción tabla por tabla). Pasó de 17 tablas iniciales a **10 tablas** finales, eliminando 7 tablas puente innecesarias y aplicando 3NF, enums para valores cerrados y auditoría por actor.
 
 Tablas finales: `clientes`, `clientes_corporativos`, `clientes_no_corporativos`, `empresas_aseguradoras`, `tipos_seguro`, `polizas`, `siniestros`, `siniestro_documentos`, `pagos`, `usuarios`.
 
-### 1.6 Modelo Conceptual de Datos
+### 1.6 Modelo Conceptual de Datos consistente con el Modelo de Entidad Relación o con el Diagrama de Clases, según corresponda
 
 El modelo conceptual coincide con la jerarquía de conceptos definida en el Glosario (Entrega 1) y materializada en el ERD:
 
@@ -105,7 +116,7 @@ Entregables producidos:
 - **Diagrama de Contenedores (C4 Nivel 2):** especifica la arquitectura distribuida con frontend, backend, base de datos y servicios satélite.
 - **Diagrama de Componentes (C4 Nivel 3):** detalla la separación de responsabilidades interna del contenedor de backend.
 
-### 2.1 Diagrama de Contexto
+### 2.1. Diagrama de Contexto
 
 El diagrama de contexto representa a Polizing como una caja negra que conversa con dos actores humanos y tres sistemas externos. No expone detalles internos: solo el qué entra y qué sale del sistema.
 
@@ -155,16 +166,19 @@ Sistemas externos de cada compañía. El Backend de Polizing las consulta para s
 
 Las decisiones de esta sección están registradas en detalle como ADRs en `Entregables/Entrega 4/ADRs/`. Aquí se resumen las justificaciones clave.
 
-**Organización de servicios — Dos servicios desplegables independientes (ADR-001)**
-Se adopta una división en dos servicios: el panel web (`my-app`, monolito modular Next.js) y el chatbot (`chatbot`, servicio FastAPI). No es monolito único ni microservicios completos. La división responde a tres motivadores: (a) dos audiencias con perfiles muy distintos (productor en web vs cliente en WhatsApp), (b) requerimientos de runtime opuestos (serverless funciona para el panel pero rompe el webhook del bot, que necesita proceso persistente y estado local), (c) ritmos de evolución distintos (un cambio de copy del bot no debe forzar un deploy del panel). Las limitaciones asumidas: el modelo de dominio se duplica parcialmente entre los dos servicios y hay dos pipelines de CI/CD.
+#### Organización de servicios
 
-**Estrategia de persistencia — PostgreSQL relacional + SQLite local en el chatbot (ADR-002)**
-Se elige **PostgreSQL** (sobre Supabase) como base única del panel: el modelo de dominio es fuertemente relacional (clientes ↔ pólizas ↔ siniestros ↔ pagos), las transacciones multi-tabla son frecuentes (alta de siniestro + documentos, validación de pago) y los reportes requieren joins complejos. NoSQL fue descartado porque obligaría a emular joins en código aplicativo. El chatbot mantiene su propia **SQLite local** solo para el estado conversacional (qué flujo y paso lleva cada teléfono); los datos de negocio nunca se duplican en el bot, se consultan vía API al panel.
+Se adopta una división en **dos servicios desplegables independientes** (ADR-001): el panel web (`my-app`, monolito modular Next.js) y el chatbot (`chatbot`, servicio FastAPI). No es monolito único ni microservicios completos. La división responde a tres motivadores: (a) dos audiencias con perfiles muy distintos (productor en web vs cliente en WhatsApp), (b) requerimientos de runtime opuestos (serverless funciona para el panel pero rompe el webhook del bot, que necesita proceso persistente y estado local), (c) ritmos de evolución distintos (un cambio de copy del bot no debe forzar un deploy del panel). Las limitaciones asumidas conscientemente: el modelo de dominio se duplica parcialmente entre los dos servicios y hay dos pipelines de CI/CD.
 
-**Mecanismo de comunicación — REST síncrono con API Key (ADR-003)**
-La comunicación entre el chatbot y el panel es **REST síncrono server-to-server sobre HTTPS**, autenticado con header `X-API-Key`. Las alternativas (colas de mensajes, eventos pub-sub) se descartaron por dos razones: el patrón de uso del bot es estrictamente petición/respuesta (cada mensaje del cliente exige una respuesta inmediata), y el volumen acotado por la cadencia humana no justifica el overhead de un broker. El trade-off asumido: si el panel cae, el bot no puede responder al cliente; no hay desacoplamiento temporal.
+#### Estrategia de persistencia
 
-### 2.3 Diagrama de Componentes
+Se elige **PostgreSQL relacional** (administrado por Supabase) como base única del panel (ADR-002): el modelo de dominio es fuertemente relacional (clientes ↔ pólizas ↔ siniestros ↔ pagos), las transacciones multi-tabla son frecuentes (alta de siniestro + documentos, validación de pago) y los reportes requieren joins complejos. NoSQL fue descartado porque obligaría a emular joins en código aplicativo. El chatbot mantiene su propia **SQLite local** solo para el estado conversacional (qué flujo y paso lleva cada teléfono); los datos de negocio nunca se duplican en el bot, se consultan vía API al panel. El criterio que define qué datos van a cada base es claro: datos de negocio en Postgres, estado conversacional efímero en SQLite local.
+
+#### Mecanismo de comunicación entre componentes
+
+La comunicación entre el chatbot y el panel es **REST síncrono server-to-server sobre HTTPS**, autenticada con header `X-API-Key` (ADR-003). Las alternativas asíncronas (colas de mensajes, eventos pub-sub) se descartaron por dos razones: el patrón de uso del bot es estrictamente petición/respuesta (cada mensaje del cliente exige una respuesta inmediata), y el volumen acotado por la cadencia humana no justifica el overhead de un broker. Dentro del panel, el Frontend habla con el Backend mediante Server Actions y endpoints HTTP internos. El trade-off asumido: si el panel cae, el bot no puede responder al cliente; no hay desacoplamiento temporal.
+
+### 2.3. Diagrama de Componentes
 
 El diagrama de componentes detalla la estructura interna del contenedor Backend de Polizing. Los componentes externos al backend (Frontend, DataBase, Chatbot, APIs de aseguradoras) se incluyen como cajas grises de referencia.
 
@@ -245,7 +259,7 @@ El criterio de separación es mantener cada componente con una sola responsabili
 
 ## 5. Flujos Principales del Sistema
 
-### 5.1 Flujo de autenticación (usuario interno)
+### 5.1 Flujo de autenticación
 
 1. El productor accede al panel `my-app` y completa el formulario de Login (componente Frontend).
 2. El componente **Login / Logout** recibe las credenciales y delega su validación en el componente **Security**.
