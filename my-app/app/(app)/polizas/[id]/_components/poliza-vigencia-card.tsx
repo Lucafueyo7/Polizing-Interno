@@ -13,7 +13,6 @@ export function PolizaVigenciaCard({ poliza }: { poliza: PolizaFull }) {
         </h3>
       </div>
       <dl className="px-5 py-2">
-        <KvRow label="Emisión" value={fmtDate(poliza.emision)} mono />
         <KvRow label="Inicio" value={fmtDate(poliza.inicio)} mono />
         <KvRow label="Fin" value={fmtDate(poliza.fin)} mono />
         <KvRow

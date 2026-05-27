@@ -53,7 +53,7 @@ export function ClienteContratacionesTable({
             <TableCell>
               <div className="flex flex-col">
                 <span className="font-medium">{p.tipo}</span>
-                <small className="text-muted-foreground">{p.cobertura}</small>
+                <small className="text-muted-foreground">{p.cobertura.nombre}</small>
               </div>
             </TableCell>
             <TableCell>{p.aseguradora.razonSocial}</TableCell>

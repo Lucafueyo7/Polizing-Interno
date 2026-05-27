@@ -10,9 +10,9 @@ export type ActionResult =
   | { ok: false; error: string };
 
 /**
- * MVP: marca el siniestro como leído al derivar y revalida.
- * En siguientes etapas cuando exista una tabla de auditoría / asignación,
- * se registra el evento y se notifica a la aseguradora.
+ * MVP: registra la lectura del siniestro por parte del usuario actual al derivar.
+ * En siguientes etapas, cuando exista una tabla de asignación/auditoría con más detalle,
+ * se registra el evento de derivación y se notifica a la aseguradora.
  */
 export async function derivarSiniestro(id: number): Promise<ActionResult> {
   if (!Number.isInteger(id) || id <= 0) {
@@ -25,8 +25,17 @@ export async function derivarSiniestro(id: number): Promise<ActionResult> {
   try {
     await prisma.siniestros.update({
       where: { id },
-      data: { leido: true, ...audit },
+      data: { ...audit },
     });
+    if (user?.id) {
+      await prisma.siniestro_lecturas.upsert({
+        where: {
+          siniestro_id_usuario_id: { siniestro_id: id, usuario_id: user.id },
+        },
+        create: { siniestro_id: id, usuario_id: user.id },
+        update: { leido_en: new Date() },
+      });
+    }
     updateTag(CACHE_TAGS.siniestros);
     return { ok: true };
   } catch {

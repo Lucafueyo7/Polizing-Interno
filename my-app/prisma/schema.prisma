@@ -29,18 +29,34 @@ enum PolizaEstado {
   renovada
 }
 
-enum CoberturaTipo {
-  responsabilidad_civil
-  terceros_completo
-  todo_riesgo
-  basica
-  integral
-}
-
 enum SiniestroEstado {
   nuevo
-  tramite
+  pendiente_documentacion
+  en_tramite
   cerrado
+  rechazado
+}
+
+enum CategoriaSeguro {
+  auto
+  vida
+  hogar
+  salud
+  comercio
+  art
+  agricola
+  otros
+}
+
+enum MetodoPago {
+  transferencia
+  debito_automatico
+  tarjeta_credito
+  tarjeta_debito
+  efectivo
+  mercadopago
+  cheque
+  otro
 }
 
 enum DocumentoTipo {
@@ -112,8 +128,6 @@ model empresas_aseguradoras {
   cuit              String    @unique
   telefono          String?
   email             String?
-  contacto_nombre   String?
-  direccion         String?
   created_at        DateTime  @default(now()) @db.Timestamptz(6)
   updated_at        DateTime  @updatedAt @db.Timestamptz(6)
   modificado_por_id Int?
@@ -124,15 +138,32 @@ model empresas_aseguradoras {
 }
 
 // =============================================================================
-// TIPOS DE SEGURO
+// TIPOS DE SEGURO + CATÁLOGO DE COBERTURAS
 // =============================================================================
 
 model tipos_seguro {
-  id          Int     @id @default(autoincrement())
-  nombre      String  @unique
+  id          Int             @id @default(autoincrement())
+  nombre      String          @unique
+  categoria   CategoriaSeguro
   descripcion String?
 
-  polizas polizas[]
+  polizas    polizas[]
+  coberturas coberturas[]
+
+  @@index([categoria])
+}
+
+model coberturas {
+  id             Int     @id @default(autoincrement())
+  tipo_seguro_id Int
+  nombre         String
+  descripcion    String?
+
+  tipo_seguro tipos_seguro @relation(fields: [tipo_seguro_id], references: [id], onDelete: Cascade)
+  polizas     polizas[]
+
+  @@unique([tipo_seguro_id, nombre])
+  @@index([tipo_seguro_id])
 }
 
 // =============================================================================
@@ -140,30 +171,30 @@ model tipos_seguro {
 // =============================================================================
 
 model polizas {
-  id                         Int           @id @default(autoincrement())
-  numero_poliza              String        @unique
-  cliente_id                 Int
-  aseguradora_id             Int
-  tipo_seguro_id             Int
-  cobertura                  CoberturaTipo
-  estado                     PolizaEstado
-  fecha_emision              DateTime      @db.Timestamptz(6)
-  fecha_inicio_vigencia      DateTime      @db.Timestamptz(6)
-  fecha_fin_vigencia         DateTime      @db.Timestamptz(6)
-  suma_asegurada             Decimal       @db.Decimal(15, 2)
-  prima_mensual              Decimal       @db.Decimal(15, 2)
-  moneda                     String        @default("ARS") @db.Char(3)
-  tarjeta_circulacion_poliza String?
-  numero_cuota               Int?
-  pago_id                    Int?
-  created_at                 DateTime      @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime      @updatedAt @db.Timestamptz(6)
-  modificado_por_id          Int?
-  modificado_en              DateTime?     @db.Timestamptz(6)
+  id                    Int          @id @default(autoincrement())
+  numero_poliza         String       @unique
+  cliente_id            Int
+  aseguradora_id        Int
+  tipo_seguro_id        Int
+  cobertura_id          Int
+  pago_id               Int?
+  estado                PolizaEstado
+  fecha_inicio_vigencia DateTime     @db.Timestamptz(6)
+  fecha_fin_vigencia    DateTime     @db.Timestamptz(6)
+  suma_asegurada        Decimal      @db.Decimal(15, 2)
+  /// Cuota mensual fija que el cliente abona para mantener la póliza vigente.
+  /// Capturada al momento de la emisión.
+  prima_mensual         Decimal      @db.Decimal(15, 2)
+  moneda                String       @default("ARS") @db.Char(3)
+  created_at            DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime     @updatedAt @db.Timestamptz(6)
+  modificado_por_id     Int?
+  modificado_en         DateTime?    @db.Timestamptz(6)
 
   cliente        clientes              @relation(fields: [cliente_id], references: [id])
   aseguradora    empresas_aseguradoras @relation(fields: [aseguradora_id], references: [id])
   tipo_seguro    tipos_seguro          @relation(fields: [tipo_seguro_id], references: [id])
+  cobertura      coberturas            @relation(fields: [cobertura_id], references: [id])
   pago           pagos?                @relation(fields: [pago_id], references: [id], onDelete: SetNull)
   siniestros     siniestros[]
   modificado_por usuarios?             @relation("PolizaModificadaPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
@@ -171,6 +202,7 @@ model polizas {
   @@index([cliente_id])
   @@index([aseguradora_id])
   @@index([tipo_seguro_id])
+  @@index([cobertura_id])
   @@index([estado])
   @@index([fecha_fin_vigencia])
   @@index([pago_id])
@@ -182,30 +214,28 @@ model polizas {
 // =============================================================================
 
 model siniestros {
-  id                 Int             @id @default(autoincrement())
-  poliza_id          Int
-  numero             String          @unique
-  titulo             String
-  fecha_ocurrencia   DateTime        @db.Timestamptz(6)
-  fecha_reporte      DateTime        @db.Timestamptz(6)
-  descripcion_hechos String?
-  estado             SiniestroEstado @default(nuevo)
-  leido              Boolean         @default(false)
-  ai_summary         String?
-  created_at         DateTime        @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime        @updatedAt @db.Timestamptz(6)
-  modificado_por_id  Int?
-  modificado_en      DateTime?       @db.Timestamptz(6)
+  id                Int             @id @default(autoincrement())
+  poliza_id         Int
+  /// Identificador visible al cliente (formato `SIN-NNNNN`), generado por la
+  /// aplicación con prefijo + secuencia al crear el siniestro. Distinto del id interno.
+  numero            String          @unique
+  titulo            String
+  fecha_ocurrencia  DateTime        @db.Timestamptz(6)
+  fecha_reporte     DateTime        @db.Timestamptz(6)
+  estado            SiniestroEstado @default(nuevo)
+  created_at        DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime        @updatedAt @db.Timestamptz(6)
+  modificado_por_id Int?
+  modificado_en     DateTime?       @db.Timestamptz(6)
 
   poliza         polizas                @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
   documentos     siniestro_documentos[]
+  lecturas       siniestro_lecturas[]
   modificado_por usuarios?              @relation("SiniestroModificadoPor", fields: [modificado_por_id], references: [id], onDelete: SetNull)
 
   @@index([poliza_id])
   @@index([estado])
-  @@index([leido])
   @@index([fecha_reporte(sort: Desc)])
-  @@index([estado, leido])
 }
 
 model siniestro_documentos {
@@ -215,7 +245,6 @@ model siniestro_documentos {
   nombre       String
   url          String
   mime_type    String
-  hash         String?
   tamano_bytes Int?
   created_at   DateTime      @default(now()) @db.Timestamptz(6)
 
@@ -224,24 +253,36 @@ model siniestro_documentos {
   @@index([siniestro_id])
 }
 
+/// Registra qué usuario leyó qué siniestro y cuándo.
+/// Reemplaza al flag `siniestros.leido` (que mezclaba estado de UI con dominio).
+model siniestro_lecturas {
+  siniestro_id Int
+  usuario_id   Int
+  leido_en     DateTime @default(now()) @db.Timestamptz(6)
+
+  siniestro siniestros @relation(fields: [siniestro_id], references: [id], onDelete: Cascade)
+  usuario   usuarios   @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+
+  @@id([siniestro_id, usuario_id])
+  @@index([usuario_id])
+}
+
 // =============================================================================
 // PAGOS (un pago agrupa N pólizas)
 // =============================================================================
 
 model pagos {
-  id                Int        @id @default(autoincrement())
+  id                Int         @id @default(autoincrement())
   cliente_id        Int
-  monto             Decimal    @db.Decimal(15, 2)
-  fecha_pago        DateTime?  @db.Timestamptz(6)
-  estado            PagoEstado @default(pendiente)
-  metodo_pago       String?
-  comprobante       String?
-  cbu               String?
-  moneda            String     @default("ARS") @db.Char(3)
-  created_at        DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime   @updatedAt @db.Timestamptz(6)
+  monto             Decimal     @db.Decimal(15, 2)
+  fecha_pago        DateTime?   @db.Timestamptz(6)
+  estado            PagoEstado  @default(pendiente)
+  metodo_pago       MetodoPago?
+  moneda            String      @default("ARS") @db.Char(3)
+  created_at        DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime    @updatedAt @db.Timestamptz(6)
   modificado_por_id Int?
-  modificado_en     DateTime?  @db.Timestamptz(6)
+  modificado_en     DateTime?   @db.Timestamptz(6)
 
   cliente        clientes  @relation(fields: [cliente_id], references: [id])
   polizas        polizas[]
@@ -271,6 +312,7 @@ model usuarios {
   siniestros_modificados   siniestros[]            @relation("SiniestroModificadoPor")
   pagos_modificados        pagos[]                 @relation("PagoModificadoPor")
   aseguradoras_modificadas empresas_aseguradoras[] @relation("AseguradoraModificadaPor")
+  siniestros_leidos        siniestro_lecturas[]
 }
 
 // =============================================================================

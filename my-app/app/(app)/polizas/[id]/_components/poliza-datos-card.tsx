@@ -13,7 +13,7 @@ export function PolizaDatosCard({ poliza }: { poliza: PolizaFull }) {
       </div>
       <dl className="px-5 py-2">
         <KvRow label="Tipo" value={poliza.tipo} />
-        <KvRow label="Cobertura" value={poliza.cobertura} />
+        <KvRow label="Cobertura" value={poliza.cobertura.nombre} />
         <KvRow label="Suma asegurada" value={fmtAR(poliza.suma)} mono />
         <KvRow label="Prima mensual" value={fmtAR(poliza.prima)} mono />
         <KvRow

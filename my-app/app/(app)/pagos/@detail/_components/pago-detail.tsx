@@ -4,7 +4,22 @@ import { Card } from "@/components/ui/card";
 import { fmtAR } from "@/lib/format/currency";
 import { fmtDate } from "@/lib/format/date";
 import { cn } from "@/lib/utils";
-import type { PagoEstado, PagoFull } from "@/lib/data/types";
+import type { MetodoPago, PagoEstado, PagoFull } from "@/lib/data/types";
+
+const METODO_LABEL: Record<MetodoPago, string> = {
+  transferencia: "Transferencia bancaria",
+  debito_automatico: "Débito automático",
+  tarjeta_credito: "Tarjeta de crédito",
+  tarjeta_debito: "Tarjeta de débito",
+  efectivo: "Efectivo",
+  mercadopago: "MercadoPago",
+  cheque: "Cheque",
+  otro: "Otro",
+};
+
+function metodoLabel(m: MetodoPago | null): string | null {
+  return m ? METODO_LABEL[m] : null;
+}
 import { PagoActions } from "./pago-actions";
 import { PagoBanner } from "./pago-banner";
 import { PagoTotals } from "./pago-totals";
@@ -61,10 +76,8 @@ export function PagoDetail({ pago }: { pago: PagoFull }) {
 
       <div className="px-6 py-5 flex flex-col gap-5 overflow-y-auto">
         <Card className="overflow-hidden p-0 gap-0">
-          <dl className="px-5 py-2 grid grid-cols-1 md:grid-cols-3 gap-x-5">
-            <KvRow label="Método" value={pago.metodoPago} />
-            <KvRow label="Comprobante" value={pago.comprobante} mono />
-            <KvRow label="CBU / CVU" value={pago.cbu} mono />
+          <dl className="px-5 py-2 grid grid-cols-1 gap-x-5">
+            <KvRow label="Método" value={metodoLabel(pago.metodoPago)} />
           </dl>
         </Card>
 

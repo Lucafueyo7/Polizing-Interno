@@ -9,6 +9,7 @@ import {
   PAGOS,
   POLIZAS,
   SINIESTROS,
+  TIPOS_SEGURO,
 } from "./seed-data";
 
 async function main() {
@@ -22,18 +23,19 @@ async function main() {
 
   try {
     await reset(prisma);
-    const tipoSeguroIdMap = await seedTiposSeguro(prisma);
+    const { tipoSeguroIdMap, coberturaIdMap } = await seedTiposSeguro(prisma);
     const clienteIdMap = await seedClientes(prisma);
     const aseguradoraIdMap = await seedAseguradoras(prisma);
     const pagoIdMap = await seedPagos(prisma, clienteIdMap);
-    const polizaIdMap = await seedPolizas(
+    await seedPolizas(
       prisma,
       clienteIdMap,
       aseguradoraIdMap,
       tipoSeguroIdMap,
+      coberturaIdMap,
       pagoIdMap,
     );
-    await seedSiniestros(prisma, polizaIdMap);
+    await seedSiniestros(prisma);
 
     const counts = await tally(prisma);
     console.log("✅ Seed completo:", counts);
@@ -43,9 +45,11 @@ async function main() {
 }
 
 async function reset(prisma: PrismaClient) {
+  await prisma.siniestro_lecturas.deleteMany();
   await prisma.siniestro_documentos.deleteMany();
   await prisma.siniestros.deleteMany();
   await prisma.polizas.deleteMany();
+  await prisma.coberturas.deleteMany();
   await prisma.pagos.deleteMany();
   await prisma.clientes_corporativos.deleteMany();
   await prisma.clientes_no_corporativos.deleteMany();
@@ -54,14 +58,34 @@ async function reset(prisma: PrismaClient) {
   await prisma.tipos_seguro.deleteMany();
 }
 
-async function seedTiposSeguro(prisma: PrismaClient): Promise<Map<string, number>> {
-  const nombres = Array.from(new Set(POLIZAS.map((p) => p.tipo)));
-  const map = new Map<string, number>();
-  for (const nombre of nombres) {
-    const created = await prisma.tipos_seguro.create({ data: { nombre } });
-    map.set(nombre, created.id);
+async function seedTiposSeguro(prisma: PrismaClient): Promise<{
+  tipoSeguroIdMap: Map<string, number>;
+  /** Key: `${tipoNombre}|${coberturaNombre}` → cobertura.id */
+  coberturaIdMap: Map<string, number>;
+}> {
+  const tipoSeguroIdMap = new Map<string, number>();
+  const coberturaIdMap = new Map<string, number>();
+  for (const t of TIPOS_SEGURO) {
+    const created = await prisma.tipos_seguro.create({
+      data: {
+        nombre: t.nombre,
+        categoria: t.categoria,
+        descripcion: t.descripcion ?? null,
+      },
+    });
+    tipoSeguroIdMap.set(t.nombre, created.id);
+    for (const cob of t.coberturas) {
+      const c = await prisma.coberturas.create({
+        data: {
+          tipo_seguro_id: created.id,
+          nombre: cob.nombre,
+          descripcion: cob.descripcion ?? null,
+        },
+      });
+      coberturaIdMap.set(`${t.nombre}|${cob.nombre}`, c.id);
+    }
   }
-  return map;
+  return { tipoSeguroIdMap, coberturaIdMap };
 }
 
 async function seedClientes(prisma: PrismaClient): Promise<Map<string, number>> {
@@ -110,8 +134,6 @@ async function seedAseguradoras(prisma: PrismaClient): Promise<Map<string, numbe
         cuit: a.cuit,
         telefono: a.telefono,
         email: a.email,
-        contacto_nombre: a.contactoNombre,
-        direccion: a.direccion,
       },
     });
     map.set(a.id, created.id);
@@ -133,8 +155,6 @@ async function seedPagos(
         fecha_pago: pago.fechaPago ? new Date(pago.fechaPago) : null,
         estado: pago.estado,
         metodo_pago: pago.metodoPago,
-        comprobante: pago.comprobante,
-        cbu: pago.cbu,
       },
     });
     map.set(pago.id, created.id);
@@ -147,6 +167,7 @@ async function seedPolizas(
   clienteIdMap: Map<string, number>,
   aseguradoraIdMap: Map<string, number>,
   tipoSeguroIdMap: Map<string, number>,
+  coberturaIdMap: Map<string, number>,
   pagoIdMap: Map<string, number>,
 ): Promise<Map<string, number>> {
   const polizaToPago = new Map<string, number>();
@@ -162,6 +183,11 @@ async function seedPolizas(
     const clienteId = required(clienteIdMap, p.clienteId, `cliente ${p.clienteId}`);
     const aseguradoraId = required(aseguradoraIdMap, p.aseguradoraId, `aseguradora ${p.aseguradoraId}`);
     const tipoSeguroId = required(tipoSeguroIdMap, p.tipo, `tipo ${p.tipo}`);
+    const coberturaId = required(
+      coberturaIdMap,
+      `${p.tipo}|${p.cobertura}`,
+      `cobertura ${p.cobertura} para tipo ${p.tipo}`,
+    );
     const pagoId = polizaToPago.get(p.id) ?? null;
 
     const created = await prisma.polizas.create({
@@ -170,9 +196,8 @@ async function seedPolizas(
         cliente_id: clienteId,
         aseguradora_id: aseguradoraId,
         tipo_seguro_id: tipoSeguroId,
-        cobertura: p.cobertura,
+        cobertura_id: coberturaId,
         estado: p.estado,
-        fecha_emision: new Date(p.emision),
         fecha_inicio_vigencia: new Date(p.inicio),
         fecha_fin_vigencia: new Date(p.fin),
         suma_asegurada: p.suma,
@@ -185,23 +210,20 @@ async function seedPolizas(
   return map;
 }
 
-async function seedSiniestros(
-  prisma: PrismaClient,
-  polizaIdMap: Map<string, number>,
-) {
+async function seedSiniestros(prisma: PrismaClient) {
   for (const s of SINIESTROS) {
-    const polizaId = required(polizaIdMap, s.polizaId, `póliza ${s.polizaId}`);
+    const poliza = await prisma.polizas.findUnique({
+      where: { numero_poliza: numeroPolizaFromSeedId(s.polizaId) },
+    });
+    if (!poliza) throw new Error(`Seed: póliza ${s.polizaId} no encontrada`);
     const created = await prisma.siniestros.create({
       data: {
-        poliza_id: polizaId,
+        poliza_id: poliza.id,
         numero: s.numero,
         titulo: s.titulo,
         fecha_ocurrencia: new Date(s.fecha),
         fecha_reporte: new Date(s.fechaReporte),
-        descripcion_hechos: s.descripcion,
         estado: s.estado,
-        leido: s.leido,
-        ai_summary: s.aiSummary,
       },
     });
     if (s.docs.length > 0) {
@@ -218,15 +240,25 @@ async function seedSiniestros(
   }
 }
 
+/** Mapea el id de seed (`P-YYYY-NNNN`) al numero_poliza correspondiente. */
+function numeroPolizaFromSeedId(seedId: string): string {
+  const poliza = POLIZAS.find((p) => p.id === seedId);
+  if (!poliza) throw new Error(`Seed: póliza ${seedId} no definida en POLIZAS`);
+  return poliza.numero;
+}
+
 async function tally(prisma: PrismaClient) {
-  const [clientes, aseguradoras, polizas, siniestros, pagos] = await Promise.all([
-    prisma.clientes.count(),
-    prisma.empresas_aseguradoras.count(),
-    prisma.polizas.count(),
-    prisma.siniestros.count(),
-    prisma.pagos.count(),
-  ]);
-  return { clientes, aseguradoras, polizas, siniestros, pagos };
+  const [clientes, aseguradoras, tiposSeguro, coberturas, polizas, siniestros, pagos] =
+    await Promise.all([
+      prisma.clientes.count(),
+      prisma.empresas_aseguradoras.count(),
+      prisma.tipos_seguro.count(),
+      prisma.coberturas.count(),
+      prisma.polizas.count(),
+      prisma.siniestros.count(),
+      prisma.pagos.count(),
+    ]);
+  return { clientes, aseguradoras, tiposSeguro, coberturas, polizas, siniestros, pagos };
 }
 
 function required<K, V>(map: Map<K, V>, key: K, label: string): V {

@@ -20,10 +20,19 @@ export async function aprobarTramite(id: number): Promise<ActionResult> {
   try {
     const updated = await prisma.siniestros.updateMany({
       where: { id, estado: "nuevo" },
-      data: { estado: "tramite", leido: true, ...audit },
+      data: { estado: "en_tramite", ...audit },
     });
     if (updated.count === 0) {
       return { ok: false, error: "El siniestro ya no está en estado 'nuevo'." };
+    }
+    if (user?.id) {
+      await prisma.siniestro_lecturas.upsert({
+        where: {
+          siniestro_id_usuario_id: { siniestro_id: id, usuario_id: user.id },
+        },
+        create: { siniestro_id: id, usuario_id: user.id },
+        update: { leido_en: new Date() },
+      });
     }
     updateTag(CACHE_TAGS.siniestros);
     return { ok: true };

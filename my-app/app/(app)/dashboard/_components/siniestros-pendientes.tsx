@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ChevronRight, WhatsApp } from "@/components/icons";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { timeAgo } from "@/lib/format/time-ago";
@@ -56,14 +55,6 @@ export function SiniestrosPendientes({
                     <span className="truncate">{s.cliente.label}</span>
                     <span aria-hidden="true">·</span>
                     <span className="shrink-0">{s.docsCount} adjuntos</span>
-                    {s.iaProcesada && (
-                      <>
-                        <span aria-hidden="true">·</span>
-                        <Badge variant="info" className="h-4 px-1.5 text-[10px]">
-                          IA procesada
-                        </Badge>
-                      </>
-                    )}
                   </div>
                 </div>
                 <span className="text-[11.5px] text-muted-foreground shrink-0 mt-0.5">

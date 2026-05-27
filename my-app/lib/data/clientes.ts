@@ -177,6 +177,7 @@ export async function getClienteContrataciones(
       },
       aseguradora: true,
       tipo_seguro: true,
+      cobertura: true,
     },
   });
 
@@ -184,7 +185,7 @@ export async function getClienteContrataciones(
     id: row.id,
     numero: row.numero_poliza,
     tipo: row.tipo_seguro.nombre,
-    cobertura: row.cobertura,
+    cobertura: { id: row.cobertura.id, nombre: row.cobertura.nombre },
     inicio: isoDate(row.fecha_inicio_vigencia),
     fin: isoDate(row.fecha_fin_vigencia),
     suma: Number(row.suma_asegurada),
@@ -225,11 +226,10 @@ export async function getClienteSiniestros(
     id: row.id,
     numero: row.numero,
     titulo: row.titulo,
-    descripcion: row.descripcion_hechos,
     cliente: clienteRefFromRow(row.poliza.cliente),
     fechaReporte: isoDateTime(row.fecha_reporte),
     estado: row.estado,
-    leido: row.leido,
+    leidoPorMi: false,
     docsCount: row.documentos.length,
   }));
 }

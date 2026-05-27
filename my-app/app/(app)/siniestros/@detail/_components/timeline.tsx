@@ -1,4 +1,4 @@
-import { Sparkles, WhatsApp } from "@/components/icons";
+import { WhatsApp } from "@/components/icons";
 import { timeAgo } from "@/lib/format/time-ago";
 import type { SiniestroFull } from "@/lib/data/types";
 
@@ -11,25 +11,14 @@ export function Timeline({ siniestro }: { siniestro: SiniestroFull }) {
     iconBg: string;
     title: string;
     meta: string;
-    show: boolean;
   }> = [
-    {
-      icon: Sparkles,
-      iconBg: "bg-brand-info text-white",
-      title: "IA procesó adjuntos",
-      meta: `${timeAgo(siniestro.fechaReporte)} · clasificación automática + extracción de datos`,
-      show: siniestro.aiSummary !== null,
-    },
     {
       icon: WhatsApp,
       iconBg: "bg-brand-whatsapp text-white",
       title: "Reporte recibido",
       meta: reportoText,
-      show: true,
     },
   ];
-
-  const visible = events.filter((e) => e.show);
 
   return (
     <section>
@@ -37,7 +26,7 @@ export function Timeline({ siniestro }: { siniestro: SiniestroFull }) {
         Línea de tiempo
       </h4>
       <ol className="flex flex-col gap-3">
-        {visible.map((event, i) => {
+        {events.map((event, i) => {
           const Icon = event.icon;
           return (
             <li key={i} className="flex items-start gap-3">

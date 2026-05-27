@@ -37,11 +37,9 @@ export async function createSiniestro(
         poliza_id: data.polizaId,
         numero: data.numero,
         titulo: data.titulo,
-        descripcion_hechos: data.descripcion ?? null,
         fecha_ocurrencia: new Date(`${data.fechaOcurrencia}T00:00:00Z`),
         fecha_reporte: new Date(),
         estado: data.estado,
-        leido: false,
       },
       select: { id: true },
     });

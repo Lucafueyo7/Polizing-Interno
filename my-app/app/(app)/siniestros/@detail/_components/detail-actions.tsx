@@ -4,12 +4,17 @@ import { useTransition } from "react";
 import { CheckCircle, Forward, Reply } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { toastError, toastSuccess } from "@/lib/ui/toast";
+import type { SiniestroEstado } from "@/lib/domain/poliza-status";
 import { aprobarTramite } from "../../_actions/aprobar-tramite";
 import { derivarSiniestro } from "../../_actions/derivar-siniestro";
 
-type Estado = "nuevo" | "tramite" | "cerrado";
-
-export function DetailActions({ id, estado }: { id: number; estado: Estado }) {
+export function DetailActions({
+  id,
+  estado,
+}: {
+  id: number;
+  estado: SiniestroEstado;
+}) {
   const [isPending, startTransition] = useTransition();
 
   const handleAprobar = () => {

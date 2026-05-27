@@ -18,13 +18,20 @@ export const POLIZA_STATUS: Record<
   renovada: { label: "Renovada", tone: "info" },
 };
 
-export type SiniestroEstado = "nuevo" | "tramite" | "cerrado";
+export type SiniestroEstado =
+  | "nuevo"
+  | "pendiente_documentacion"
+  | "en_tramite"
+  | "cerrado"
+  | "rechazado";
 
 export const SINIESTRO_STATUS: Record<
   SiniestroEstado,
   { label: string; tone: StatusTone }
 > = {
-  nuevo: { label: "Nuevo", tone: "info" },
-  tramite: { label: "En trámite", tone: "warn" },
-  cerrado: { label: "Cerrado", tone: "neutral" },
+  nuevo:                   { label: "Nuevo",                 tone: "info"    },
+  pendiente_documentacion: { label: "Pend. documentación",   tone: "warn"    },
+  en_tramite:              { label: "En trámite",            tone: "warn"    },
+  cerrado:                 { label: "Cerrado",               tone: "neutral" },
+  rechazado:               { label: "Rechazado",             tone: "danger"  },
 };

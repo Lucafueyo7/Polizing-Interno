@@ -22,7 +22,7 @@ export function PolizaVinculada({ poliza }: { poliza: SiniestroFull["poliza"] })
             {poliza.numero}
           </div>
           <div className="text-[11.5px] text-muted-foreground">
-            {poliza.tipo} · {poliza.cobertura}
+            {poliza.tipo} · {poliza.cobertura.nombre}
           </div>
         </div>
         <Stat label="Aseguradora" value={poliza.aseguradora.razonSocial} />

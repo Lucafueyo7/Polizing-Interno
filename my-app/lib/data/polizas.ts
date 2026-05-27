@@ -10,6 +10,9 @@ import {
   vencimientoDays,
 } from "./_mappers";
 import type {
+  CategoriaSeguro,
+  CoberturaCatalogo,
+  CoberturaRef,
   FormCliente,
   PolizaCounts,
   PolizaFormRefs,
@@ -28,6 +31,7 @@ const POLIZA_INCLUDE = {
   },
   aseguradora: true,
   tipo_seguro: true,
+  cobertura: true,
 } as const;
 
 type PolizaRow = Awaited<ReturnType<typeof findPolizas>>[number];
@@ -39,12 +43,16 @@ function findPolizas() {
   });
 }
 
+function toCoberturaRef(c: { id: number; nombre: string }): CoberturaRef {
+  return { id: c.id, nombre: c.nombre };
+}
+
 function toListItem(row: PolizaRow): PolizaListItem {
   return {
     id: row.id,
     numero: row.numero_poliza,
     tipo: row.tipo_seguro.nombre,
-    cobertura: row.cobertura,
+    cobertura: toCoberturaRef(row.cobertura),
     inicio: isoDate(row.fecha_inicio_vigencia),
     fin: isoDate(row.fecha_fin_vigencia),
     suma: Number(row.suma_asegurada),
@@ -85,7 +93,7 @@ function matchesFilters(p: PolizaListItem, f: PolizasFilters): boolean {
   if (f.q) {
     const q = f.q.toLowerCase();
     const haystack =
-      `${p.numero} ${p.cliente.label} ${p.cliente.ident} ${p.tipo} ${p.cobertura}`.toLowerCase();
+      `${p.numero} ${p.cliente.label} ${p.cliente.ident} ${p.tipo} ${p.cobertura.nombre}`.toLowerCase();
     if (!haystack.includes(q)) return false;
   }
   return true;
@@ -131,7 +139,6 @@ export async function getPolizaById(id: number): Promise<PolizaFull | null> {
   if (!row) return null;
   return {
     ...toListItem(row),
-    emision: isoDate(row.fecha_emision),
     tipoSeguroId: row.tipo_seguro_id,
   };
 }
@@ -139,7 +146,7 @@ export async function getPolizaById(id: number): Promise<PolizaFull | null> {
 export async function getPolizaFormRefs(): Promise<PolizaFormRefs> {
   "use cache";
   cacheLife("minutes");
-  cacheTag(CACHE_TAGS.clientes, CACHE_TAGS.aseguradoras);
+  cacheTag(CACHE_TAGS.clientes, CACHE_TAGS.aseguradoras, CACHE_TAGS.polizas);
 
   const [clientesRows, aseguradorasRows, tiposRows] = await Promise.all([
     prisma.clientes.findMany({
@@ -156,7 +163,15 @@ export async function getPolizaFormRefs(): Promise<PolizaFormRefs> {
     }),
     prisma.tipos_seguro.findMany({
       orderBy: { nombre: "asc" },
-      select: { id: true, nombre: true },
+      select: {
+        id: true,
+        nombre: true,
+        categoria: true,
+        coberturas: {
+          orderBy: { nombre: "asc" },
+          select: { id: true, nombre: true },
+        },
+      },
     }),
   ]);
 
@@ -172,6 +187,11 @@ export async function getPolizaFormRefs(): Promise<PolizaFormRefs> {
     })
     .filter((c): c is FormCliente => c !== null);
 
+  const coberturasPorTipo: CoberturaCatalogo[] = tiposRows.map((t) => ({
+    tipoSeguroId: t.id,
+    coberturas: t.coberturas.map((c) => ({ id: c.id, nombre: c.nombre })),
+  }));
+
   return {
     clientes,
     aseguradoras: aseguradorasRows.map((a) => ({
@@ -181,6 +201,8 @@ export async function getPolizaFormRefs(): Promise<PolizaFormRefs> {
     tiposSeguro: tiposRows.map((t) => ({
       id: t.id,
       nombre: t.nombre,
+      categoria: t.categoria as CategoriaSeguro,
     })),
+    coberturasPorTipo,
   };
 }

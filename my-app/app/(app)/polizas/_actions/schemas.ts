@@ -20,15 +20,8 @@ export const PolizaSchema = z
     clienteId: z.number().int().positive("Cliente requerido"),
     aseguradoraId: z.number().int().positive("Aseguradora requerida"),
     tipoSeguroId: z.number().int().positive("Tipo de seguro requerido"),
-    cobertura: z.enum([
-      "responsabilidad_civil",
-      "terceros_completo",
-      "todo_riesgo",
-      "basica",
-      "integral",
-    ]),
+    coberturaId: z.number().int().positive("Cobertura requerida"),
     estado: z.enum(["vigente", "proxima", "vencida", "anulada", "renovada"]),
-    fechaEmision: isoDateString,
     fechaInicio: isoDateString,
     fechaFin: isoDateString,
     sumaAsegurada: positiveDecimal("Suma asegurada"),
@@ -39,13 +32,6 @@ export const PolizaSchema = z
     {
       message: "El fin de vigencia debe ser posterior al inicio",
       path: ["fechaFin"],
-    },
-  )
-  .refine(
-    (data) => new Date(data.fechaEmision) <= new Date(data.fechaInicio),
-    {
-      message: "La emisión no puede ser posterior al inicio",
-      path: ["fechaEmision"],
     },
   );
 

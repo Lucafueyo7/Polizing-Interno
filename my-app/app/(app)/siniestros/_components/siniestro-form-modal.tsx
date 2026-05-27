@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useUrlModal } from "@/lib/hooks/use-url-modal";
 import { TODAY_ISO } from "@/lib/format/date";
 import { toastError, toastSuccess } from "@/lib/ui/toast";
@@ -25,14 +24,18 @@ import type { SiniestroFormRefs } from "@/lib/data/types";
 import { createSiniestro } from "../_actions/create-siniestro";
 import type { SiniestroInput } from "../_actions/schemas";
 
-type Estado = "nuevo" | "tramite" | "cerrado";
+type Estado =
+  | "nuevo"
+  | "pendiente_documentacion"
+  | "en_tramite"
+  | "cerrado"
+  | "rechazado";
 
 type FormShape = {
   clienteId: string;
   polizaId: string;
   numero: string;
   titulo: string;
-  descripcion: string;
   fechaOcurrencia: string;
   estado: Estado;
 };
@@ -54,7 +57,6 @@ function emptyForm(opts: {
     polizaId: opts.defaultPolizaId ? String(opts.defaultPolizaId) : "",
     numero: opts.defaultNumero,
     titulo: "",
-    descripcion: "",
     fechaOcurrencia: TODAY_ISO,
     estado: "nuevo",
   };
@@ -65,7 +67,6 @@ function toInput(values: FormShape): SiniestroInput {
     polizaId: Number(values.polizaId),
     numero: values.numero,
     titulo: values.titulo,
-    descripcion: values.descripcion,
     fechaOcurrencia: values.fechaOcurrencia,
     estado: values.estado,
   };
@@ -132,7 +133,7 @@ export function SiniestroFormModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Registrar siniestro"
-      description="Vinculá un cliente y una póliza, y describí el evento. La IA asistirá en la clasificación cuando se procese el caso."
+      description="Vinculá un cliente y una póliza, y describí el evento."
       maxWidthClass="sm:max-w-[680px]"
     >
       <form
@@ -249,17 +250,6 @@ export function SiniestroFormModal({
             />
           </Field>
           <Field
-            label="Descripción de los hechos"
-            className="col-span-2"
-            error={form.formState.errors.descripcion?.message}
-          >
-            <Textarea
-              {...form.register("descripcion")}
-              rows={4}
-              placeholder="Relato del cliente o del productor: qué pasó, daños observables, terceros involucrados…"
-            />
-          </Field>
-          <Field
             label="Estado inicial"
             required
             error={form.formState.errors.estado?.message}
@@ -277,8 +267,12 @@ export function SiniestroFormModal({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="nuevo">Nuevo</SelectItem>
-                    <SelectItem value="tramite">En trámite</SelectItem>
+                    <SelectItem value="pendiente_documentacion">
+                      Pendiente de documentación
+                    </SelectItem>
+                    <SelectItem value="en_tramite">En trámite</SelectItem>
                     <SelectItem value="cerrado">Cerrado</SelectItem>
+                    <SelectItem value="rechazado">Rechazado</SelectItem>
                   </SelectContent>
                 </Select>
               )}

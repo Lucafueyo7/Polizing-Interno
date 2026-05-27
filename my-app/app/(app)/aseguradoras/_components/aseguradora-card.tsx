@@ -1,4 +1,4 @@
-import { Mail, Phone, User } from "@/components/icons";
+import { Mail, Phone } from "@/components/icons";
 import { Card } from "@/components/ui/card";
 import { fmtAR } from "@/lib/format/currency";
 import { fmtNum } from "@/lib/format/number";
@@ -32,7 +32,6 @@ export function AseguradoraCard({ a }: { a: AseguradoraListItem }) {
       </div>
 
       <div className="px-5 py-4 flex flex-col gap-2.5">
-        <ContactRow icon={User}>{a.contactoNombre ?? "—"}</ContactRow>
         <ContactRow icon={Mail}>{a.email ?? "—"}</ContactRow>
         <ContactRow icon={Phone} mono>
           {a.telefono ?? "—"}

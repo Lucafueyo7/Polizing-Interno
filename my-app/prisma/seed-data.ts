@@ -35,16 +35,25 @@ export type AseguradoraSeed = {
   cuit: string;
   email: string;
   telefono: string;
-  contactoNombre: string;
-  direccion: string;
 };
 
-export type CoberturaSeed =
-  | "responsabilidad_civil"
-  | "terceros_completo"
-  | "todo_riesgo"
-  | "basica"
-  | "integral";
+export type CategoriaSeguroSeed =
+  | "auto"
+  | "vida"
+  | "hogar"
+  | "salud"
+  | "comercio"
+  | "art"
+  | "agricola"
+  | "otros";
+
+export type TipoSeguroSeed = {
+  nombre: string;
+  categoria: CategoriaSeguroSeed;
+  descripcion?: string;
+  /** Catálogo de coberturas válidas para este tipo de seguro. */
+  coberturas: { nombre: string; descripcion?: string }[];
+};
 
 export type PolizaSeed = {
   id: string;
@@ -52,8 +61,8 @@ export type PolizaSeed = {
   clienteId: string;
   aseguradoraId: string;
   tipo: string;
-  cobertura: CoberturaSeed;
-  emision: string;
+  /** Nombre de la cobertura dentro del catálogo del `tipo`. Se resuelve a `cobertura_id` en seed.ts. */
+  cobertura: string;
   inicio: string;
   fin: string;
   suma: number;
@@ -72,26 +81,99 @@ export type SiniestroSeed = {
   polizaId: string;
   fecha: string;
   fechaReporte: string;
-  estado: "nuevo" | "tramite" | "cerrado";
+  estado: "nuevo" | "pendiente_documentacion" | "en_tramite" | "cerrado" | "rechazado";
   titulo: string;
-  descripcion: string;
-  leido: boolean;
   docs: SiniestroDocSeed[];
-  aiSummary: string;
 };
+
+export type MetodoPagoSeed =
+  | "transferencia"
+  | "debito_automatico"
+  | "tarjeta_credito"
+  | "tarjeta_debito"
+  | "efectivo"
+  | "mercadopago"
+  | "cheque"
+  | "otro";
 
 export type PagoSeed = {
   id: string;
   clienteId: string;
   estado: "pendiente" | "validado";
-  metodoPago: string;
-  comprobante: string;
-  cbu: string;
+  metodoPago: MetodoPagoSeed;
   fechaPago: string | null;
   monto: number;
   /** Pólizas que cubre el pago (1 pago : N pólizas). */
   polizaIds: string[];
 };
+
+// =============================================================================
+// TIPOS DE SEGURO + CATÁLOGO DE COBERTURAS
+// =============================================================================
+
+export const TIPOS_SEGURO: TipoSeguroSeed[] = [
+  {
+    nombre: "Automotor",
+    categoria: "auto",
+    descripcion: "Seguro de vehículo particular",
+    coberturas: [
+      { nombre: "responsabilidad_civil", descripcion: "Solo daños a terceros" },
+      { nombre: "terceros_completo",     descripcion: "Terceros + robo e incendio" },
+      { nombre: "todo_riesgo",           descripcion: "Cobertura integral incluyendo daños propios" },
+    ],
+  },
+  {
+    nombre: "Flota Automotor",
+    categoria: "auto",
+    descripcion: "Seguro para flotas comerciales",
+    coberturas: [
+      { nombre: "responsabilidad_civil", descripcion: "Solo daños a terceros (flota)" },
+      { nombre: "todo_riesgo",           descripcion: "Cobertura integral por unidad" },
+    ],
+  },
+  {
+    nombre: "Hogar",
+    categoria: "hogar",
+    descripcion: "Seguro de vivienda",
+    coberturas: [
+      { nombre: "basica",   descripcion: "Incendio + responsabilidad civil" },
+      { nombre: "integral", descripcion: "Incluye robo, daños eléctricos y cristales" },
+    ],
+  },
+  {
+    nombre: "ART",
+    categoria: "art",
+    descripcion: "Aseguradora de Riesgos del Trabajo",
+    coberturas: [
+      { nombre: "basica", descripcion: "Cobertura legal obligatoria de ART" },
+    ],
+  },
+  {
+    nombre: "Integral de Comercio",
+    categoria: "comercio",
+    descripcion: "Seguro para locales comerciales",
+    coberturas: [
+      { nombre: "integral", descripcion: "Incendio, robo, cristales y responsabilidad civil" },
+    ],
+  },
+  {
+    nombre: "Vida Individual",
+    categoria: "vida",
+    descripcion: "Seguro de vida personal",
+    coberturas: [
+      { nombre: "basica",   descripcion: "Cobertura por muerte" },
+      { nombre: "integral", descripcion: "Muerte + invalidez total y permanente" },
+    ],
+  },
+  {
+    nombre: "Agrícola",
+    categoria: "agricola",
+    descripcion: "Seguro de cultivos",
+    coberturas: [
+      { nombre: "integral", descripcion: "Multirriesgo agrícola (granizo, helada, sequía)" },
+    ],
+  },
+];
 
 // =============================================================================
 // CLIENTES (12)
@@ -117,11 +199,11 @@ export const CLIENTES: ClienteSeed[] = [
 // =============================================================================
 
 export const ASEGURADORAS: AseguradoraSeed[] = [
-  { id: "A01", razonSocial: "La Federal Seguros S.A.",       cuit: "30-50001234-1", email: "productores@lafederal.com.ar",      telefono: "+54 11 4339-9000", contactoNombre: "Sergio Brizuela",  direccion: "Av. Corrientes 1234, CABA" },
-  { id: "A02", razonSocial: "Sancor Cooperativa de Seguros", cuit: "30-50002378-8", email: "canales@sancor.com.ar",             telefono: "+54 3493 42-8000", contactoNombre: "Patricia Lemos",   direccion: "Ruta 91 km 11.5, Sunchales, Santa Fe" },
-  { id: "A03", razonSocial: "Provincia ART",                 cuit: "30-50091344-2", email: "convenios@provinciaart.com.ar",     telefono: "+54 11 4378-3300", contactoNombre: "Diego Quiroga",    direccion: "Carlos Pellegrini 91, CABA" },
-  { id: "A04", razonSocial: "Galicia Seguros S.A.",          cuit: "30-66891022-5", email: "productores@galiciaseguros.com.ar", telefono: "+54 11 6329-0000", contactoNombre: "María Belén Ortiz", direccion: "Av. Pte. R.S. Peña 525, CABA" },
-  { id: "A05", razonSocial: "Mercantil Andina",              cuit: "30-50001876-3", email: "lerner@mercantilandina.com.ar",     telefono: "+54 261 405-9000", contactoNombre: "Cecilia Lerner",   direccion: "Av. España 1336, Mendoza" },
+  { id: "A01", razonSocial: "La Federal Seguros S.A.",       cuit: "30-50001234-1", email: "productores@lafederal.com.ar",      telefono: "+54 11 4339-9000" },
+  { id: "A02", razonSocial: "Sancor Cooperativa de Seguros", cuit: "30-50002378-8", email: "canales@sancor.com.ar",             telefono: "+54 3493 42-8000" },
+  { id: "A03", razonSocial: "Provincia ART",                 cuit: "30-50091344-2", email: "convenios@provinciaart.com.ar",     telefono: "+54 11 4378-3300" },
+  { id: "A04", razonSocial: "Galicia Seguros S.A.",          cuit: "30-66891022-5", email: "productores@galiciaseguros.com.ar", telefono: "+54 11 6329-0000" },
+  { id: "A05", razonSocial: "Mercantil Andina",              cuit: "30-50001876-3", email: "lerner@mercantilandina.com.ar",     telefono: "+54 261 405-9000" },
 ];
 
 // =============================================================================
@@ -129,24 +211,24 @@ export const ASEGURADORAS: AseguradoraSeed[] = [
 // =============================================================================
 
 export const POLIZAS: PolizaSeed[] = [
-  { id: "P-2024-0918", numero: "AUT-918274", clienteId: "C002", aseguradoraId: "A01", tipo: "Automotor",            cobertura: "todo_riesgo",          emision: "2025-08-12", inicio: "2025-09-01", fin: "2026-08-31", suma: 18500000,  prima:    38400, estado: "vigente"  },
-  { id: "P-2024-1145", numero: "HOG-441098", clienteId: "C002", aseguradoraId: "A04", tipo: "Hogar",                cobertura: "integral",             emision: "2025-04-22", inicio: "2025-05-01", fin: "2026-05-15", suma: 42000000,  prima:    45900, estado: "proxima"  },
-  { id: "P-2023-7782", numero: "FLO-220011", clienteId: "C001", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "responsabilidad_civil",emision: "2025-01-08", inicio: "2025-02-01", fin: "2026-01-31", suma: 580000000, prima:  2840000, estado: "vigente"  },
-  { id: "P-2024-2231", numero: "ART-885672", clienteId: "C001", aseguradoraId: "A03", tipo: "ART",                  cobertura: "basica",               emision: "2025-06-15", inicio: "2025-07-01", fin: "2026-06-30", suma: 0,         prima:  1280000, estado: "vigente"  },
-  { id: "P-2024-0011", numero: "INT-103298", clienteId: "C003", aseguradoraId: "A05", tipo: "Integral de Comercio", cobertura: "integral",             emision: "2025-03-04", inicio: "2025-04-01", fin: "2026-03-31", suma: 1240000000,prima:  5210000, estado: "vigente"  },
-  { id: "P-2024-0334", numero: "AUT-552108", clienteId: "C004", aseguradoraId: "A01", tipo: "Automotor",            cobertura: "terceros_completo",    emision: "2025-09-19", inicio: "2025-10-01", fin: "2026-05-22", suma: 9800000,   prima:    28100, estado: "proxima"  },
-  { id: "P-2024-0902", numero: "VID-008712", clienteId: "C004", aseguradoraId: "A04", tipo: "Vida Individual",      cobertura: "integral",             emision: "2024-11-30", inicio: "2024-12-01", fin: "2025-11-30", suma: 60000000,  prima:    67800, estado: "renovada" },
-  { id: "P-2025-0188", numero: "ART-993341", clienteId: "C005", aseguradoraId: "A03", tipo: "ART",                  cobertura: "basica",               emision: "2025-02-22", inicio: "2025-03-01", fin: "2026-02-28", suma: 0,         prima:  4120000, estado: "vigente"  },
-  { id: "P-2025-0210", numero: "FLO-771820", clienteId: "C005", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "todo_riesgo",          emision: "2025-05-11", inicio: "2025-06-01", fin: "2026-05-31", suma: 980000000, prima:  3700000, estado: "proxima"  },
-  { id: "P-2024-1530", numero: "HOG-228174", clienteId: "C007", aseguradoraId: "A01", tipo: "Hogar",                cobertura: "integral",             emision: "2025-07-08", inicio: "2025-08-01", fin: "2026-07-31", suma: 95000000,  prima:    89200, estado: "vigente"  },
-  { id: "P-2024-1531", numero: "AUT-882013", clienteId: "C007", aseguradoraId: "A02", tipo: "Automotor",            cobertura: "todo_riesgo",          emision: "2025-07-08", inicio: "2025-08-01", fin: "2026-07-31", suma: 24700000,  prima:    49800, estado: "vigente"  },
-  { id: "P-2024-1532", numero: "VID-118472", clienteId: "C007", aseguradoraId: "A04", tipo: "Vida Individual",      cobertura: "integral",             emision: "2024-08-19", inicio: "2024-09-01", fin: "2025-08-31", suma: 80000000,  prima:    79900, estado: "anulada"  },
-  { id: "P-2024-2018", numero: "AGR-770251", clienteId: "C008", aseguradoraId: "A02", tipo: "Agrícola",             cobertura: "integral",             emision: "2025-09-12", inicio: "2025-10-01", fin: "2026-09-30", suma: 320000000, prima:  1640000, estado: "vigente"  },
-  { id: "P-2024-2240", numero: "AUT-110289", clienteId: "C010", aseguradoraId: "A05", tipo: "Automotor",            cobertura: "todo_riesgo",          emision: "2025-08-29", inicio: "2025-09-01", fin: "2026-05-18", suma: 32000000,  prima:    62400, estado: "proxima"  },
-  { id: "P-2024-2241", numero: "AUT-110290", clienteId: "C010", aseguradoraId: "A05", tipo: "Automotor",            cobertura: "terceros_completo",    emision: "2024-04-15", inicio: "2024-05-01", fin: "2025-04-30", suma: 12000000,  prima:    31200, estado: "vencida"  },
-  { id: "P-2025-0044", numero: "INT-409812", clienteId: "C011", aseguradoraId: "A01", tipo: "Integral de Comercio", cobertura: "integral",             emision: "2025-01-19", inicio: "2025-02-01", fin: "2026-01-31", suma: 480000000, prima:  1980000, estado: "vigente"  },
-  { id: "P-2025-0045", numero: "FLO-208917", clienteId: "C011", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "todo_riesgo",          emision: "2025-01-19", inicio: "2025-02-01", fin: "2026-01-31", suma: 380000000, prima:  1970000, estado: "vigente"  },
-  { id: "P-2024-1104", numero: "HOG-309218", clienteId: "C012", aseguradoraId: "A01", tipo: "Hogar",                cobertura: "integral",             emision: "2025-08-22", inicio: "2025-09-01", fin: "2026-08-31", suma: 28000000,  prima:    38900, estado: "vigente"  },
+  { id: "P-2024-0918", numero: "AUT-918274", clienteId: "C002", aseguradoraId: "A01", tipo: "Automotor",            cobertura: "todo_riesgo",          inicio: "2025-09-01", fin: "2026-08-31", suma: 18500000,  prima:    38400, estado: "vigente"  },
+  { id: "P-2024-1145", numero: "HOG-441098", clienteId: "C002", aseguradoraId: "A04", tipo: "Hogar",                cobertura: "integral",             inicio: "2025-05-01", fin: "2026-05-15", suma: 42000000,  prima:    45900, estado: "proxima"  },
+  { id: "P-2023-7782", numero: "FLO-220011", clienteId: "C001", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "responsabilidad_civil",inicio: "2025-02-01", fin: "2026-01-31", suma: 580000000, prima:  2840000, estado: "vigente"  },
+  { id: "P-2024-2231", numero: "ART-885672", clienteId: "C001", aseguradoraId: "A03", tipo: "ART",                  cobertura: "basica",               inicio: "2025-07-01", fin: "2026-06-30", suma: 0,         prima:  1280000, estado: "vigente"  },
+  { id: "P-2024-0011", numero: "INT-103298", clienteId: "C003", aseguradoraId: "A05", tipo: "Integral de Comercio", cobertura: "integral",             inicio: "2025-04-01", fin: "2026-03-31", suma: 1240000000,prima:  5210000, estado: "vigente"  },
+  { id: "P-2024-0334", numero: "AUT-552108", clienteId: "C004", aseguradoraId: "A01", tipo: "Automotor",            cobertura: "terceros_completo",    inicio: "2025-10-01", fin: "2026-05-22", suma: 9800000,   prima:    28100, estado: "proxima"  },
+  { id: "P-2024-0902", numero: "VID-008712", clienteId: "C004", aseguradoraId: "A04", tipo: "Vida Individual",      cobertura: "integral",             inicio: "2024-12-01", fin: "2025-11-30", suma: 60000000,  prima:    67800, estado: "renovada" },
+  { id: "P-2025-0188", numero: "ART-993341", clienteId: "C005", aseguradoraId: "A03", tipo: "ART",                  cobertura: "basica",               inicio: "2025-03-01", fin: "2026-02-28", suma: 0,         prima:  4120000, estado: "vigente"  },
+  { id: "P-2025-0210", numero: "FLO-771820", clienteId: "C005", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "todo_riesgo",          inicio: "2025-06-01", fin: "2026-05-31", suma: 980000000, prima:  3700000, estado: "proxima"  },
+  { id: "P-2024-1530", numero: "HOG-228174", clienteId: "C007", aseguradoraId: "A01", tipo: "Hogar",                cobertura: "integral",             inicio: "2025-08-01", fin: "2026-07-31", suma: 95000000,  prima:    89200, estado: "vigente"  },
+  { id: "P-2024-1531", numero: "AUT-882013", clienteId: "C007", aseguradoraId: "A02", tipo: "Automotor",            cobertura: "todo_riesgo",          inicio: "2025-08-01", fin: "2026-07-31", suma: 24700000,  prima:    49800, estado: "vigente"  },
+  { id: "P-2024-1532", numero: "VID-118472", clienteId: "C007", aseguradoraId: "A04", tipo: "Vida Individual",      cobertura: "integral",             inicio: "2024-09-01", fin: "2025-08-31", suma: 80000000,  prima:    79900, estado: "anulada"  },
+  { id: "P-2024-2018", numero: "AGR-770251", clienteId: "C008", aseguradoraId: "A02", tipo: "Agrícola",             cobertura: "integral",             inicio: "2025-10-01", fin: "2026-09-30", suma: 320000000, prima:  1640000, estado: "vigente"  },
+  { id: "P-2024-2240", numero: "AUT-110289", clienteId: "C010", aseguradoraId: "A05", tipo: "Automotor",            cobertura: "todo_riesgo",          inicio: "2025-09-01", fin: "2026-05-18", suma: 32000000,  prima:    62400, estado: "proxima"  },
+  { id: "P-2024-2241", numero: "AUT-110290", clienteId: "C010", aseguradoraId: "A05", tipo: "Automotor",            cobertura: "terceros_completo",    inicio: "2024-05-01", fin: "2025-04-30", suma: 12000000,  prima:    31200, estado: "vencida"  },
+  { id: "P-2025-0044", numero: "INT-409812", clienteId: "C011", aseguradoraId: "A01", tipo: "Integral de Comercio", cobertura: "integral",             inicio: "2025-02-01", fin: "2026-01-31", suma: 480000000, prima:  1980000, estado: "vigente"  },
+  { id: "P-2025-0045", numero: "FLO-208917", clienteId: "C011", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "todo_riesgo",          inicio: "2025-02-01", fin: "2026-01-31", suma: 380000000, prima:  1970000, estado: "vigente"  },
+  { id: "P-2024-1104", numero: "HOG-309218", clienteId: "C012", aseguradoraId: "A01", tipo: "Hogar",                cobertura: "integral",             inicio: "2025-09-01", fin: "2026-08-31", suma: 28000000,  prima:    38900, estado: "vigente"  },
 ];
 
 // =============================================================================
@@ -160,15 +242,12 @@ export const SINIESTROS: SiniestroSeed[] = [
     fecha: "2026-05-07", fechaReporte: "2026-05-07T18:42:00",
     estado: "nuevo",
     titulo: "Choque trasero en Av. Cabildo y Juramento",
-    descripcion: "Conduciendo por Av. Cabildo, fui chocada en la parte trasera por un Volkswagen Gol blanco al detenerme en el semáforo. El conductor reconoció su responsabilidad. Hay daños visibles en paragolpes y baúl. Adjunto fotos del vehículo y de la denuncia policial.",
-    leido: false,
     docs: [
       { tipo: "img", nombre: "frente_auto.jpg" },
       { tipo: "img", nombre: "danos_atras.jpg" },
       { tipo: "img", nombre: "patente_otro.jpg" },
       { tipo: "pdf", nombre: "denuncia_policial.pdf" },
     ],
-    aiSummary: "Siniestro de tránsito con responsabilidad de tercero identificada. Daños materiales estimados moderados (paragolpes y baúl). Documentación completa: 3 fotos + denuncia policial. Recomendación: derivar a perito asignado.",
   },
   {
     id: "S-2026-0117", numero: "SIN-2026-0117",
@@ -176,72 +255,57 @@ export const SINIESTROS: SiniestroSeed[] = [
     fecha: "2026-05-06", fechaReporte: "2026-05-06T11:15:00",
     estado: "nuevo",
     titulo: "Robo de unidad de flota — Iveco Daily 35-150",
-    descripcion: "El conductor reportó robo de la unidad mientras realizaba una entrega en Avellaneda. La denuncia policial fue radicada en la Comisaría 3a. Se solicita activación urgente de la cobertura de Robo Total.",
-    leido: false,
     docs: [
       { tipo: "pdf", nombre: "denuncia_robo.pdf" },
       { tipo: "img", nombre: "ultima_ubicacion.jpg" },
     ],
-    aiSummary: "Robo total de unidad comercial. Denuncia policial adjunta. Caso de alta prioridad: requiere activación inmediata de cobertura por Robo y notificación a aseguradora dentro de las 72hs.",
   },
   {
     id: "S-2026-0116", numero: "SIN-2026-0116",
     polizaId: "P-2024-0011",
     fecha: "2026-05-04", fechaReporte: "2026-05-04T09:30:00",
-    estado: "tramite",
+    estado: "en_tramite",
     titulo: "Daños por inundación en planta — sector congelado",
-    descripcion: "Lluvias intensas el fin de semana provocaron filtración en techo del sector cámara N°3, dañando productos refrigerados y equipo de compresor.",
-    leido: true,
     docs: [
       { tipo: "img", nombre: "techo_filtra.jpg" },
       { tipo: "img", nombre: "camara_3.jpg" },
       { tipo: "pdf", nombre: "presupuesto_compresor.pdf" },
       { tipo: "pdf", nombre: "lista_productos_perdidos.pdf" },
     ],
-    aiSummary: "Daño por evento climático. Presupuesto de reparación adjunto: AR$ 8.4M. Se estima daño en mercadería perecedera. Pendiente: visita de perito designado.",
   },
   {
     id: "S-2026-0115", numero: "SIN-2026-0115",
     polizaId: "P-2024-0334",
     fecha: "2026-04-29", fechaReporte: "2026-04-29T20:11:00",
-    estado: "tramite",
+    estado: "en_tramite",
     titulo: "Granizo — daños en techo y vidrios",
-    descripcion: "Tormenta de granizo afectó el vehículo estacionado en la vía pública. Múltiples abolladuras en techo, capot y rotura del parabrisas trasero.",
-    leido: true,
     docs: [
       { tipo: "img", nombre: "techo.jpg" },
       { tipo: "img", nombre: "capot.jpg" },
       { tipo: "img", nombre: "luneta.jpg" },
     ],
-    aiSummary: "Daños múltiples por granizo. Abolladuras en chapa y rotura de cristales. Cobertura aplicable. Pendiente: elección de taller homologado.",
   },
   {
     id: "S-2026-0114", numero: "SIN-2026-0114",
     polizaId: "P-2025-0188",
     fecha: "2026-04-25", fechaReporte: "2026-04-25T14:22:00",
-    estado: "tramite",
+    estado: "en_tramite",
     titulo: "Accidente laboral — caída en obra (ART)",
-    descripcion: "Operario de la obra Núñez sufrió caída desde andamio a 2.5m de altura. Trasladado a Hospital Pirovano. Lesión: fractura de tobillo izquierdo.",
-    leido: true,
     docs: [
       { tipo: "pdf", nombre: "denuncia_art.pdf" },
       { tipo: "pdf", nombre: "informe_medico.pdf" },
     ],
-    aiSummary: "Accidente laboral con baja médica estimada 30 días. ART activada. Pendiente: alta médica del paciente.",
   },
   {
     id: "S-2026-0113", numero: "SIN-2026-0113",
     polizaId: "P-2024-1531",
     fecha: "2026-04-22", fechaReporte: "2026-04-22T08:45:00",
-    estado: "tramite",
+    estado: "pendiente_documentacion",
     titulo: "Robo de espejos retrovisores",
-    descripcion: "Vehículo estacionado frente al domicilio amaneció sin los espejos retrovisores. Sin daños adicionales.",
-    leido: true,
     docs: [
       { tipo: "img", nombre: "auto_sin_espejo.jpg" },
       { tipo: "pdf", nombre: "exposicion.pdf" },
     ],
-    aiSummary: "Robo parcial de accesorios. Cobertura Todo Riesgo aplica. Reposición estimada: AR$ 380.000.",
   },
   {
     id: "S-2026-0112", numero: "SIN-2026-0112",
@@ -249,12 +313,9 @@ export const SINIESTROS: SiniestroSeed[] = [
     fecha: "2026-04-15", fechaReporte: "2026-04-15T17:00:00",
     estado: "cerrado",
     titulo: "Choque en estacionamiento — daños menores",
-    descripcion: "Otro vehículo abrió la puerta y rayó el lateral. Conductor identificado, pago directo aceptado.",
-    leido: true,
     docs: [
       { tipo: "img", nombre: "rayadura.jpg" },
     ],
-    aiSummary: "Caso cerrado por acuerdo entre partes. No requirió uso de cobertura.",
   },
   {
     id: "S-2026-0111", numero: "SIN-2026-0111",
@@ -262,13 +323,10 @@ export const SINIESTROS: SiniestroSeed[] = [
     fecha: "2026-04-08", fechaReporte: "2026-04-08T10:30:00",
     estado: "cerrado",
     titulo: "Pérdida de cosecha por granizo — Lote 7",
-    descripcion: "Granizo afectó 240 ha de soja en estado R5. Daño verificado por perito.",
-    leido: true,
     docs: [
       { tipo: "pdf", nombre: "informe_perito.pdf" },
       { tipo: "img", nombre: "lote_7_aerea.jpg" },
     ],
-    aiSummary: "Siniestro agrícola cerrado. Indemnización liquidada: AR$ 18.4M. Cobertura Granizo aplicada.",
   },
 ];
 
@@ -279,35 +337,35 @@ export const SINIESTROS: SiniestroSeed[] = [
 export const PAGOS: PagoSeed[] = [
   {
     id: "PG-2026-0042", clienteId: "C005",
-    estado: "pendiente", metodoPago: "Transferencia bancaria", comprobante: "TRF-558891204", cbu: "0070****5512345678",
+    estado: "pendiente", metodoPago: "transferencia",
     fechaPago: null,
     monto: 7820000,
     polizaIds: ["P-2025-0188", "P-2025-0210"],
   },
   {
     id: "PG-2026-0041", clienteId: "C001",
-    estado: "pendiente", metodoPago: "Transferencia bancaria", comprobante: "TRF-998812301", cbu: "0110****1188224410",
+    estado: "pendiente", metodoPago: "transferencia",
     fechaPago: null,
     monto: 4120000,
     polizaIds: ["P-2023-7782", "P-2024-2231"],
   },
   {
     id: "PG-2026-0040", clienteId: "C003",
-    estado: "validado", metodoPago: "Transferencia bancaria", comprobante: "TRF-441298033", cbu: "0140****8865210394",
+    estado: "validado", metodoPago: "transferencia",
     fechaPago: "2026-05-02",
     monto: 5210000,
     polizaIds: ["P-2024-0011"],
   },
   {
     id: "PG-2026-0039", clienteId: "C011",
-    estado: "validado", metodoPago: "Cheque diferido", comprobante: "CHQ-00084492", cbu: "—",
+    estado: "validado", metodoPago: "cheque",
     fechaPago: "2026-05-02",
     monto: 3950000,
     polizaIds: ["P-2025-0044", "P-2025-0045"],
   },
   {
     id: "PG-2026-0038", clienteId: "C008",
-    estado: "validado", metodoPago: "Transferencia bancaria", comprobante: "TRF-220194812", cbu: "0072****3392001876",
+    estado: "validado", metodoPago: "transferencia",
     fechaPago: "2026-04-30",
     monto: 1640000,
     polizaIds: ["P-2024-2018"],

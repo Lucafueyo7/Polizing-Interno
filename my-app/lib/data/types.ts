@@ -2,12 +2,32 @@ import type { PolizaEstado, SiniestroEstado } from "@/lib/domain/poliza-status";
 
 export type ClienteTipo = "corp" | "normal";
 export type ClienteEstado = "activo" | "baja";
-export type CoberturaTipo =
-  | "responsabilidad_civil"
-  | "terceros_completo"
-  | "todo_riesgo"
-  | "basica"
-  | "integral";
+
+export type CategoriaSeguro =
+  | "auto"
+  | "vida"
+  | "hogar"
+  | "salud"
+  | "comercio"
+  | "art"
+  | "agricola"
+  | "otros";
+
+export type MetodoPago =
+  | "transferencia"
+  | "debito_automatico"
+  | "tarjeta_credito"
+  | "tarjeta_debito"
+  | "efectivo"
+  | "mercadopago"
+  | "cheque"
+  | "otro";
+
+/** Referencia liviana a una cobertura del catálogo. */
+export type CoberturaRef = {
+  id: number;
+  nombre: string;
+};
 
 export type ClienteListItem = {
   id: number;
@@ -42,8 +62,6 @@ export type AseguradoraListItem = {
   cuit: string;
   email: string | null;
   telefono: string | null;
-  contactoNombre: string | null;
-  direccion: string | null;
   color: string;
   initials: string;
   polizasActivas: number;
@@ -97,19 +115,28 @@ export type FormAseguradora = {
 export type FormTipoSeguro = {
   id: number;
   nombre: string;
+  categoria: CategoriaSeguro;
+};
+
+/** Catálogo de coberturas válidas por tipo de seguro. */
+export type CoberturaCatalogo = {
+  tipoSeguroId: number;
+  coberturas: CoberturaRef[];
 };
 
 export type PolizaFormRefs = {
   clientes: FormCliente[];
   aseguradoras: FormAseguradora[];
   tiposSeguro: FormTipoSeguro[];
+  /** Catálogo de coberturas indexable por tipo_seguro_id. */
+  coberturasPorTipo: CoberturaCatalogo[];
 };
 
 export type PolizaListItem = {
   id: number;
   numero: string;
   tipo: string;
-  cobertura: CoberturaTipo;
+  cobertura: CoberturaRef;
   inicio: string;
   fin: string;
   suma: number;
@@ -121,7 +148,6 @@ export type PolizaListItem = {
 };
 
 export type PolizaFull = PolizaListItem & {
-  emision: string;
   tipoSeguroId: number;
 };
 
@@ -134,7 +160,13 @@ export type SiniestroDoc = {
   procesadoIA: boolean;
 };
 
-export type SiniestroTab = "all" | "nuevo" | "tramite" | "cerrado";
+export type SiniestroTab =
+  | "all"
+  | "nuevo"
+  | "pendiente_documentacion"
+  | "en_tramite"
+  | "cerrado"
+  | "rechazado";
 
 export type SiniestrosFilters = {
   q?: string;
@@ -148,7 +180,7 @@ export type FormPolizaRef = {
   numero: string;
   clienteId: number;
   tipo: string;
-  cobertura: CoberturaTipo;
+  cobertura: CoberturaRef;
 };
 
 export type SiniestroFormRefs = {
@@ -160,23 +192,22 @@ export type SiniestroListItem = {
   id: number;
   numero: string;
   titulo: string;
-  descripcion: string | null;
   cliente: PolizaClienteRef;
   fechaReporte: string;
   estado: SiniestroEstado;
-  leido: boolean;
+  /** True si el usuario actual ya leyó el siniestro (resuelto vía `siniestro_lecturas`). */
+  leidoPorMi: boolean;
   docsCount: number;
 };
 
 export type SiniestroFull = SiniestroListItem & {
   fechaOcurrencia: string;
-  aiSummary: string | null;
   docs: SiniestroDoc[];
   poliza: {
     id: number;
     numero: string;
     tipo: string;
-    cobertura: CoberturaTipo;
+    cobertura: CoberturaRef;
     suma: number;
     aseguradora: PolizaAseguradoraRef;
   };
@@ -189,7 +220,7 @@ export type PagoListItem = {
   cliente: PolizaClienteRef;
   fechaPago: string | null;
   estado: PagoEstado;
-  metodoPago: string | null;
+  metodoPago: MetodoPago | null;
   monto: number;
   polizasCount: number;
 };
@@ -198,15 +229,13 @@ export type PagoPolizaRef = {
   id: number;
   numero: string;
   tipo: string;
-  cobertura: CoberturaTipo;
+  cobertura: CoberturaRef;
   concepto: string;
   prima: number;
   aseguradora: PolizaAseguradoraRef;
 };
 
 export type PagoFull = PagoListItem & {
-  comprobante: string | null;
-  cbu: string | null;
   polizas: PagoPolizaRef[];
 };
 
@@ -223,7 +252,8 @@ export type PagosSummary = {
   pendienteCount: number;
   validadoTotal: number;
   polizasAlcanzadas: number;
-  comprobantes: number;
+  /** Cantidad total de operaciones de pago registradas (alias histórico). */
+  operaciones: number;
   empresas: number;
 };
 
@@ -240,7 +270,6 @@ export type SiniestroPendiente = {
   cliente: PolizaClienteRef;
   fechaReporte: string;
   docsCount: number;
-  iaProcesada: boolean;
 };
 
 export type DistribucionAseguradora = {

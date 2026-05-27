@@ -20,7 +20,7 @@ export default async function SiniestrosLayout({
     <>
       <PageHeader
         title="Siniestros"
-        subtitle={`Bandeja de entrada · ${fmtNum(counts.nuevo)} nuevos sin revisar · ${fmtNum(counts.tramite)} en trámite`}
+        subtitle={`Bandeja de entrada · ${fmtNum(counts.nuevo)} nuevos sin revisar · ${fmtNum(counts.en_tramite)} en trámite`}
         actions={<SiniestrosPageActions />}
       />
 

@@ -12,7 +12,7 @@ import type {
 } from "./types";
 
 const ACTIVE_POLIZAS = ["vigente", "proxima"] as const;
-const PENDING_SINIESTROS = ["nuevo", "tramite"] as const;
+const PENDING_SINIESTROS = ["nuevo", "pendiente_documentacion", "en_tramite"] as const;
 const COMPUTABLE_POLIZAS = ["vigente", "proxima", "renovada"] as const;
 
 export async function getDashboardKPIs(): Promise<DashboardKPIs> {
@@ -94,7 +94,6 @@ export async function getSiniestrosPendientes(
     cliente: clienteRefFromRow(row.poliza.cliente),
     fechaReporte: isoDateTime(row.fecha_reporte),
     docsCount: row.documentos.length,
-    iaProcesada: row.ai_summary !== null,
   }));
 }
 

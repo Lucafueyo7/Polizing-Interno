@@ -24,29 +24,23 @@ type Mode =
 type FormShape = {
   razonSocial: string;
   cuit: string;
-  contactoNombre: string;
   email: string;
   telefono: string;
-  direccion: string;
 };
 
 const EMPTY: FormShape = {
   razonSocial: "",
   cuit: "",
-  contactoNombre: "",
   email: "",
   telefono: "",
-  direccion: "",
 };
 
 function defaultsFromAseguradora(a: AseguradoraListItem): FormShape {
   return {
     razonSocial: a.razonSocial,
     cuit: a.cuit,
-    contactoNombre: a.contactoNombre ?? "",
     email: a.email ?? "",
     telefono: a.telefono ?? "",
-    direccion: a.direccion ?? "",
   };
 }
 
@@ -54,10 +48,8 @@ function toInput(values: FormShape): AseguradoraInput {
   return {
     razonSocial: values.razonSocial,
     cuit: values.cuit,
-    contactoNombre: values.contactoNombre,
     email: values.email,
     telefono: values.telefono,
-    direccion: values.direccion,
   };
 }
 
@@ -140,15 +132,6 @@ export function AseguradoraFormModal(props: Mode) {
               className="font-mono"
             />
           </Field>
-          <Field
-            label="Persona de contacto"
-            error={form.formState.errors.contactoNombre?.message}
-          >
-            <Input
-              {...form.register("contactoNombre")}
-              placeholder="Nombre Apellido"
-            />
-          </Field>
         </div>
 
         <SectionLabel>Contacto</SectionLabel>
@@ -165,16 +148,6 @@ export function AseguradoraFormModal(props: Mode) {
               {...form.register("telefono")}
               placeholder="+54 11 ..."
               className="font-mono"
-            />
-          </Field>
-          <Field
-            label="Dirección"
-            className="col-span-2"
-            error={form.formState.errors.direccion?.message}
-          >
-            <Input
-              {...form.register("direccion")}
-              placeholder="Calle 123, Ciudad"
             />
           </Field>
         </div>

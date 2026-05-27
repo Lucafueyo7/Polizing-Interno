@@ -23,7 +23,6 @@ const cuit = z
 export const AseguradoraSchema = z.object({
   razonSocial: trimmed(120),
   cuit,
-  contactoNombre: optionalString(120),
   email: z
     .string()
     .trim()
@@ -31,7 +30,6 @@ export const AseguradoraSchema = z.object({
     .optional()
     .transform((v) => (v === "" ? undefined : v)),
   telefono: optionalString(40),
-  direccion: optionalString(160),
 });
 
 export type AseguradoraInput = z.infer<typeof AseguradoraSchema>;

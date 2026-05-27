@@ -6,7 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import { fmtDate } from "@/lib/format/date";
 import { timeAgo } from "@/lib/format/time-ago";
 import type { SiniestroFull } from "@/lib/data/types";
-import { AiSummary } from "./ai-summary";
 import { DetailActions } from "./detail-actions";
 import { DocsGrid } from "./docs-grid";
 import { MarkAsRead } from "./mark-as-read";
@@ -16,7 +15,7 @@ import { Timeline } from "./timeline";
 export function InboxDetail({ siniestro }: { siniestro: SiniestroFull }) {
   return (
     <article className="flex flex-col h-full">
-      <MarkAsRead id={siniestro.id} leido={siniestro.leido} />
+      <MarkAsRead id={siniestro.id} leidoPorMi={siniestro.leidoPorMi} />
 
       <header className="px-6 pt-6 pb-5 border-b border-border">
         <div className="flex items-center gap-2 mb-3">
@@ -74,20 +73,7 @@ export function InboxDetail({ siniestro }: { siniestro: SiniestroFull }) {
       </header>
 
       <div className="px-6 py-5 flex flex-col gap-6 overflow-y-auto">
-        <AiSummary summary={siniestro.aiSummary} />
-
         <PolizaVinculada poliza={siniestro.poliza} />
-
-        {siniestro.descripcion && (
-          <section>
-            <h4 className="text-[12px] font-semibold tracking-[0.04em] uppercase text-muted-foreground mb-2">
-              Descripción de los hechos
-            </h4>
-            <p className="text-[13.5px] leading-relaxed text-brand-fg-2">
-              {siniestro.descripcion}
-            </p>
-          </section>
-        )}
 
         <DocsGrid docs={siniestro.docs} />
 

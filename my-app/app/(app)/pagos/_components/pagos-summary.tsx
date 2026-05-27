@@ -29,7 +29,7 @@ export function PagosSummary({ summary }: { summary: PagosSummary }) {
         icon={Shield}
         label="Pólizas alcanzadas"
         value={fmtNum(summary.polizasAlcanzadas)}
-        meta={`en ${fmtNum(summary.comprobantes)} comprobantes`}
+        meta={`en ${fmtNum(summary.operaciones)} operaciones`}
       />
       <SummaryCard
         icon={Building}

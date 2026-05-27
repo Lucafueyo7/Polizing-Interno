@@ -7,14 +7,6 @@ const trimmed = (max: number) =>
     .min(1, "Requerido")
     .max(max, `Máximo ${max} caracteres`);
 
-const optionalString = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, `Máximo ${max} caracteres`)
-    .optional()
-    .transform((v) => (v === "" ? undefined : v));
-
 const isoDateString = z
   .string()
   .trim()
@@ -24,9 +16,14 @@ export const SiniestroSchema = z.object({
   polizaId: z.number().int().positive("Póliza requerida"),
   numero: trimmed(40),
   titulo: trimmed(160),
-  descripcion: optionalString(2000),
   fechaOcurrencia: isoDateString,
-  estado: z.enum(["nuevo", "tramite", "cerrado"]),
+  estado: z.enum([
+    "nuevo",
+    "pendiente_documentacion",
+    "en_tramite",
+    "cerrado",
+    "rechazado",
+  ]),
 });
 
 export type SiniestroInput = z.infer<typeof SiniestroSchema>;

@@ -1,3 +1,4 @@
+import { getCurrentUser } from "@/lib/auth/session";
 import { Inbox } from "@/components/icons";
 import { EmptyState } from "@/components/shared/empty-state";
 import { getSiniestros } from "@/lib/data/siniestros";
@@ -10,8 +11,10 @@ type SearchParams = { tab?: string; q?: string };
 const TAB_VALUES: ReadonlyArray<SiniestroTab> = [
   "all",
   "nuevo",
-  "tramite",
+  "pendiente_documentacion",
+  "en_tramite",
   "cerrado",
+  "rechazado",
 ];
 
 function parseTab(raw: string | undefined): SiniestroTab {
@@ -27,7 +30,8 @@ export async function InboxList({
 }) {
   const tab = parseTab(searchParams.tab);
   const q = searchParams.q?.trim() || undefined;
-  const items = await getSiniestros({ tab, q });
+  const user = await getCurrentUser();
+  const items = await getSiniestros({ tab, q }, user?.id);
 
   return (
     <>

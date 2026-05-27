@@ -38,10 +38,8 @@ export async function updateAseguradora(
         ...audit,
         razon_social: data.razonSocial,
         cuit: data.cuit.replace(/-/g, ""),
-        contacto_nombre: data.contactoNombre ?? null,
         email: data.email ?? null,
         telefono: data.telefono ?? null,
-        direccion: data.direccion ?? null,
       },
     });
 

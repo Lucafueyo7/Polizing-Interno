@@ -22,7 +22,7 @@ export function PolizaDetailHeader({ poliza }: { poliza: PolizaFull }) {
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             <PolizaBadge estado={poliza.estado} />
             <span className="text-[13px] text-muted-foreground">
-              {poliza.tipo} · {poliza.cobertura}
+              {poliza.tipo} · {poliza.cobertura.nombre}
             </span>
           </div>
         </div>

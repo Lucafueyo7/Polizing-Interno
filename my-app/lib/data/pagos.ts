@@ -7,6 +7,7 @@ import {
   isoDate,
 } from "./_mappers";
 import type {
+  CoberturaRef,
   PagoCounts,
   PagoFull,
   PagoListItem,
@@ -37,6 +38,7 @@ const FULL_INCLUDE = {
     include: {
       aseguradora: true,
       tipo_seguro: true,
+      cobertura: true,
     },
   },
 } as const;
@@ -58,6 +60,10 @@ function findPagoById(id: number) {
   });
 }
 
+function toCoberturaRef(c: { id: number; nombre: string }): CoberturaRef {
+  return { id: c.id, nombre: c.nombre };
+}
+
 function toListItem(row: PagoListRow): PagoListItem {
   return {
     id: row.id,
@@ -75,7 +81,7 @@ function toPolizaRef(p: PagoFullRow["polizas"][number]): PagoPolizaRef {
     id: p.id,
     numero: p.numero_poliza,
     tipo: p.tipo_seguro.nombre,
-    cobertura: p.cobertura,
+    cobertura: toCoberturaRef(p.cobertura),
     concepto: `Prima mensual · ${p.tipo_seguro.nombre}`,
     prima: Number(p.prima_mensual),
     aseguradora: aseguradoraRefFromRow(p.aseguradora),
@@ -123,7 +129,7 @@ export async function getPagosSummary(): Promise<PagosSummary> {
     pendienteCount: pendientes.length,
     validadoTotal: validados.reduce((s, p) => s + p.monto, 0),
     polizasAlcanzadas: all.reduce((s, p) => s + p.polizasCount, 0),
-    comprobantes: all.length,
+    operaciones: all.length,
     empresas: empresas.size,
   };
 }
@@ -159,8 +165,6 @@ export async function getPagoById(id: number): Promise<PagoFull | null> {
   };
   return {
     ...base,
-    comprobante: row.comprobante,
-    cbu: row.cbu,
     polizas: row.polizas.map(toPolizaRef),
   };
 }

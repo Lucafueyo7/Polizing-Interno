@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useMemo, useTransition } from "react";
+import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
 import {
   Field,
   FormFooter,
@@ -13,7 +13,6 @@ import {
 } from "@/components/shared/form";
 import { Input } from "@/components/ui/input";
 import { useUrlModal } from "@/lib/hooks/use-url-modal";
-import { TODAY_ISO } from "@/lib/format/date";
 import { toastError, toastSuccess } from "@/lib/ui/toast";
 import type { PolizaFormRefs, PolizaFull } from "@/lib/data/types";
 import { createPoliza } from "../_actions/create-poliza";
@@ -24,22 +23,7 @@ type Mode =
   | { mode: "create"; refs: PolizaFormRefs; newForCliente?: number }
   | { mode: "edit"; refs: PolizaFormRefs; poliza: PolizaFull };
 
-type Cobertura =
-  | "responsabilidad_civil"
-  | "terceros_completo"
-  | "todo_riesgo"
-  | "basica"
-  | "integral";
-
 type Estado = "vigente" | "proxima" | "vencida" | "anulada" | "renovada";
-
-const COBERTURA_OPTIONS: ReadonlyArray<FormSelectOption> = [
-  { value: "responsabilidad_civil", label: "Responsabilidad Civil" },
-  { value: "terceros_completo", label: "Terceros Completo" },
-  { value: "todo_riesgo", label: "Todo Riesgo" },
-  { value: "basica", label: "Básica" },
-  { value: "integral", label: "Integral" },
-];
 
 const ESTADO_OPTIONS: ReadonlyArray<FormSelectOption> = [
   { value: "vigente", label: "Vigente" },
@@ -54,9 +38,8 @@ type FormShape = {
   clienteId: string;
   aseguradoraId: string;
   tipoSeguroId: string;
-  cobertura: Cobertura;
+  coberturaId: string;
   estado: Estado;
-  fechaEmision: string;
   fechaInicio: string;
   fechaFin: string;
   sumaAsegurada: string;
@@ -66,15 +49,15 @@ type FormShape = {
 function emptyForm(opts: {
   newForCliente?: number;
   defaultTipoId?: number;
+  defaultCoberturaId?: number;
 }): FormShape {
   return {
     numero: "",
     clienteId: opts.newForCliente ? String(opts.newForCliente) : "",
     aseguradoraId: "",
     tipoSeguroId: opts.defaultTipoId ? String(opts.defaultTipoId) : "",
-    cobertura: "todo_riesgo",
+    coberturaId: opts.defaultCoberturaId ? String(opts.defaultCoberturaId) : "",
     estado: "vigente",
-    fechaEmision: TODAY_ISO,
     fechaInicio: "",
     fechaFin: "",
     sumaAsegurada: "",
@@ -88,9 +71,8 @@ function defaultsFromPoliza(p: PolizaFull): FormShape {
     clienteId: String(p.cliente.id),
     aseguradoraId: String(p.aseguradora.id),
     tipoSeguroId: String(p.tipoSeguroId),
-    cobertura: p.cobertura,
+    coberturaId: String(p.cobertura.id),
     estado: p.estado,
-    fechaEmision: p.emision,
     fechaInicio: p.inicio,
     fechaFin: p.fin,
     sumaAsegurada: String(p.suma),
@@ -104,9 +86,8 @@ function toInput(values: FormShape): PolizaInput {
     clienteId: Number(values.clienteId),
     aseguradoraId: Number(values.aseguradoraId),
     tipoSeguroId: Number(values.tipoSeguroId),
-    cobertura: values.cobertura,
+    coberturaId: Number(values.coberturaId),
     estado: values.estado,
-    fechaEmision: values.fechaEmision,
     fechaInicio: values.fechaInicio,
     fechaFin: values.fechaFin,
     sumaAsegurada: Number(values.sumaAsegurada),
@@ -121,14 +102,37 @@ export function PolizaFormModal(props: Mode) {
   const closeTo = isEdit ? `/polizas/${props.poliza.id}` : "/polizas";
   const { open, setOpen, close, onOpenChange } = useUrlModal({ closeTo });
 
+  const defaultTipoId = props.refs.tiposSeguro[0]?.id;
+  const defaultCoberturaId = props.refs.coberturasPorTipo.find(
+    (c) => c.tipoSeguroId === defaultTipoId,
+  )?.coberturas[0]?.id;
+
   const form = useForm<FormShape>({
     defaultValues: isEdit
       ? defaultsFromPoliza(props.poliza)
       : emptyForm({
           newForCliente: props.newForCliente,
-          defaultTipoId: props.refs.tiposSeguro[0]?.id,
+          defaultTipoId,
+          defaultCoberturaId,
         }),
   });
+
+  const tipoSeguroIdSelected = useWatch({
+    control: form.control,
+    name: "tipoSeguroId",
+  });
+
+  const coberturaOptions: FormSelectOption[] = useMemo(() => {
+    const tipoId = Number(tipoSeguroIdSelected);
+    if (!tipoId) return [];
+    const entry = props.refs.coberturasPorTipo.find(
+      (c) => c.tipoSeguroId === tipoId,
+    );
+    return (entry?.coberturas ?? []).map((c) => ({
+      value: String(c.id),
+      label: c.nombre.replaceAll("_", " "),
+    }));
+  }, [tipoSeguroIdSelected, props.refs.coberturasPorTipo]);
 
   const clienteOptions: FormSelectOption[] = props.refs.clientes.map((c) => ({
     value: String(c.id),
@@ -229,28 +233,22 @@ export function PolizaFormModal(props: Mode) {
           />
           <FormSelect
             control={form.control}
-            name="cobertura"
+            name="coberturaId"
             label="Cobertura"
             required
             className="col-span-2"
-            options={COBERTURA_OPTIONS}
-            error={form.formState.errors.cobertura?.message}
+            placeholder={
+              coberturaOptions.length === 0
+                ? "Seleccioná primero un tipo de seguro"
+                : "Seleccionar cobertura…"
+            }
+            options={coberturaOptions}
+            error={form.formState.errors.coberturaId?.message}
           />
         </div>
 
         <SectionLabel>Vigencia</SectionLabel>
         <div className="grid grid-cols-2 gap-3">
-          <Field
-            label="Fecha de emisión"
-            required
-            error={form.formState.errors.fechaEmision?.message}
-          >
-            <Input
-              type="date"
-              {...form.register("fechaEmision", { required: "Requerido" })}
-              className="font-mono"
-            />
-          </Field>
           <FormSelect
             control={form.control}
             name="estado"
@@ -259,6 +257,7 @@ export function PolizaFormModal(props: Mode) {
             options={ESTADO_OPTIONS}
             error={form.formState.errors.estado?.message}
           />
+          <div />
           <Field
             label="Inicio de vigencia"
             required
