@@ -1,0 +1,12 @@
+Grupo 6
+Bien en general. Algunas observaciones
+
+- La direccion de la relacion entre polizas y pagos esta invertida. polizas tiene pago_id (FK a pagos), cuando deberia ser al reves: un pago referencia a una poliza, no la poliza al pago. Corregir: eliminar pago_id de polizas y agregar poliza_id en pagos.
+- pagos tiene cliente_id como FK, pero si el pago referencia a la poliza (via poliza_id) y la poliza ya referencia al cliente (via cliente_id), entonces cliente_id en pagos es redundante. El cliente debe accederse a traves de polizas, no directamente desde pagos.
+- prima_mensual en polizas nunca se define ni justifica en el documento. ¿Qué representa? ¿Es el monto que se cobra cada mes? 
+- El campo leido en siniestros mezcla estado de UI con el modelo de dominio. Si hay multiples usuarios que siguen un siniestro, ¿leido para quien? Deberia manejarse fuera de la entidad principal.
+- tipos_seguro solo tiene nombre y descripcion. Para el dominio de seguros parece insuficiente: falta al menos un atributo de categoria o rama (auto, vida, hogar, etc.) que permita clasificar y filtrar. Sin eso, dos tipos de seguro solo se distinguen por nombre libre, lo que complica consultas y agrupaciones.
+- SiniestroEstado tiene solo tres valores (nuevo, tramite, cerrado). Para un flujo real de siniestros podria faltar granularidad (documentacion pendiente, pericia programada, etc.). Considerar si el dominio lo requiere.
+- CoberturaTipo en polizas tiene valores responsabilidad_civil, terceros_completo, todo_riesgo, basica, integral, que son especificos de seguro de auto. Sin embargo el modelo maneja multiples tipos de seguro. Si se registra una poliza de vida o de hogar, ningun valor del enum aplica correctamente. Revisar si CoberturaTipo deberia ser dependiente del tipo de seguro. Esto podría relacionarse con el comentario anterior sobre tipos_seguro.
+- pagos.metodo_pago es un String nullable. Para un sistema que gestiona pagos de polizas deberia ser un enum controlado (transferencia, debito, credito, etc.). Como string libre genera inconsistencias en datos y complica reportes por metodo de pago.
+- siniestros tiene dos identificadores: id (PK) y numero (@unique), pero en ningun momento del documento se explica que es numero, como se genera ni si es el identificador que se le comunica al cliente.

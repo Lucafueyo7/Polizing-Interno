@@ -1,0 +1,2778 @@
+{
+	"_type": "Project",
+	"_id": "AAAAAAFF+h6SjaM2Hec=",
+	"name": "Untitled",
+	"ownedElements": [
+		{
+			"_type": "C4Model",
+			"_id": "AAAAAAGIJ9MNFXaLtCg=",
+			"_parent": {
+				"$ref": "AAAAAAFF+h6SjaM2Hec="
+			},
+			"name": "C4Model",
+			"ownedElements": [
+				{
+					"_type": "C4Diagram",
+					"_id": "AAAAAAGIJ9MNFnaM7XY=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "System Context Diagram",
+					"defaultDiagram": true,
+					"ownedViews": [
+						{
+							"_type": "C4ElementView",
+							"_id": "AAAAAAGdqx2k5YZXb64=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqx2k5IZVsZI="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqx2k5YZYuNk=",
+									"_parent": {
+										"$ref": "AAAAAAGdqx2k5YZXb64="
+									},
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 1640,
+									"top": 1289,
+									"width": 848,
+									"height": 13,
+									"text": "Sistema de Chatbot",
+									"horizontalAlignment": 0,
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqx2k5YZZ4y8=",
+									"_parent": {
+										"$ref": "AAAAAAGdqx2k5YZXb64="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1640,
+									"top": 1304,
+									"width": 848,
+									"horizontalAlignment": 0,
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqx2k5YZaIhQ=",
+									"_parent": {
+										"$ref": "AAAAAAGdqx2k5YZXb64="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1640,
+									"top": 1312,
+									"width": 848,
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 1632,
+							"top": 224,
+							"width": 864,
+							"height": 1088,
+							"nameLabel": {
+								"$ref": "AAAAAAGdqx2k5YZYuNk="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqx2k5YZZ4y8="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqx2k5YZaIhQ="
+							}
+						},
+						{
+							"_type": "C4PersonView",
+							"_id": "AAAAAAGdjgSC7dylXVI=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjgSC7dyjCSk="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjgSC7tymSpQ=",
+									"_parent": {
+										"$ref": "AAAAAAGdjgSC7dylXVI="
+									},
+									"fillColor": "#38bcff",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 112,
+									"top": 157,
+									"width": 360,
+									"height": 13,
+									"text": "Administrativo/Productor",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjgSC7tynu5s=",
+									"_parent": {
+										"$ref": "AAAAAAGdjgSC7dylXVI="
+									},
+									"fillColor": "#38bcff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 112,
+									"top": 172,
+									"width": 360,
+									"height": 13,
+									"text": "[Person]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjgSC7tyoEho=",
+									"_parent": {
+										"$ref": "AAAAAAGdjgSC7dylXVI="
+									},
+									"fillColor": "#38bcff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 112,
+									"top": 195,
+									"width": 360,
+									"height": 26,
+									"text": "Usuario interno de la agencia, interactua  viasualmente con la web app\n",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#38bcff",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 104,
+							"top": 16,
+							"width": 376,
+							"height": 213,
+							"nameLabel": {
+								"$ref": "AAAAAAGdjgSC7tymSpQ="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjgSC7tynu5s="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjgSC7tyoEho="
+							}
+						},
+						{
+							"_type": "RectangleView",
+							"_id": "AAAAAAGdjglOgNzNUSs=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"top": 256,
+							"width": 1008,
+							"height": 1056
+						},
+						{
+							"_type": "UMLTextView",
+							"_id": "AAAAAAGdjgl0BNzQbJQ=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"font": "Arial;18;0",
+							"parentStyle": false,
+							"left": 32,
+							"top": 1296,
+							"width": 112,
+							"height": 48,
+							"text": "Polizing ",
+							"horzAlign": 2
+						},
+						{
+							"_type": "C4PersonView",
+							"_id": "AAAAAAGdjgrGg9zc6ss=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjgrGg9zaqt4="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjgrGg9zdApc=",
+									"_parent": {
+										"$ref": "AAAAAAGdjgrGg9zc6ss="
+									},
+									"fillColor": "#38bcff",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 1944,
+									"top": 152,
+									"width": 392,
+									"height": 13,
+									"text": "Cliente",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjgrGg9zeLhw=",
+									"_parent": {
+										"$ref": "AAAAAAGdjgrGg9zc6ss="
+									},
+									"fillColor": "#38bcff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1944,
+									"top": 167,
+									"width": 392,
+									"height": 13,
+									"text": "[Person]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjgrGg9zfy5E=",
+									"_parent": {
+										"$ref": "AAAAAAGdjgrGg9zc6ss="
+									},
+									"fillColor": "#38bcff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1944,
+									"top": 190,
+									"width": 392,
+									"height": 13,
+									"text": "Persona que contrata un seguro",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#38bcff",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 1936,
+							"width": 408,
+							"height": 211,
+							"nameLabel": {
+								"$ref": "AAAAAAGdjgrGg9zdApc="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjgrGg9zeLhw="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjgrGg9zfy5E="
+							}
+						},
+						{
+							"_type": "C4ComponentView",
+							"_id": "AAAAAAGdjg++D91/hOE=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjg++D919UOs="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjg++D92A8RE=",
+									"_parent": {
+										"$ref": "AAAAAAGdjg++D91/hOE="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 1112,
+									"top": 248,
+									"width": 272,
+									"height": 13,
+									"text": " Api Federacion Patronal",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjg++D92BXGs=",
+									"_parent": {
+										"$ref": "AAAAAAGdjg++D91/hOE="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1112,
+									"top": 263,
+									"width": 272,
+									"height": 13,
+									"text": "[Component: Software System]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjg++D92CfaQ=",
+									"_parent": {
+										"$ref": "AAAAAAGdjg++D91/hOE="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1112,
+									"top": 286,
+									"width": 272,
+									"height": 13,
+									"text": "Sistema de datos fuente de la aseguradora\n",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#8E8E8E",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 1104,
+							"top": 240,
+							"width": 288,
+							"height": 120,
+							"nameLabel": {
+								"$ref": "AAAAAAGdjg++D92A8RE="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjg++D92BXGs="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjg++D92CfaQ="
+							}
+						},
+						{
+							"_type": "C4ContainerView",
+							"_id": "AAAAAAGdjhKTfd3A+yI=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjhKTfN2+vHQ="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhKTfd3BTjk=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhKTfd3A+yI="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 136,
+									"top": 406,
+									"width": 304,
+									"height": 13,
+									"text": "Frontend",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhKTfd3CxqQ=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhKTfd3A+yI="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 136,
+									"top": 421,
+									"width": 304,
+									"height": 13,
+									"text": "[Container: Next.js]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhKTfd3DA9M=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhKTfd3A+yI="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 136,
+									"top": 444,
+									"width": 304,
+									"height": 39,
+									"text": "Panel de control, permite a los productores y administrativos iniciar sesion, listar clientes, registrar polizas y ver siniestros",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#a3e0ff",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 128,
+							"top": 376,
+							"width": 320,
+							"height": 184,
+							"nameLabel": {
+								"$ref": "AAAAAAGdjhKTfd3BTjk="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjhKTfd3CxqQ="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjhKTfd3DA9M="
+							}
+						},
+						{
+							"_type": "C4ContainerView",
+							"_id": "AAAAAAGdjhOgk93RQB0=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhOgk93Srmc=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhOgk93RQB0="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 1120,
+									"top": 46,
+									"width": 320,
+									"height": 13,
+									"text": "Api",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhOgk93T45w=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhOgk93RQB0="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1120,
+									"top": 61,
+									"width": 320,
+									"height": 13,
+									"text": "[Container: Json/Https]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhOgk93UHew=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhOgk93RQB0="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1120,
+									"top": 84,
+									"width": 320,
+									"height": 13,
+									"text": "Api rest de Whatsapp Cloud\n",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#8E8E8E",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 1112,
+							"top": 16,
+							"width": 336,
+							"height": 184,
+							"nameLabel": {
+								"$ref": "AAAAAAGdjhOgk93Srmc="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjhOgk93T45w="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjhOgk93UHew="
+							}
+						},
+						{
+							"_type": "C4ComponentView",
+							"_id": "AAAAAAGdjhPAnt3gEd0=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhPAn93huzU=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhPAnt3gEd0="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 648,
+									"top": 392,
+									"width": 312,
+									"height": 13,
+									"text": "Backend",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhPAn93i320=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhPAnt3gEd0="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 648,
+									"top": 407,
+									"width": 312,
+									"height": 13,
+									"text": "[Component: Next.js]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhPAn93j4eY=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhPAnt3gEd0="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 648,
+									"top": 430,
+									"width": 312,
+									"height": 52,
+									"text": "Contiene toda la lógica de negocio. Expone una API REST para la Web SPA y recibe los Webhooks del Chatbot\nTambién incluye el \"Timer\" interno para notificar vencimientos de pólizas\n",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#d8f2ff",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 640,
+							"top": 384,
+							"width": 328,
+							"height": 160,
+							"nameLabel": {
+								"$ref": "AAAAAAGdjhPAn93huzU="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjhPAn93i320="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjhPAn93j4eY="
+							}
+						},
+						{
+							"_type": "UMLTextView",
+							"_id": "AAAAAAGdjhP2N93uK9g=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"font": "Arial;32;0",
+							"parentStyle": false,
+							"left": 648,
+							"top": 376,
+							"width": 82.4130859375,
+							"height": 54,
+							"text": ">_"
+						},
+						{
+							"_type": "C4ContainerView",
+							"_id": "AAAAAAGdjhazP94s5wU=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjhazP94qcMc="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhazP94tNFs=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhazP94s5wU="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 144,
+									"top": 744,
+									"width": 288,
+									"height": 13,
+									"text": "DataBase",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhazP94uvDg=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhazP94s5wU="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 144,
+									"top": 759,
+									"width": 288,
+									"height": 13,
+									"text": "[Container: Postgress Relacional]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdjhazP94v+Ao=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhazP94s5wU="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 144,
+									"top": 782,
+									"width": 288,
+									"height": 26,
+									"text": "Almacena la estructura de datos del sistema, como polizas, Imagenes, etc.",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#a3e0ff",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 136,
+							"top": 696,
+							"width": 304,
+							"height": 160,
+							"nameLabel": {
+								"$ref": "AAAAAAGdjhazP94tNFs="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjhazP94uvDg="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjhazP94v+Ao="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdjhh6sN5YpNM=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjhh6r95WrlY="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdjhh6sN5Z+co=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhh6sN5YpNM="
+									},
+									"model": {
+										"$ref": "AAAAAAGdjhh6r95WrlY="
+									},
+									"font": "Arial;16;0",
+									"parentStyle": false,
+									"left": 277,
+									"top": 270,
+									"width": 37.796875,
+									"height": 16,
+									"alpha": 2.9039517405621584,
+									"distance": 23.769728648009426,
+									"hostEdge": {
+										"$ref": "AAAAAAGdjhh6sN5YpNM="
+									},
+									"edgePosition": 1,
+									"text": "usa\n",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdjhh6sN5azTM=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhh6sN5YpNM="
+									},
+									"model": {
+										"$ref": "AAAAAAGdjhh6r95WrlY="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 271,
+									"top": 288,
+									"width": 37.5654296875,
+									"height": 13,
+									"alpha": 3.1591332882625798,
+									"distance": 8,
+									"hostEdge": {
+										"$ref": "AAAAAAGdjhh6sN5YpNM="
+									},
+									"edgePosition": 1,
+									"text": "[Https]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdjhKTfd3A+yI="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjgSC7dylXVI="
+							},
+							"lineStyle": 1,
+							"points": "291:230;289:375",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjhh6sN5Z+co="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjhh6sN5azTM="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdjhieQt5l2pA=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjhieQt5jsR8="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdjhieQt5mt1M=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhieQt5l2pA="
+									},
+									"model": {
+										"$ref": "AAAAAAGdjhieQt5jsR8="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 494,
+									"top": 447,
+									"width": 98,
+									"height": 13,
+									"alpha": -4.639774502006327,
+									"distance": 12.041594578792296,
+									"hostEdge": {
+										"$ref": "AAAAAAGdjhieQt5l2pA="
+									},
+									"edgePosition": 1,
+									"text": "Solicita datos",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdjhieQ95nZ2g=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhieQt5l2pA="
+									},
+									"model": {
+										"$ref": "AAAAAAGdjhieQt5jsR8="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 540,
+									"top": 474,
+									"width": 8.658203125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdjhieQt5l2pA="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdjhPAnt3gEd0="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjhKTfd3A+yI="
+							},
+							"lineStyle": 1,
+							"points": "449:467;639:465",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjhieQt5mt1M="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjhieQ95nZ2g="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdjhqzdd7ZESU=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjhqzdN7X02k="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdjhqzdd7aaEI=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhqzdd7ZESU="
+									},
+									"model": {
+										"$ref": "AAAAAAGdjhqzdN7X02k="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1000,
+									"top": 342,
+									"width": 55.63720703125,
+									"height": 26,
+									"alpha": -4.668039723932177,
+									"distance": 23.769728648009426,
+									"hostEdge": {
+										"$ref": "AAAAAAGdjhqzdd7ZESU="
+									},
+									"edgePosition": 1,
+									"text": "Se comunica",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdjhqzdd7bIPY=",
+									"_parent": {
+										"$ref": "AAAAAAGdjhqzdd7ZESU="
+									},
+									"model": {
+										"$ref": "AAAAAAGdjhqzdN7X02k="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 993,
+									"top": 384,
+									"width": 67.92626953125,
+									"height": 13,
+									"alpha": -2.6095031835274796,
+									"distance": 15.620499351813308,
+									"hostEdge": {
+										"$ref": "AAAAAAGdjhqzdd7ZESU="
+									},
+									"edgePosition": 1,
+									"text": "[Rest]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdjg++D91/hOE="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjhPAnt3gEd0="
+							},
+							"lineStyle": 1,
+							"points": "969:403;1103:354",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjhqzdd7aaEI="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjhqzdd7bIPY="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdjh0hat8sysg=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdjh0had8qKkA="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdjh0hat8tdxc=",
+									"_parent": {
+										"$ref": "AAAAAAGdjh0hat8sysg="
+									},
+									"model": {
+										"$ref": "AAAAAAGdjh0had8qKkA="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 528,
+									"top": 592,
+									"width": 80,
+									"height": 26,
+									"alpha": 3.196041518578226,
+									"distance": 26.627053911388696,
+									"hostEdge": {
+										"$ref": "AAAAAAGdjh0hat8sysg="
+									},
+									"edgePosition": 1,
+									"text": "Lee y escribe datos",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdjh0hat8ua60=",
+									"_parent": {
+										"$ref": "AAAAAAGdjh0hat8sysg="
+									},
+									"model": {
+										"$ref": "AAAAAAGdjh0had8qKkA="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 512,
+									"top": 624,
+									"width": 33.236328125,
+									"height": 13,
+									"alpha": -0.036871076683091086,
+									"distance": 20.591260281974,
+									"hostEdge": {
+										"$ref": "AAAAAAGdjh0hat8sysg="
+									},
+									"edgePosition": 1,
+									"text": "[SQL]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdjhazP94s5wU="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjhPAnt3gEd0="
+							},
+							"lineStyle": 1,
+							"points": "670:545;422:695",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdjh0hat8tdxc="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdjh0hat8ua60="
+							}
+						},
+						{
+							"_type": "C4ContainerView",
+							"_id": "AAAAAAGdqyANi4amTWk=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqyANi4akrx0="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqyANi4anwds=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyANi4amTWk="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 2016,
+									"top": 368,
+									"width": 272,
+									"height": 13,
+									"text": "ChatWhatsapp(Frontend)",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqyANi4aoVPo=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyANi4amTWk="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 2016,
+									"top": 383,
+									"width": 272,
+									"height": 13,
+									"text": "[Container]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqyANi4apXwg=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyANi4amTWk="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 2016,
+									"top": 406,
+									"width": 272,
+									"height": 26,
+									"text": "App de mensajeria whatsapp  que se comunica mediante peticiones asincronas",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#a3e0ff",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 2008,
+							"top": 360,
+							"width": 288,
+							"height": 224,
+							"nameLabel": {
+								"$ref": "AAAAAAGdqyANi4anwds="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqyANi4aoVPo="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqyANi4apXwg="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdqyE7Voa2zbs=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqyE7Voa0JxM="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyE7Voa3fBM=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyE7Voa2zbs="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyE7Voa0JxM="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 2160,
+									"top": 278,
+									"width": 54.919921875,
+									"height": 13,
+									"alpha": 1.5540828599224992,
+									"distance": 42.01190307520001,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyE7Voa2zbs="
+									},
+									"edgePosition": 1,
+									"text": "Consulta\n",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyE7Voa4hXs=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyE7Voa2zbs="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyE7Voa0JxM="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 2127,
+									"top": 279,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyE7Voa2zbs="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdqyANi4amTWk="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjgrGg9zc6ss="
+							},
+							"lineStyle": 1,
+							"points": "2143:212;2148:359",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqyE7Voa3fBM="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqyE7Voa4hXs="
+							}
+						},
+						{
+							"_type": "C4ComponentView",
+							"_id": "AAAAAAGdqySPeYbHWzQ=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqySPeYbICWw=",
+									"_parent": {
+										"$ref": "AAAAAAGdqySPeYbHWzQ="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 2008,
+									"top": 792,
+									"width": 312,
+									"height": 13,
+									"text": "Backend",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqySPeYbJw3M=",
+									"_parent": {
+										"$ref": "AAAAAAGdqySPeYbHWzQ="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 2008,
+									"top": 807,
+									"width": 312,
+									"height": 13,
+									"text": "[Component]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqySPeYbKKYY=",
+									"_parent": {
+										"$ref": "AAAAAAGdqySPeYbHWzQ="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 2008,
+									"top": 830,
+									"width": 312,
+									"height": 26,
+									"text": "Se encarga de  procesar los pedidos y  realizar las peticiones a las apis que correspondan",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#d8f2ff",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 2000,
+							"top": 784,
+							"width": 328,
+							"height": 176,
+							"nameLabel": {
+								"$ref": "AAAAAAGdqySPeYbICWw="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqySPeYbJw3M="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqySPeYbKKYY="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdqyT5+4bXYR4=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqyT5+4bVIY4="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyT5+4bYYBw=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyT5+4bXYR4="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyT5+4bVIY4="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 2172,
+									"top": 683,
+									"alpha": 1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyT5+4bXYR4="
+									},
+									"edgePosition": 1,
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyT5+4bZSO8=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyT5+4bXYR4="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyT5+4bVIY4="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 2140,
+									"top": 678,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyT5+4bXYR4="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdqySPeYbHWzQ="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdqyANi4amTWk="
+							},
+							"lineStyle": 1,
+							"points": "2155:585;2161:783",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqyT5+4bYYBw="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqyT5+4bZSO8="
+							}
+						},
+						{
+							"_type": "C4ComponentView",
+							"_id": "AAAAAAGdqyYCNIbne4s=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqyYCNIblin4="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqyYCNIboZnk=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyYCNIbne4s="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 1368,
+									"top": 648,
+									"width": 200,
+									"height": 13,
+									"text": "Api IA",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqyYCNIbpS/k=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyYCNIbne4s="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1368,
+									"top": 663,
+									"width": 200,
+									"height": 13,
+									"text": "[Component]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqyYCNIbqeEU=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyYCNIbne4s="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1368,
+									"top": 686,
+									"width": 200,
+									"height": 104,
+									"text": "Recibe los documentos físicos y comprobantes adjuntados por los clientes mediante WhatsApp. Ejecuta el procesamiento automatizado para extraer, estructurar y validar la información contenida, retornando los datos al Backend. \n",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#8E8E8E",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 1360,
+							"top": 640,
+							"width": 216,
+							"height": 160,
+							"nameLabel": {
+								"$ref": "AAAAAAGdqyYCNIboZnk="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqyYCNIbpS/k="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqyYCNIbqeEU="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdqybG74cKDQ8=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqybG74cIvPg="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqybG74cLMjE=",
+									"_parent": {
+										"$ref": "AAAAAAGdqybG74cKDQ8="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqybG74cIvPg="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1720,
+									"top": 743,
+									"width": 104,
+									"height": 26,
+									"alpha": -0.9046925846005878,
+									"distance": 36.6742416417845,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqybG74cKDQ8="
+									},
+									"edgePosition": 1,
+									"text": "Envía datos crudos",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqybG74cMIWg=",
+									"_parent": {
+										"$ref": "AAAAAAGdqybG74cKDQ8="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqybG74cIvPg="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1788,
+									"top": 769,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqybG74cKDQ8="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdqyYCNIbne4s="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdqySPeYbHWzQ="
+							},
+							"lineStyle": 1,
+							"points": "1999:836;1577:744",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqybG74cLMjE="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqybG74cMIWg="
+							}
+						},
+						{
+							"_type": "C4ComponentView",
+							"_id": "AAAAAAGdqyd3eoccRvY=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqyd3eocasc8="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqyd3e4cdrBM=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyd3eoccRvY="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 680,
+									"top": 768,
+									"width": 240,
+									"height": 13,
+									"text": "Api Application",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqyd3e4ceMx0=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyd3eoccRvY="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 680,
+									"top": 783,
+									"width": 240,
+									"height": 13,
+									"text": "[Component]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqyd3e4cfXic=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyd3eoccRvY="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 680,
+									"top": 806,
+									"width": 240,
+									"height": 26,
+									"text": "Endpoints expuestos por la aplicacion para recibir informacion \n",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#d8f2ff",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 672,
+							"top": 760,
+							"width": 256,
+							"height": 128,
+							"nameLabel": {
+								"$ref": "AAAAAAGdqyd3e4cdrBM="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqyd3e4ceMx0="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqyd3e4cfXic="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdqyfpCIc5lY8=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqyfpCIc3Q+s="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyfpCIc6YIg=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyfpCIc5lY8="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyfpCIc3Q+s="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1452,
+									"top": 1530,
+									"width": 55.63720703125,
+									"alpha": 1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyfpCIc5lY8="
+									},
+									"edgePosition": 1,
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyfpCIc7C/c=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyfpCIc5lY8="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyfpCIc3Q+s="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1477,
+									"top": 1495,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyfpCIc5lY8="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdqyd3eoccRvY="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdqySPeYbHWzQ="
+							},
+							"lineStyle": 1,
+							"points": "2165:961;2168:1528;792:1504;799:889",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqyfpCIc6YIg="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqyfpCIc7C/c="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdqyfvVIdGrrk=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqyfvVIdEhqE="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyfvVIdHzfw=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyfvVIdGrrk="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyfvVIdEhqE="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 807,
+									"top": 959,
+									"width": 26.72998046875,
+									"height": 13,
+									"alpha": -3.07498483424229,
+									"distance": 314.5155004129367,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyfvVIdGrrk="
+									},
+									"edgePosition": 1,
+									"text": "Usa\n",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyfvVIdI1/E=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyfvVIdGrrk="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyfvVIdEhqE="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 800,
+									"top": 975,
+									"width": 68.63720703125,
+									"height": 13,
+									"alpha": -3.0355795467900504,
+									"distance": 331.54788492765266,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyfvVIdGrrk="
+									},
+									"edgePosition": 1,
+									"text": "[Json/Https]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdjhPAnt3gEd0="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdqyd3eoccRvY="
+							},
+							"lineStyle": 1,
+							"points": "801:759;803:545",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqyfvVIdHzfw="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqyfvVIdI1/E="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdqyyo+Ydmc7k=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqyyo+Idkius="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyyo+Ydnd+U=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyyo+Ydmc7k="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyyo+Idkius="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1704,
+									"top": 448,
+									"width": 129,
+									"height": 26,
+									"alpha": 4.469113334551602,
+									"distance": 53.823786563191554,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyyo+Ydmc7k="
+									},
+									"edgePosition": 1,
+									"text": "Envía mensajes usando",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyyo+YdobZM=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyyo+Ydmc7k="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyyo+Idkius="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1730,
+									"top": 474,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyyo+Ydmc7k="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdjhOgk93RQB0="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdqySPeYbHWzQ="
+							},
+							"lineStyle": 1,
+							"points": "2061:783;1388:201",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqyyo+Ydnd+U="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqyyo+YdobZM="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdqyyw1Ydz/mE=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqyyw1YdxFRg="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyyw1Yd0IxE=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyyw1Ydz/mE="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyyw1YdxFRg="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1584,
+									"top": 112,
+									"width": 104,
+									"height": 26,
+									"alpha": -2.8144945022517067,
+									"distance": 59.135437767890075,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyyw1Ydz/mE="
+									},
+									"edgePosition": 1,
+									"text": "Envía mensajes a",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqyyw1Yd1ryk=",
+									"_parent": {
+										"$ref": "AAAAAAGdqyyw1Ydz/mE="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqyyw1YdxFRg="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1689,
+									"top": 115,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqyyw1Ydz/mE="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdjgrGg9zc6ss="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjhOgk93RQB0="
+							},
+							"lineStyle": 1,
+							"points": "1449:107;1935:106",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqyyw1Yd0IxE="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqyyw1Yd1ryk="
+							}
+						},
+						{
+							"_type": "C4ComponentView",
+							"_id": "AAAAAAGdqy4tXoeBPAI=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqy4tXod/AQI="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqy4tXoeCPYI=",
+									"_parent": {
+										"$ref": "AAAAAAGdqy4tXoeBPAI="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 1696,
+									"top": 1016,
+									"width": 256,
+									"height": 13,
+									"text": "Api Chatbot",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqy4tXoeDki4=",
+									"_parent": {
+										"$ref": "AAAAAAGdqy4tXoeBPAI="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1696,
+									"top": 1031,
+									"width": 256,
+									"height": 13,
+									"text": "[Component]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdqy4tXoeEBlM=",
+									"_parent": {
+										"$ref": "AAAAAAGdqy4tXoeBPAI="
+									},
+									"fillColor": "#d8f2ff",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1696,
+									"top": 1054,
+									"width": 256,
+									"height": 91,
+									"text": "Plataforma que actúa como intermediario para la comunicación bidireccional con el cliente. Emplea servicios REST para la transmisión de mensajes, alertas de vencimientos, notificaciones de pago y recepción de archivos adjuntos (comprobantes y denuncias de siniestros).",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#d8f2ff",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 1688,
+							"top": 1008,
+							"width": 272,
+							"height": 216,
+							"nameLabel": {
+								"$ref": "AAAAAAGdqy4tXoeCPYI="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqy4tXoeDki4="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqy4tXoeEBlM="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdqzAmiIfl+8s=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqzAmiIfjIsQ="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqzAmiIfmOxk=",
+									"_parent": {
+										"$ref": "AAAAAAGdqzAmiIfl+8s="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqzAmiIfjIsQ="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1272,
+									"top": 792,
+									"width": 26.72998046875,
+									"height": 13,
+									"alpha": -2.108481571227289,
+									"distance": 26.832815729997478,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqzAmiIfl+8s="
+									},
+									"edgePosition": 1,
+									"text": "Usa\n",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqzAmiIfnw24=",
+									"_parent": {
+										"$ref": "AAAAAAGdqzAmiIfl+8s="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqzAmiIfjIsQ="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1248,
+									"top": 808,
+									"width": 68.63720703125,
+									"height": 13,
+									"alpha": -1.7685511833615681,
+									"distance": 38.897300677553446,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqzAmiIfl+8s="
+									},
+									"edgePosition": 1,
+									"text": "[Json/Https]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdqy4tXoeBPAI="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjhPAnt3gEd0="
+							},
+							"lineStyle": 1,
+							"points": "931:545;1687:1028",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqzAmiIfmOxk="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqzAmiIfnw24="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdqzA8dYf4xCU=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdqzA8dYf2YkM="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqzA8dYf5f5U=",
+									"_parent": {
+										"$ref": "AAAAAAGdqzA8dYf4xCU="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqzA8dYf2YkM="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1991,
+									"top": 976,
+									"alpha": 1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqzA8dYf4xCU="
+									},
+									"edgePosition": 1,
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdqzA8dYf6Lq4=",
+									"_parent": {
+										"$ref": "AAAAAAGdqzA8dYf4xCU="
+									},
+									"model": {
+										"$ref": "AAAAAAGdqzA8dYf2YkM="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 2005,
+									"top": 995,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdqzA8dYf4xCU="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdqySPeYbHWzQ="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdqy4tXoeBPAI="
+							},
+							"lineStyle": 1,
+							"points": "1961:1018;2040:961",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdqzA8dYf5f5U="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdqzA8dYf6Lq4="
+							}
+						},
+						{
+							"_type": "C4ComponentView",
+							"_id": "AAAAAAGdq0K+R4iQtQc=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdq0K+R4iOSk0="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdq0K+R4iRVdg=",
+									"_parent": {
+										"$ref": "AAAAAAGdq0K+R4iQtQc="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;1",
+									"parentStyle": true,
+									"left": 1104,
+									"top": 408,
+									"width": 280,
+									"height": 13,
+									"text": "Api Berkley",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdq0K+R4iSJKs=",
+									"_parent": {
+										"$ref": "AAAAAAGdq0K+R4iQtQc="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1104,
+									"top": 423,
+									"width": 280,
+									"height": 13,
+									"text": "[Component: Software System]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGdq0K+R4iTphU=",
+									"_parent": {
+										"$ref": "AAAAAAGdq0K+R4iQtQc="
+									},
+									"fillColor": "#8E8E8E",
+									"font": "Arial;13;0",
+									"parentStyle": true,
+									"left": 1104,
+									"top": 446,
+									"width": 280,
+									"height": 13,
+									"text": "Sistema de datos fuente de la aseguradora\n",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#8E8E8E",
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"left": 1096,
+							"top": 400,
+							"width": 296,
+							"height": 128,
+							"nameLabel": {
+								"$ref": "AAAAAAGdq0K+R4iRVdg="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdq0K+R4iSJKs="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdq0K+R4iTphU="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGdq0Ovtoik6o0=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGdq0OvtYiiqvs="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdq0OvtoilquA=",
+									"_parent": {
+										"$ref": "AAAAAAGdq0Ovtoik6o0="
+									},
+									"model": {
+										"$ref": "AAAAAAGdq0OvtYiiqvs="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1008,
+									"top": 436,
+									"width": 58.5380859375,
+									"height": 26,
+									"alpha": 1.2490451723983744,
+									"distance": 15.811388300841896,
+									"hostEdge": {
+										"$ref": "AAAAAAGdq0Ovtoik6o0="
+									},
+									"edgePosition": 1,
+									"text": "Se Conunica\n",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGdq0OvtoimUHM=",
+									"_parent": {
+										"$ref": "AAAAAAGdq0Ovtoik6o0="
+									},
+									"model": {
+										"$ref": "AAAAAAGdq0OvtYiiqvs="
+									},
+									"font": "Arial;13;0",
+									"parentStyle": false,
+									"left": 1014,
+									"top": 473,
+									"width": 37.58447265625,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGdq0Ovtoik6o0="
+									},
+									"edgePosition": 1,
+									"text": "[Soap]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"parentStyle": false,
+							"head": {
+								"$ref": "AAAAAAGdq0K+R4iQtQc="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjhPAnt3gEd0="
+							},
+							"lineStyle": 1,
+							"points": "969:464;1095:464",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGdq0OvtoilquA="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGdq0OvtoimUHM="
+							}
+						}
+					]
+				},
+				{
+					"_type": "C4Person",
+					"_id": "AAAAAAGdjgSC7dyjCSk=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Administrativo/Productor",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjg08h90SHmc=",
+							"_parent": {
+								"$ref": "AAAAAAGdjgSC7dyjCSk="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjgSC7dyjCSk="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjgx4h90Aimw="
+							}
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjhh6r95WrlY=",
+							"_parent": {
+								"$ref": "AAAAAAGdjgSC7dyjCSk="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjgSC7dyjCSk="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhKTfN2+vHQ="
+							},
+							"technology": "Https",
+							"description": "usa\n"
+						}
+					],
+					"description": "Usuario interno de la agencia, interactua  viasualmente con la web app\n"
+				},
+				{
+					"_type": "C4Container",
+					"_id": "AAAAAAGdjggAQ9yz4L8=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Polizing",
+					"kind": "etc"
+				},
+				{
+					"_type": "C4Person",
+					"_id": "AAAAAAGdjgrGg9zaqt4=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Cliente",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqx+k5YaFCNs=",
+							"_parent": {
+								"$ref": "AAAAAAGdjgrGg9zaqt4="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjgrGg9zaqt4="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjg7xmt1pgzM="
+							}
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqyE7Voa0JxM=",
+							"_parent": {
+								"$ref": "AAAAAAGdjgrGg9zaqt4="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjgrGg9zaqt4="
+							},
+							"target": {
+								"$ref": "AAAAAAGdqyANi4akrx0="
+							},
+							"description": "Consulta\n"
+						}
+					],
+					"description": "Persona que contrata un seguro"
+				},
+				{
+					"_type": "C4Container",
+					"_id": "AAAAAAGdjgx4h90Aimw=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Interface Grafica",
+					"kind": "client-webapp"
+				},
+				{
+					"_type": "C4Component",
+					"_id": "AAAAAAGdjg7SkN1SMl8=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					}
+				},
+				{
+					"_type": "C4Component",
+					"_id": "AAAAAAGdjg7xmt1pgzM=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Chatbot Whatsapp",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjhjdYt59DME=",
+							"_parent": {
+								"$ref": "AAAAAAGdjg7xmt1pgzM="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjg7xmt1pgzM="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							}
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjho2Rd7HEJo=",
+							"_parent": {
+								"$ref": "AAAAAAGdjg7xmt1pgzM="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjg7xmt1pgzM="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							}
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjh1ul983tes=",
+							"_parent": {
+								"$ref": "AAAAAAGdjg7xmt1pgzM="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjg7xmt1pgzM="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjgrGg9zaqt4="
+							},
+							"technology": "Whatsapp",
+							"description": "Envia y recibe datos y documentos "
+						}
+					],
+					"technology": "Software System",
+					"description": "Plataforma que actua como intermediario entre el cliente y la App"
+				},
+				{
+					"_type": "C4Component",
+					"_id": "AAAAAAGdjg++D919UOs=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": " Api Federacion Patronal",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjhrC7N7k6RI=",
+							"_parent": {
+								"$ref": "AAAAAAGdjg++D919UOs="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjg++D919UOs="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							}
+						}
+					],
+					"technology": "Software System",
+					"description": "Sistema de datos fuente de la aseguradora\n"
+				},
+				{
+					"_type": "C4Container",
+					"_id": "AAAAAAGdjhKTfN2+vHQ=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Frontend",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjhieQt5jsR8=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhKTfN2+vHQ="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhKTfN2+vHQ="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"description": "Solicita datos"
+						}
+					],
+					"technology": "Next.js",
+					"description": "Panel de control, permite a los productores y administrativos iniciar sesion, listar clientes, registrar polizas y ver siniestros",
+					"kind": "client-webapp"
+				},
+				{
+					"_type": "C4Container",
+					"_id": "AAAAAAGdjhOgkt3PF7I=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Api",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjhlyB96ksSM=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							}
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjhotCt66c9Y=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjg7xmt1pgzM="
+							},
+							"technology": "Rest",
+							"description": "Envia y recibe mensajes"
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqyyw1YdxFRg=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjgrGg9zaqt4="
+							},
+							"description": "Envía mensajes a"
+						}
+					],
+					"technology": "Json/Https",
+					"description": "Api rest de Whatsapp Cloud\n",
+					"kind": "client-webapp"
+				},
+				{
+					"_type": "C4Component",
+					"_id": "AAAAAAGdjhPAnt3eim4=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Backend",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjhjJEd5w74s=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjg7xmt1pgzM="
+							}
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjhldu96RQdc=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"technology": "Rest",
+							"description": "Se comunica"
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjhqzdN7X02k=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjg++D919UOs="
+							},
+							"technology": "Rest",
+							"description": "Se comunica"
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdjh0had8qKkA=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhazP94qcMc="
+							},
+							"technology": "SQL",
+							"description": "Lee y escribe datos"
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqzAmiIfjIsQ=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"target": {
+								"$ref": "AAAAAAGdqy4tXod/AQI="
+							},
+							"technology": "Json/Https",
+							"description": "Usa\n"
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdq0OvtYiiqvs=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"target": {
+								"$ref": "AAAAAAGdq0K+R4iOSk0="
+							},
+							"technology": "Soap",
+							"description": "Se Conunica\n"
+						}
+					],
+					"technology": "Next.js",
+					"description": "Contiene toda la lógica de negocio. Expone una API REST para la Web SPA y recibe los Webhooks del Chatbot\nTambién incluye el \"Timer\" interno para notificar vencimientos de pólizas\n"
+				},
+				{
+					"_type": "C4Container",
+					"_id": "AAAAAAGdjhaV5d4TsXI=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"kind": "etc"
+				},
+				{
+					"_type": "C4Container",
+					"_id": "AAAAAAGdjhazP94qcMc=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "DataBase",
+					"technology": "Postgress Relacional",
+					"description": "Almacena la estructura de datos del sistema, como polizas, Imagenes, etc.",
+					"kind": "database"
+				},
+				{
+					"_type": "C4Container",
+					"_id": "AAAAAAGdqxoxtIY+yYU=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "C4Container1",
+					"kind": "etc"
+				},
+				{
+					"_type": "C4Element",
+					"_id": "AAAAAAGdqx2k5IZVsZI=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Sistema de Chatbot"
+				},
+				{
+					"_type": "C4Container",
+					"_id": "AAAAAAGdqyANi4akrx0=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "ChatWhatsapp(Frontend)",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqyT5+4bVIY4=",
+							"_parent": {
+								"$ref": "AAAAAAGdqyANi4akrx0="
+							},
+							"source": {
+								"$ref": "AAAAAAGdqyANi4akrx0="
+							},
+							"target": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							}
+						}
+					],
+					"description": "App de mensajeria whatsapp  que se comunica mediante peticiones asincronas",
+					"kind": "etc"
+				},
+				{
+					"_type": "C4Component",
+					"_id": "AAAAAAGdqySPeYbF62A=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Backend",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqybG74cIvPg=",
+							"_parent": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							},
+							"source": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							},
+							"target": {
+								"$ref": "AAAAAAGdqyYCNIblin4="
+							},
+							"description": "Envía datos crudos"
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqyfpCIc3Q+s=",
+							"_parent": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							},
+							"source": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							},
+							"target": {
+								"$ref": "AAAAAAGdqyd3eocasc8="
+							}
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqyyo+Idkius=",
+							"_parent": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							},
+							"source": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"description": "Envía mensajes usando"
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqy/mKYfCXNQ=",
+							"_parent": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							},
+							"source": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							},
+							"target": {
+								"$ref": "AAAAAAGdqy4tXod/AQI="
+							}
+						}
+					],
+					"description": "Se encarga de  procesar los pedidos y  realizar las peticiones a las apis que correspondan"
+				},
+				{
+					"_type": "C4Component",
+					"_id": "AAAAAAGdqyYCNIblin4=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Api IA",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqyeK9Ico1GU=",
+							"_parent": {
+								"$ref": "AAAAAAGdqyYCNIblin4="
+							},
+							"source": {
+								"$ref": "AAAAAAGdqyYCNIblin4="
+							},
+							"target": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							}
+						}
+					],
+					"description": "Recibe los documentos físicos y comprobantes adjuntados por los clientes mediante WhatsApp. Ejecuta el procesamiento automatizado para extraer, estructurar y validar la información contenida, retornando los datos al Backend. \n"
+				},
+				{
+					"_type": "C4Component",
+					"_id": "AAAAAAGdqyd3eocasc8=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Api Application",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqyfvVIdEhqE=",
+							"_parent": {
+								"$ref": "AAAAAAGdqyd3eocasc8="
+							},
+							"source": {
+								"$ref": "AAAAAAGdqyd3eocasc8="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhPAnt3eim4="
+							},
+							"technology": "Json/Https",
+							"description": "Usa\n"
+						}
+					],
+					"description": "Endpoints expuestos por la aplicacion para recibir informacion \n"
+				},
+				{
+					"_type": "C4Component",
+					"_id": "AAAAAAGdqy4tXod/AQI=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Api Chatbot",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqy/+94fPex8=",
+							"_parent": {
+								"$ref": "AAAAAAGdqy4tXod/AQI="
+							},
+							"source": {
+								"$ref": "AAAAAAGdqy4tXod/AQI="
+							},
+							"target": {
+								"$ref": "AAAAAAGdqy4tXod/AQI="
+							}
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGdqzA8dYf2YkM=",
+							"_parent": {
+								"$ref": "AAAAAAGdqy4tXod/AQI="
+							},
+							"source": {
+								"$ref": "AAAAAAGdqy4tXod/AQI="
+							},
+							"target": {
+								"$ref": "AAAAAAGdqySPeYbF62A="
+							}
+						}
+					],
+					"description": "Plataforma que actúa como intermediario para la comunicación bidireccional con el cliente. Emplea servicios REST para la transmisión de mensajes, alertas de vencimientos, notificaciones de pago y recepción de archivos adjuntos (comprobantes y denuncias de siniestros)."
+				},
+				{
+					"_type": "C4Component",
+					"_id": "AAAAAAGdq0K+R4iOSk0=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "Api Berkley",
+					"technology": "Software System",
+					"description": "Sistema de datos fuente de la aseguradora\n"
+				}
+			]
+		}
+	]
+}
