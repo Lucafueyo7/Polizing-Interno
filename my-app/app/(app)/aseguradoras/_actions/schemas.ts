@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeTelefono } from "@/lib/format/telefono";
 
 const trimmed = (max: number) =>
   z
@@ -7,13 +8,15 @@ const trimmed = (max: number) =>
     .min(1, "Requerido")
     .max(max, `Máximo ${max} caracteres`);
 
-const optionalString = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, `Máximo ${max} caracteres`)
-    .optional()
-    .transform((v) => (v === "" ? undefined : v));
+const optionalTelefono = z
+  .string()
+  .trim()
+  .max(40, "Máximo 40 caracteres")
+  .optional()
+  .transform((v) => normalizeTelefono(v ?? null) ?? undefined)
+  .refine((v) => v === undefined || /^\d{6,15}$/.test(v), {
+    message: "El teléfono debe contener entre 6 y 15 dígitos",
+  });
 
 const cuit = z
   .string()
@@ -29,7 +32,7 @@ export const AseguradoraSchema = z.object({
     .email("Email inválido")
     .optional()
     .transform((v) => (v === "" ? undefined : v)),
-  telefono: optionalString(40),
+  telefono: optionalTelefono,
 });
 
 export type AseguradoraInput = z.infer<typeof AseguradoraSchema>;

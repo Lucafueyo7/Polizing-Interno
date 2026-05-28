@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { fmtAR } from "@/lib/format/currency";
 import { fmtDate } from "@/lib/format/date";
+import { formatTelefono } from "@/lib/format/telefono";
 import type { ClienteListItem } from "@/lib/data/types";
 
 export function ClientesTable({
@@ -83,7 +84,7 @@ export function ClientesTable({
                     {c.email ?? "—"}
                   </span>
                   <span className="text-[11.5px] font-mono text-muted-foreground">
-                    {c.telefono ?? "—"}
+                    {formatTelefono(c.telefono)}
                   </span>
                 </div>
               </TableCell>

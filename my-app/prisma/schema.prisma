@@ -24,9 +24,11 @@ model clientes {
   clientes_no_corporativos clientes_no_corporativos?
   pagos                    pagos[]
   polizas                  polizas[]
+  solicitudes_polizas      solicitudes_polizas[]
 
   @@index([tipo])
   @@index([estado])
+  @@index([telefono])
 }
 
 model clientes_corporativos {
@@ -98,6 +100,9 @@ model polizas {
   /// Capturada al momento de la emisión.
   prima_mensual         Decimal               @db.Decimal(15, 2)
   moneda                String                @default("ARS") @db.Char(3)
+  dominio                  String?
+  tarjeta_circulacion_pdf  Bytes?
+  tarjeta_circulacion_mime String?
   created_at            DateTime              @default(now()) @db.Timestamptz(6)
   updated_at            DateTime              @updatedAt @db.Timestamptz(6)
   modificado_por_id     Int?
@@ -149,7 +154,8 @@ model siniestro_documentos {
   siniestro_id Int
   tipo         DocumentoTipo
   nombre       String
-  url          String
+  url          String?
+  contenido    Bytes?
   mime_type    String
   tamano_bytes Int?
   created_at   DateTime      @default(now()) @db.Timestamptz(6)
@@ -179,6 +185,9 @@ model pagos {
   estado            PagoEstado  @default(pendiente)
   metodo_pago       MetodoPago?
   moneda            String      @default("ARS") @db.Char(3)
+  comprobante_nombre    String?
+  comprobante_mime      String?
+  comprobante_contenido Bytes?
   created_at        DateTime    @default(now()) @db.Timestamptz(6)
   updated_at        DateTime    @updatedAt @db.Timestamptz(6)
   modificado_por_id Int?
@@ -222,6 +231,29 @@ model noticias_scrapeadas {
 
   @@index([publicada_en(sort: Desc)])
   @@index([scrapeada_en(sort: Desc)])
+}
+
+model solicitudes_polizas {
+  id             Int                   @id @default(autoincrement())
+  numero         String                @unique
+  cliente_id     Int?
+  telefono       String
+  insurance_type TipoSeguroSolicitud
+  dominio        String
+  marca          String
+  modelo         String
+  anio           String
+  uso            UsoVehiculo
+  notas          String?
+  estado         SolicitudPolizaEstado @default(nueva)
+  created_at     DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime              @updatedAt @db.Timestamptz(6)
+  cliente        clientes?             @relation(fields: [cliente_id], references: [id], onDelete: SetNull)
+
+  @@index([cliente_id])
+  @@index([telefono])
+  @@index([estado])
+  @@index([created_at(sort: Desc)])
 }
 
 enum ClienteTipo {
@@ -286,4 +318,20 @@ enum PagoEstado {
 enum Rol {
   productor
   administrativo
+}
+
+enum TipoSeguroSolicitud {
+  auto
+  moto
+}
+
+enum UsoVehiculo {
+  particular
+  comercial
+}
+
+enum SolicitudPolizaEstado {
+  nueva
+  aceptada
+  rechazada
 }

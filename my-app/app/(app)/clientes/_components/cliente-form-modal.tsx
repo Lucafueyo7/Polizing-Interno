@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useUrlModal } from "@/lib/hooks/use-url-modal";
 import { toastError, toastSuccess } from "@/lib/ui/toast";
+import { formatTelefono } from "@/lib/format/telefono";
 import type { ClienteFull, ClienteTipo } from "@/lib/data/types";
 import { ClienteTipoCard } from "./cliente-tipo-card";
 import { createCliente } from "../_actions/create-cliente";
@@ -73,7 +74,7 @@ function defaultsFromCliente(c: ClienteFull): FormShape {
     apellido: c.apellido ?? "",
     dni: c.dni ?? "",
     email: c.email ?? "",
-    telefono: c.telefono ?? "",
+    telefono: c.telefono ? formatTelefono(c.telefono) : "",
     direccion: c.direccion ?? "",
     estado: c.estado,
   };

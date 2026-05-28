@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../app/generated/prisma/client";
 import { normalizePgUrl } from "../lib/utils/db-url";
+import { normalizeTelefono } from "../lib/format/telefono";
 import {
   ASEGURADORAS,
   CLIENTES,
@@ -95,7 +96,7 @@ async function seedClientes(prisma: PrismaClient): Promise<Map<string, number>> 
       data: {
         tipo: c.tipo === "corp" ? "corporativo" : "persona",
         email: c.email,
-        telefono: c.telefono,
+        telefono: normalizeTelefono(c.telefono),
         direccion: c.direccion,
         fecha_alta: new Date(c.desde),
         estado: c.estado,
@@ -132,7 +133,7 @@ async function seedAseguradoras(prisma: PrismaClient): Promise<Map<string, numbe
       data: {
         razon_social: a.razonSocial,
         cuit: a.cuit,
-        telefono: a.telefono,
+        telefono: normalizeTelefono(a.telefono),
         email: a.email,
       },
     });

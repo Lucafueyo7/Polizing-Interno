@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.intents.circulation_card import CirculationCardHandler
 from app.intents.claim import ClaimHandler
 from app.intents.payment_receipt import PaymentReceiptHandler
+from app.intents.policy_request import PolicyRequestHandler
 from app.intents.utils import format_policies, normalize_option
 from app.main_system_client import MainSystemClient
 from app.messages import get_message
@@ -25,6 +26,7 @@ class ConversationEngine:
             "circulation_card": CirculationCardHandler(db, self.whatsapp, self.main_system),
             "payment_receipt": PaymentReceiptHandler(db, self.whatsapp, self.main_system),
             "claim": ClaimHandler(db, self.whatsapp, self.main_system),
+            "policy_request": PolicyRequestHandler(db, self.whatsapp, self.main_system),
         }
 
     async def process(self, inbound: dict) -> None:
@@ -71,9 +73,20 @@ class ConversationEngine:
             await self._start_policy_selection(conversation, "payment_receipt", "select_policy", "payment_policy_prompt")
         elif option == "3":
             await self._start_policy_selection(conversation, "claim", "select_policy", "claim_policy_prompt")
+        elif option == "4":
+            await self._start_policy_request(conversation)
         else:
             await self.whatsapp.send_text(conversation.phone, get_message(self.db, "invalid_option"))
             await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
+
+    async def _start_policy_request(self, conversation: Conversation) -> None:
+        conversation.current_flow = "policy_request"
+        conversation.current_step = "insurance_type"
+        conversation.data_json = "{}"
+        self.db.commit()
+        await self.whatsapp.send_text(
+            conversation.phone, get_message(self.db, "policy_request_type_prompt")
+        )
 
     async def _start_policy_selection(self, conversation: Conversation, flow: str, step: str, message_key: str) -> None:
         policies = await self.main_system.list_policies(conversation.phone)

@@ -1,6 +1,7 @@
 import { KvRow } from "@/components/shared/kv-row";
 import { Card } from "@/components/ui/card";
 import { fmtDate } from "@/lib/format/date";
+import { formatTelefono } from "@/lib/format/telefono";
 import type { ClienteFull } from "@/lib/data/types";
 
 export function ClienteInfoCard({ cliente }: { cliente: ClienteFull }) {
@@ -28,7 +29,7 @@ export function ClienteInfoCard({ cliente }: { cliente: ClienteFull }) {
           </>
         )}
         <KvRow label="Email" value={cliente.email} />
-        <KvRow label="Teléfono" value={cliente.telefono} mono />
+        <KvRow label="Teléfono" value={formatTelefono(cliente.telefono)} mono />
         <KvRow label="Dirección" value={cliente.direccion} />
         <KvRow
           label="Cliente desde"

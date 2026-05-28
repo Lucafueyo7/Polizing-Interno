@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useUrlModal } from "@/lib/hooks/use-url-modal";
 import { toastError, toastSuccess } from "@/lib/ui/toast";
+import { formatTelefono } from "@/lib/format/telefono";
 import type { AseguradoraListItem } from "@/lib/data/types";
 import { createAseguradora } from "../_actions/create-aseguradora";
 import { updateAseguradora } from "../_actions/update-aseguradora";
@@ -40,7 +41,7 @@ function defaultsFromAseguradora(a: AseguradoraListItem): FormShape {
     razonSocial: a.razonSocial,
     cuit: a.cuit,
     email: a.email ?? "",
-    telefono: a.telefono ?? "",
+    telefono: a.telefono ? formatTelefono(a.telefono) : "",
   };
 }
 

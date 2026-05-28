@@ -59,6 +59,10 @@ def register_claim(db: Session, phone: str, payload: dict) -> dict:
     return create_operation(db, "claim", phone, "SIN", payload)
 
 
+def register_policy_request(db: Session, phone: str, payload: dict) -> dict:
+    return create_operation(db, "policy_request", phone, "SOL", payload)
+
+
 def create_operation(db: Session, operation_type: str, phone: str, prefix: str, payload: dict) -> dict:
     reference = f"{prefix}-{uuid4().hex[:8].upper()}"
     op = MockOperation(

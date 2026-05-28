@@ -6,7 +6,7 @@ from app.models import EditableMessage
 DEFAULT_MESSAGES = {
     "welcome_menu": (
         "Menu principal",
-        "Bienvenido. Seleccione una opcion:\n\n1. Obtener tarjeta de circulacion\n2. Adjuntar comprobante de pago\n3. Registrar siniestro\n\nResponda con el numero de la opcion.",
+        "Bienvenido. Seleccione una opcion:\n\n1. Obtener tarjeta de circulacion\n2. Adjuntar comprobante de pago\n3. Registrar siniestro\n4. Solicitar nueva poliza\n\nResponda con el numero de la opcion.",
     ),
     "invalid_option": ("Opcion invalida", "No pudimos interpretar su respuesta. Por favor seleccione una opcion valida."),
     "client_not_found": (
@@ -38,6 +38,22 @@ DEFAULT_MESSAGES = {
     "claim_police_report_prompt": ("Denuncia siniestro", "Adjunte denuncia policial si corresponde, o responda NO."),
     "claim_photos_prompt": ("Fotos siniestro", "Adjunte fotos/documentos adicionales o responda FINALIZAR."),
     "claim_success": ("Siniestro registrado", "El siniestro fue registrado correctamente. Numero de siniestro: {reference}."),
+    "policy_request_type_prompt": (
+        "Tipo seguro solicitud",
+        "Que tipo de seguro desea solicitar?\n\n1. Auto\n2. Moto",
+    ),
+    "policy_request_domain_prompt": ("Dominio solicitud", "Indique el dominio (patente) del vehiculo."),
+    "policy_request_brand_prompt": ("Marca solicitud", "Indique la marca del vehiculo."),
+    "policy_request_model_prompt": ("Modelo solicitud", "Indique el modelo del vehiculo."),
+    "policy_request_year_prompt": ("Anio solicitud", "Indique el anio del vehiculo (AAAA)."),
+    "policy_request_use_prompt": ("Uso solicitud", "Indique el uso del vehiculo:\n\n1. Particular\n2. Comercial"),
+    "policy_request_notes_prompt": ("Notas solicitud", "Agregue notas o comentarios, o responda - si no tiene."),
+    "policy_request_invalid_choice": ("Solicitud invalida", "Por favor responda con una opcion valida."),
+    "policy_request_invalid_year": ("Anio invalido", "El anio debe tener 4 digitos. Ejemplo: 2020."),
+    "policy_request_success": (
+        "Solicitud registrada",
+        "Su solicitud fue registrada. Numero de solicitud: {reference}. Su productor se pondra en contacto.",
+    ),
     "outbound_sent": ("Mensaje externo", "{message}"),
 }
 

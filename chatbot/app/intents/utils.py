@@ -9,8 +9,11 @@ def normalize_option(text: str) -> str | None:
         "comprobante": "2",
         "pago": "2",
         "siniestro": "3",
+        "solicitud": "4",
+        "nueva poliza": "4",
+        "solicitar": "4",
     }
-    if value in {"1", "2", "3"}:
+    if value in {"1", "2", "3", "4"}:
         return value
     return aliases.get(value)
 

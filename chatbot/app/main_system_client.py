@@ -14,6 +14,7 @@ _PATH_POLICY           = "/policies/{policy_id}"
 _PATH_CIRCULATION_CARD = "/circulation-card"
 _PATH_PAYMENT_RECEIPTS = "/payment-receipts"
 _PATH_CLAIMS           = "/claims"
+_PATH_POLICY_REQUESTS  = "/policy-requests"
 
 
 class MainSystemClient:
@@ -55,6 +56,11 @@ class MainSystemClient:
         if self.use_mock:
             return mock_system.register_claim(self.db, phone, payload)
         return await self._post(_PATH_CLAIMS, {"phone": phone, **payload})
+
+    async def register_policy_request(self, phone: str, payload: dict) -> dict:
+        if self.use_mock:
+            return mock_system.register_policy_request(self.db, phone, payload)
+        return await self._post(_PATH_POLICY_REQUESTS, {"phone": phone, **payload})
 
     @asynccontextmanager
     async def _http(self):

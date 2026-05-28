@@ -19,7 +19,25 @@
       "Bash(python3 -c \"from app.models import MockPolicy; from app.mock_system import policy_to_dict; from app.seed import seed_mock_data; print\\('chatbot OK'\\)\")",
       "Bash(python3 -m py_compile app/models.py app/mock_system.py app/seed.py)",
       "Bash(npx tsx *)",
-      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"si hace todo\" npx prisma db push --force-reset)"
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"si hace todo\" npx prisma db push --force-reset)",
+      "Bash(openssl rand *)",
+      "Bash(node *)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm test *)",
+      "Bash(pnpm remove *)",
+      "Bash(npx next *)",
+      "Bash(pnpm dev *)",
+      "Bash(curl -s -o /tmp/out -w '%{http_code}\\\\n' http://localhost:3000/api/chatbot/clients/by-phone/5491112345678)",
+      "Bash(curl -s -o /tmp/out -w '%{http_code}\\\\n' -H 'X-API-Key: 04bf8da68faec4911c221e2e506daf535d62f794f69575d199e90a04d00c793c' http://localhost:3000/api/chatbot/clients/by-phone/0000)",
+      "Bash(curl -s -o /tmp/out -w '%{http_code}\\\\n' -H 'X-API-Key: 04bf8da68faec4911c221e2e506daf535d62f794f69575d199e90a04d00c793c' http://localhost:3000/api/chatbot/policies)",
+      "Bash(curl -s -o /tmp/out -w '%{http_code}\\\\n' -H 'X-API-Key: 04bf8da68faec4911c221e2e506daf535d62f794f69575d199e90a04d00c793c' 'http://localhost:3000/api/chatbot/policies?phone=5491112345678')",
+      "Bash(curl -s -o /tmp/out -w '%{http_code}\\\\n' -X POST -H 'X-API-Key: 04bf8da68faec4911c221e2e506daf535d62f794f69575d199e90a04d00c793c' -H 'Content-Type: application/json' -d '{\"phone\":\"5491100000000\",\"insurance_type\":\"auto\",\"domain\":\"AB123CD\",\"brand\":\"Renault\",\"model\":\"Sandero\",\"year\":\"2020\",\"use\":\"particular\",\"notes\":\"smoke test\"}' http://localhost:3000/api/chatbot/policy-requests)",
+      "Bash(curl -s -o /tmp/o -w '%{http_code} ' http://localhost:3000/api/chatbot/clients/by-phone/5491112345678)",
+      "Bash(curl -s -o /tmp/o -w '%{http_code} ' -H 'X-API-Key: 04bf8da68faec4911c221e2e506daf535d62f794f69575d199e90a04d00c793c' http://localhost:3000/api/chatbot/clients/by-phone/0000)",
+      "Bash(curl -s -o /tmp/o -w '%{http_code} ' -H 'X-API-Key: 04bf8da68faec4911c221e2e506daf535d62f794f69575d199e90a04d00c793c' http://localhost:3000/api/chatbot/policies)",
+      "Bash(curl -s -o /tmp/o -w '%{http_code} ' -H 'X-API-Key: 04bf8da68faec4911c221e2e506daf535d62f794f69575d199e90a04d00c793c' 'http://localhost:3000/api/chatbot/policies?phone=5491112345678')",
+      "Bash(curl -s -o /tmp/o -w '%{http_code} ' -X POST -H 'X-API-Key: 04bf8da68faec4911c221e2e506daf535d62f794f69575d199e90a04d00c793c' -H 'Content-Type: application/json' -d '{\"phone\":\"5491100000000\",\"insurance_type\":\"auto\",\"domain\":\"AB123CD\",\"brand\":\"Renault\",\"model\":\"Sandero\",\"year\":\"2020\",\"use\":\"particular\",\"notes\":\"smoke test\"}' http://localhost:3000/api/chatbot/policy-requests)",
+      "Bash(curl -s -o /tmp/o -w '%{http_code} %{time_total}s\\\\n' -X POST -H 'X-API-Key: 04bf8da68faec4911c221e2e506daf535d62f794f69575d199e90a04d00c793c' -H 'Content-Type: application/json' -d '{\"phone\":\"5491100000000\",\"insurance_type\":\"auto\",\"domain\":\"AB123CD\",\"brand\":\"Renault\",\"model\":\"Sandero\",\"year\":\"2020\",\"use\":\"particular\",\"notes\":\"smoke retry\"}' http://localhost:3000/api/chatbot/policy-requests)"
     ]
   }
 }

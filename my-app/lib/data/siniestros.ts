@@ -96,14 +96,14 @@ function toDoc(d: {
   id: number;
   tipo: "img" | "pdf";
   nombre: string;
-  url: string;
+  url: string | null;
   tamano_bytes: number | null;
 }): SiniestroDoc {
   return {
     id: d.id,
     tipo: d.tipo,
     nombre: d.nombre,
-    url: d.url,
+    url: d.url ?? "",
     tamano: fmtBytes(d.tamano_bytes),
     /** Por ahora la integración con la API de IA es aspiracional. */
     procesadoIA: false,

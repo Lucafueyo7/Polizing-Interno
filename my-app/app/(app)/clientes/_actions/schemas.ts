@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeTelefono } from "@/lib/format/telefono";
 
 const trimmed = (max: number) =>
   z
@@ -14,6 +15,16 @@ const optionalString = (max: number) =>
     .max(max, `Máximo ${max} caracteres`)
     .optional()
     .transform((v) => (v === "" ? undefined : v));
+
+const optionalTelefono = z
+  .string()
+  .trim()
+  .max(40, "Máximo 40 caracteres")
+  .optional()
+  .transform((v) => normalizeTelefono(v ?? null) ?? undefined)
+  .refine((v) => v === undefined || /^\d{6,15}$/.test(v), {
+    message: "El teléfono debe contener entre 6 y 15 dígitos",
+  });
 
 const email = z.string().trim().email("Email inválido");
 const cuit = z
@@ -31,7 +42,7 @@ export const ClienteCorpSchema = z.object({
   cuit,
   contactoNombre: optionalString(120),
   email,
-  telefono: optionalString(40),
+  telefono: optionalTelefono,
   direccion: optionalString(160),
   estado: z.enum(["activo", "baja"]),
 });
@@ -42,7 +53,7 @@ export const ClienteNormalSchema = z.object({
   apellido: trimmed(60),
   dni,
   email,
-  telefono: optionalString(40),
+  telefono: optionalTelefono,
   direccion: optionalString(160),
   estado: z.enum(["activo", "baja"]),
 });
