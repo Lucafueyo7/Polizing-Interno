@@ -1,0 +1,577 @@
+openapi: 3.0.3
+info:
+  title: API de Integración Chatbot — Polizing
+  description: >-
+    Contrato de las APIs que Polizing expone al chatbot de atención a clientes.
+    Permite identificar al cliente por teléfono, consultar sus pólizas, obtener
+    la tarjeta de circulación, registrar siniestros y enviar comprobantes de pago.
+  version: 1.0.0
+
+servers:
+  - url: https://api.polizing.com/v1
+    description: Producción
+
+tags:
+  - name: Clientes
+    description: Identificación del cliente a partir de su teléfono.
+  - name: Pólizas
+    description: Consulta de las pólizas vigentes del cliente.
+  - name: Documentos
+    description: Obtención de documentos asociados a una póliza.
+  - name: Siniestros
+    description: Registro de siniestros con su documentación de respaldo.
+  - name: Pagos
+    description: Envío de comprobantes de pago de una póliza.
+
+# Todos los endpoints requieren la API key de integración.
+security:
+  - apiKeyAuth: []
+
+paths:
+
+  # ───────────────────────── MÓDULO: CLIENTES ─────────────────────────
+  /clients/by-phone/{phone}:
+    get:
+      summary: Obtener un cliente por su teléfono
+      description: >-
+        Devuelve el cliente activo asociado al número de teléfono indicado.
+        Es el primer paso del flujo del chatbot para identificar al usuario.
+      tags: [Clientes]
+      parameters:
+        - in: path
+          name: phone
+          required: true
+          description: Teléfono del cliente, solo dígitos (6 a 15).
+          schema:
+            type: string
+            pattern: '^\d{6,15}$'
+            example: '5491122334455'
+      responses:
+        '200':
+          description: Cliente encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cliente'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+        '404':
+          description: No existe un cliente activo con ese teléfono.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoConfigurado'
+
+  # ───────────────────────── MÓDULO: PÓLIZAS ──────────────────────────
+  /policies:
+    get:
+      summary: Listar las pólizas del cliente
+      description: >-
+        Devuelve la lista de pólizas vigentes o próximas a vencer del cliente
+        identificado por el teléfono recibido como query param.
+      tags: [Pólizas]
+      parameters:
+        - in: query
+          name: phone
+          required: true
+          description: Teléfono del cliente, solo dígitos (6 a 15).
+          schema:
+            type: string
+            pattern: '^\d{6,15}$'
+            example: '5491122334455'
+      responses:
+        '200':
+          description: Lista de pólizas del cliente.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Poliza'
+        '400':
+          description: Falta el query param phone.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+        '422':
+          description: El teléfono no cumple el formato requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoConfigurado'
+
+  /policies/{policyId}:
+    get:
+      summary: Obtener el detalle de una póliza
+      description: >-
+        Devuelve el detalle de una póliza puntual, validando que pertenezca al
+        cliente identificado por el teléfono.
+      tags: [Pólizas]
+      parameters:
+        - in: path
+          name: policyId
+          required: true
+          description: Identificador de la póliza.
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            example: 1024
+        - in: query
+          name: phone
+          required: true
+          description: Teléfono del cliente, solo dígitos (6 a 15).
+          schema:
+            type: string
+            pattern: '^\d{6,15}$'
+            example: '5491122334455'
+      responses:
+        '200':
+          description: Detalle de la póliza.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Poliza'
+        '400':
+          description: Falta el query param phone.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+        '404':
+          description: No se encontró el cliente o la póliza indicada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: El teléfono o el policyId no cumplen el formato requerido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoConfigurado'
+
+  # ──────────────────────── MÓDULO: DOCUMENTOS ────────────────────────
+  /circulation-card:
+    post:
+      summary: Obtener la tarjeta de circulación de una póliza
+      description: >-
+        Devuelve la tarjeta de circulación (PDF) de la póliza indicada,
+        codificada en base64, validando que la póliza pertenezca al cliente.
+      tags: [Documentos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, policyId]
+              properties:
+                phone:
+                  type: string
+                  pattern: '^\d{6,15}$'
+                  example: '5491122334455'
+                policyId:
+                  type: integer
+                  format: int64
+                  minimum: 1
+                  example: 1024
+      responses:
+        '200':
+          description: Tarjeta de circulación encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CirculationCard'
+        '400':
+          description: El cuerpo no es un JSON válido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+        '404':
+          description: No se encontró el cliente o la tarjeta no está disponible.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          $ref: '#/components/responses/ValidacionFallida'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoConfigurado'
+
+  # ──────────────────────── MÓDULO: SINIESTROS ────────────────────────
+  /claims:
+    post:
+      summary: Registrar un siniestro
+      description: >-
+        Crea un nuevo siniestro para una póliza del cliente, adjuntando la
+        documentación de respaldo (licencia, tarjeta del vehículo, denuncia
+        policial y archivos adicionales) codificada en base64.
+      tags: [Siniestros]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+                - policy
+                - occurredAt
+                - place
+                - description
+                - thirdParties
+                - driverLicense
+                - vehicleCard
+              properties:
+                phone:
+                  type: string
+                  pattern: '^\d{6,15}$'
+                  example: '5491122334455'
+                policy:
+                  $ref: '#/components/schemas/PolicyRef'
+                occurredAt:
+                  type: string
+                  format: date-time
+                  description: Fecha y hora del siniestro en ISO 8601 UTC.
+                  example: '2026-05-18T14:30:00Z'
+                place:
+                  type: string
+                  minLength: 1
+                  example: 'Av. Corrientes 1234, CABA'
+                description:
+                  type: string
+                  minLength: 1
+                  example: 'Colisión en intersección, daños en parte trasera.'
+                thirdParties:
+                  type: string
+                  description: Datos de terceros involucrados, o "NO" si no hubo.
+                  example: 'Vehículo Ford Fiesta, dominio AB123CD'
+                driverLicense:
+                  $ref: '#/components/schemas/MediaFile'
+                vehicleCard:
+                  $ref: '#/components/schemas/MediaFile'
+                policeReport:
+                  description: Denuncia policial. Puede ser null si no corresponde.
+                  nullable: true
+                  allOf:
+                    - $ref: '#/components/schemas/MediaFile'
+                additionalFiles:
+                  type: array
+                  default: []
+                  items:
+                    $ref: '#/components/schemas/MediaFile'
+      responses:
+        '201':
+          description: Siniestro registrado.
+          headers:
+            Location:
+              description: URL del siniestro creado.
+              schema:
+                type: string
+              example: /claims/SIN-2026-000123
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Confirmation'
+        '400':
+          description: El cuerpo no es un JSON válido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+        '404':
+          description: No se encontró el cliente o la póliza indicada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          $ref: '#/components/responses/PayloadGrande'
+        '422':
+          $ref: '#/components/responses/ValidacionFallida'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoConfigurado'
+
+  # ─────────────────────────── MÓDULO: PAGOS ──────────────────────────
+  /payment-receipts:
+    post:
+      summary: Enviar un comprobante de pago
+      description: >-
+        Registra el comprobante de pago de una póliza del cliente, adjuntando el
+        archivo del comprobante codificado en base64.
+      tags: [Pagos]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, policy, file]
+              properties:
+                phone:
+                  type: string
+                  pattern: '^\d{6,15}$'
+                  example: '5491122334455'
+                policy:
+                  $ref: '#/components/schemas/PolicyRef'
+                file:
+                  $ref: '#/components/schemas/MediaFile'
+      responses:
+        '201':
+          description: Comprobante registrado.
+          headers:
+            Location:
+              description: URL del comprobante creado.
+              schema:
+                type: string
+              example: /payment-receipts/PAY-1024-000045
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Confirmation'
+        '400':
+          description: El cuerpo no es un JSON válido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/NoAutorizado'
+        '404':
+          description: No se encontró el cliente o la póliza indicada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          $ref: '#/components/responses/PayloadGrande'
+        '422':
+          $ref: '#/components/responses/ValidacionFallida'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+        '503':
+          $ref: '#/components/responses/NoConfigurado'
+
+# ─────────────────────── COMPONENTES REUTILIZABLES ──────────────────────
+components:
+
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key de integración compartida entre el chatbot y Polizing.
+
+  # Respuestas de error reutilizables, todas con el esquema Error.
+  responses:
+    NoAutorizado:
+      description: API key ausente o inválida.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ValidacionFallida:
+      description: La estructura es válida pero falló una regla de validación.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    PayloadGrande:
+      description: El payload o un archivo supera el límite permitido (8 MB por archivo, 25 MB total).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ErrorInterno:
+      description: Error no controlado del servidor.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NoConfigurado:
+      description: La integración no está configurada (falta la API key del lado del servidor).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Identificador del error de negocio, en SNAKE_UPPER_CASE.
+              example: CLIENTE_NO_ENCONTRADO
+            message:
+              type: string
+              example: No existe un cliente activo con ese teléfono.
+            details:
+              type: string
+              description: Información adicional opcional.
+
+    Cliente:
+      type: object
+      required: [id, phone, fullName, active]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 42
+        phone:
+          type: string
+          example: '5491122334455'
+        fullName:
+          type: string
+          example: 'Juan Pérez'
+        active:
+          type: boolean
+          example: true
+
+    Poliza:
+      type: object
+      required: [id, policyNumber, insuranceType, category, coverage, domain, description]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1024
+        policyNumber:
+          type: string
+          example: 'POL-2026-001024'
+        insuranceType:
+          type: string
+          example: 'Automotor'
+        category:
+          type: string
+          example: 'Auto'
+        coverage:
+          type: string
+          example: 'Todo riesgo'
+        domain:
+          type: string
+          description: Dominio/patente del vehículo. Cadena vacía si no aplica.
+          example: 'AB123CD'
+        description:
+          type: string
+          example: 'Aseguradora del Sur — Todo riesgo'
+
+    PolicyRef:
+      type: object
+      description: Referencia a una póliza del cliente. Solo id es obligatorio.
+      required: [id]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1024
+        policyNumber:
+          type: string
+          example: 'POL-2026-001024'
+        insuranceType:
+          type: string
+          example: 'Automotor'
+        category:
+          type: string
+          example: 'Auto'
+        coverage:
+          type: string
+          example: 'Todo riesgo'
+        domain:
+          type: string
+          nullable: true
+          example: 'AB123CD'
+        description:
+          type: string
+          nullable: true
+          example: 'Aseguradora del Sur — Todo riesgo'
+
+    MediaFile:
+      type: object
+      description: Archivo adjunto codificado en base64.
+      required: [filename, mimeType, contentBase64]
+      properties:
+        mediaId:
+          type: string
+          nullable: true
+          description: Identificador del medio en el canal de origen (opcional).
+          example: 'wamid.HBgL...'
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: 'licencia.pdf'
+        mimeType:
+          type: string
+          description: 'Tipos permitidos: application/pdf, image/jpeg, image/png, image/webp.'
+          example: 'application/pdf'
+        contentBase64:
+          type: string
+          format: byte
+          description: Contenido del archivo codificado en base64.
+          example: 'JVBERi0xLjQKJ...'
+
+    CirculationCard:
+      type: object
+      required: [filename, mimeType, contentBase64]
+      properties:
+        filename:
+          type: string
+          example: 'tarjeta-POL-2026-001024.pdf'
+        mimeType:
+          type: string
+          example: 'application/pdf'
+        contentBase64:
+          type: string
+          format: byte
+          example: 'JVBERi0xLjQKJ...'
+
+    Confirmation:
+      type: object
+      required: [reference, status]
+      properties:
+        reference:
+          type: string
+          description: Referencia del recurso creado.
+          example: 'SIN-2026-000123'
+        status:
+          type: string
+          enum: [ok]
+          example: ok
