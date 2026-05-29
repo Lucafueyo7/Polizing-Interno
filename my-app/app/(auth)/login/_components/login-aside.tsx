@@ -1,6 +1,6 @@
 export function LoginAside() {
   return (
-    <aside className="relative overflow-hidden flex flex-col justify-between p-14 text-[#e7ecf3] bg-[radial-gradient(1200px_600px_at_-10%_-20%,rgba(255,255,255,0.08),transparent_60%),radial-gradient(800px_600px_at_110%_110%,rgba(120,180,255,0.12),transparent_50%),linear-gradient(155deg,#0c2140_0%,#0f2744_35%,#163659_100%)]">
+    <aside className="hidden lg:flex relative overflow-hidden flex-col justify-between p-14 text-[#e7ecf3] bg-[radial-gradient(1200px_600px_at_-10%_-20%,rgba(255,255,255,0.08),transparent_60%),radial-gradient(800px_600px_at_110%_110%,rgba(120,180,255,0.12),transparent_50%),linear-gradient(155deg,#0c2140_0%,#0f2744_35%,#163659_100%)]">
       <div
         aria-hidden
         className="absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:40px_40px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_40%,#000_30%,transparent_80%)]"

@@ -35,6 +35,7 @@ export {
   Lock,
   LogOut as Logout,
   Mail,
+  Menu,
   MessageCircle as WhatsApp,
   Moon,
   Newspaper,

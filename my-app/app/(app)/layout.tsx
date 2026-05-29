@@ -26,7 +26,7 @@ export default async function DashboardLayout({
       />
       <main className="flex flex-col min-w-0">
         <Topbar />
-        <div className="p-7 flex-1 min-w-0">{children}</div>
+        <div className="p-4 md:p-7 flex-1 min-w-0">{children}</div>
       </main>
     </div>
   );
