@@ -1,13 +1,8 @@
-"use server";
+import "server-only";
 
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { DEMO_USERS } from "./demo-users";
 import type { Role, SessionUser } from "./types";
-
-const SESSION_COOKIE = "polizing-session";
-const SESSION_MAX_AGE_S = 60 * 60 * 24 * 7;
 
 function inferRole(email: string): Role {
   return email.toLowerCase().includes("admin") ? "Administrativo" : "Productor";
@@ -22,20 +17,6 @@ function deriveName(email: string): string {
     .join(" ");
 }
 
-function encode(user: SessionUser): string {
-  return Buffer.from(JSON.stringify(user)).toString("base64");
-}
-
-function decode(value: string): SessionUser | null {
-  try {
-    const parsed = JSON.parse(Buffer.from(value, "base64").toString("utf8")) as Partial<SessionUser>;
-    if (!parsed.email || !parsed.name || !parsed.role) return null;
-    return parsed as SessionUser;
-  } catch {
-    return null;
-  }
-}
-
 async function resolveUserId(email: string): Promise<number | undefined> {
   try {
     const dbUser = await prisma.usuarios.findUnique({
@@ -48,55 +29,23 @@ async function resolveUserId(email: string): Promise<number | undefined> {
   }
 }
 
-async function persistSession(user: SessionUser) {
-  const store = await cookies();
-  store.set(SESSION_COOKIE, encode(user), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: SESSION_MAX_AGE_S,
-  });
-}
-
 export async function getCurrentUser(): Promise<SessionUser | null> {
-  const store = await cookies();
-  const raw = store.get(SESSION_COOKIE)?.value;
-  return raw ? decode(raw) : null;
-}
+  const { userId } = await auth();
+  if (!userId) return null;
 
-export type LoginState = { error: string } | null;
+  const user = await currentUser();
+  if (!user) return null;
 
-export async function loginAction(
-  _prev: LoginState,
-  formData: FormData,
-): Promise<LoginState> {
-  const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
-  if (!email || !password) {
-    return { error: "Completá todos los campos." };
-  }
-  const known = DEMO_USERS.find((u) => u.email === email);
-  const base: SessionUser = known ?? {
-    email,
-    name: deriveName(email),
-    role: inferRole(email),
-  };
-  const session: SessionUser = { ...base, id: await resolveUserId(email) };
-  await persistSession(session);
-  redirect("/dashboard");
-}
+  const email =
+    user.primaryEmailAddress?.emailAddress ??
+    user.emailAddresses[0]?.emailAddress ??
+    "";
+  if (!email) return null;
 
-export async function loginAsDemoUser(email: string) {
-  const known = DEMO_USERS.find((u) => u.email === email);
-  if (!known) return;
-  const session: SessionUser = { ...known, id: await resolveUserId(email) };
-  await persistSession(session);
-  redirect("/dashboard");
-}
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
+  const name = fullName || deriveName(email);
+  const metadataRole = (user.publicMetadata?.role as Role | undefined) ?? null;
+  const role: Role = metadataRole ?? inferRole(email);
 
-export async function logoutAction() {
-  const store = await cookies();
-  store.delete(SESSION_COOKIE);
-  redirect("/login");
+  return { id: await resolveUserId(email), email, name, role };
 }

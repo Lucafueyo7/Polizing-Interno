@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useSyncExternalStore } from "react";
+import { SignOutButton } from "@clerk/nextjs";
 import { ChevronsLeft, ChevronsRight, Settings, Help, Logout } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { logoutAction } from "@/lib/auth/session";
 import type { SessionUser } from "@/lib/auth/types";
 import { NAV_ITEMS, type NavItemId } from "./sidebar-nav";
 
@@ -161,15 +161,15 @@ export function Sidebar({ user, badges = {} }: SidebarProps) {
             <small className="text-[11px] text-muted-foreground">{user.role}</small>
           </div>
         )}
-        <form action={logoutAction}>
+        <SignOutButton redirectUrl="/login">
           <button
-            type="submit"
+            type="button"
             title="Cerrar sesión"
             className="w-7 h-7 grid place-items-center rounded-md text-muted-foreground hover:bg-brand-surface-hover hover:text-foreground shrink-0"
           >
             <Logout className="w-3.5 h-3.5" />
           </button>
-        </form>
+        </SignOutButton>
       </div>
     </aside>
   );

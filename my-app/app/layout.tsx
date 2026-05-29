@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import { Suspense } from "react";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
@@ -27,22 +28,24 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="es"
-      data-theme="light"
-      suppressHydrationWarning
-      className={`${sans.variable} ${mono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full">
-        <script
-          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
-          suppressHydrationWarning
-        />
-        <ThemeProvider>
-          <Suspense>{children}</Suspense>
-          <Toaster position="bottom-right" richColors closeButton />
-        </ThemeProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="es"
+        data-theme="light"
+        suppressHydrationWarning
+        className={`${sans.variable} ${mono.variable} h-full antialiased`}
+      >
+        <body className="min-h-full">
+          <script
+            dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+            suppressHydrationWarning
+          />
+          <ThemeProvider>
+            <Suspense>{children}</Suspense>
+            <Toaster position="bottom-right" richColors closeButton />
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
