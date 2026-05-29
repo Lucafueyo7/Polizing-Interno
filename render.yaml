@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: polizing-chatbot
+    runtime: python
+    rootDir: chatbot
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      # Supabase direct URL (puerto 5432, no pooler) para SQLAlchemy
+      - key: DATABASE_URL
+        sync: false
+      # URL de my-app desplegada en Vercel (apunta a /api/chatbot)
+      - key: MAIN_SYSTEM_BASE_URL
+        sync: false
+      # Debe coincidir con CHATBOT_API_KEY en Vercel
+      - key: MAIN_SYSTEM_API_KEY
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_API_VERSION
+        value: v21.0
+      - key: OUTBOUND_API_KEY
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET_KEY
+        sync: false
