@@ -11,3 +11,8 @@ Thumbs.db
 
 # Prisma
 prisma/migrations/
+
+#IA
+.claude
+.omo
+.vscode
