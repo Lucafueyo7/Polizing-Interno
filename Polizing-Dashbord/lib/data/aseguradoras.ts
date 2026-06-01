@@ -53,6 +53,7 @@ export async function getAseguradoras(): Promise<AseguradoraListItem[]> {
       cuit: a.cuit,
       email: a.email,
       telefono: a.telefono,
+      codigoIntegracion: a.codigo_integracion,
       color: aseguradoraColor(a.id),
       initials: aseguradoraInitials(a.razon_social),
       polizasActivas: activas.length,

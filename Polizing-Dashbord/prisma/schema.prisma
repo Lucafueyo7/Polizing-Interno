@@ -53,6 +53,9 @@ model empresas_aseguradoras {
   cuit              String    @unique
   telefono          String?
   email             String?
+  /// Slug del adapter de integración (ej. "berkley", "federacion_patronal").
+  /// Null = aseguradora sin integración API. Las credenciales viven en env vars.
+  codigo_integracion String?
   created_at        DateTime  @default(now()) @db.Timestamptz(6)
   updated_at        DateTime  @updatedAt @db.Timestamptz(6)
   modificado_por_id Int?
@@ -254,6 +257,82 @@ model solicitudes_polizas {
   @@index([telefono])
   @@index([estado])
   @@index([created_at(sort: Desc)])
+}
+
+/// Estado del sync diario de Berkley (singleton: una sola fila).
+/// `ultima_corrida` es el FechaDesde de la próxima llamada a apwsnovedades.
+model berkley_sync_state {
+  id            Int      @id @default(1)
+  ultima_corrida DateTime? @db.Timestamptz(6)
+  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+}
+
+/// Log de cada archivo GD descargado en una corrida del sync.
+model berkley_sync_archivos {
+  id                 Int      @id @default(autoincrement())
+  nombre             String
+  link               String
+  fecha_modificacion DateTime? @db.Timestamptz(6)
+  hash               String?
+  tamano_bytes       Int?
+  descargado_en      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([nombre])
+  @@index([descargado_en(sort: Desc)])
+}
+
+/// Cambios detectados al parsear los archivos GD (altas y modificaciones).
+/// Iteración 1: se registran para revisión, sin upsert a las tablas de dominio.
+model berkley_novedades {
+  id           Int                 @id @default(autoincrement())
+  tipo         BerkleyNovedadTipo
+  archivo      String
+  rama         String?
+  poliza       String?
+  suplemento   String?
+  payload      Json
+  detectada_en DateTime            @default(now()) @db.Timestamptz(6)
+  procesada    Boolean             @default(false)
+
+  @@index([tipo])
+  @@index([procesada])
+  @@index([detectada_en(sort: Desc)])
+}
+
+/// Cartera de clientes sincronizada desde el archivo `asegur` (Berkley no tiene
+/// WS de cartera en vivo). Respaldo de getCartera para Berkley.
+model berkley_cartera_clientes {
+  codigo_asegurado String   @id
+  nombre           String?
+  cuit             String?
+  numero_documento String?
+  email            String?
+  telefono         String?
+  raw              Json?
+  actualizado_en   DateTime @updatedAt @db.Timestamptz(6)
+}
+
+/// Cartera de pólizas sincronizada desde el archivo `Polizas2`.
+/// Clave natural: rama + póliza + suplemento.
+model berkley_cartera_polizas {
+  id               Int      @id @default(autoincrement())
+  rama             String
+  poliza           String
+  suplemento       String
+  codigo_asegurado String?
+  vigencia_inicio  DateTime? @db.Timestamptz(6)
+  vigencia_fin     DateTime? @db.Timestamptz(6)
+  anulada          Boolean  @default(false)
+  raw              Json?
+  actualizado_en   DateTime @updatedAt @db.Timestamptz(6)
+
+  @@unique([rama, poliza, suplemento])
+  @@index([codigo_asegurado])
+}
+
+enum BerkleyNovedadTipo {
+  alta
+  cambio
 }
 
 enum ClienteTipo {

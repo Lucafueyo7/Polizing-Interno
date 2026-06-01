@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getPolizaById, getPolizaFormRefs } from "@/lib/data/polizas";
+import { GenerarDocumentoCard } from "./_components/generar-documento-card";
 import { PolizaDatosCard } from "./_components/poliza-datos-card";
 import { PolizaDetailHeader } from "./_components/poliza-detail-header";
 import { PolizaVigenciaCard } from "./_components/poliza-vigencia-card";
@@ -33,6 +34,7 @@ export default async function PolizaDetailPage({
         <PolizaVinculacionCard poliza={poliza} />
         <PolizaDatosCard poliza={poliza} />
         <PolizaVigenciaCard poliza={poliza} />
+        <GenerarDocumentoCard aseguradoraId={poliza.aseguradora.id} />
       </div>
 
       {showEdit && refs && (

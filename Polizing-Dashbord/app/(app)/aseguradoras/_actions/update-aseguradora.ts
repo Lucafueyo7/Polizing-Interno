@@ -40,6 +40,7 @@ export async function updateAseguradora(
         cuit: data.cuit.replace(/-/g, ""),
         email: data.email ?? null,
         telefono: data.telefono ?? null,
+        codigo_integracion: data.codigoIntegracion ?? null,
       },
     });
 

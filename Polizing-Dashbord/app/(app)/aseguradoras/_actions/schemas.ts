@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { normalizeTelefono } from "@/lib/format/telefono";
+import { INSURER_SLUGS } from "@/lib/insurers/slugs";
 
 const trimmed = (max: number) =>
   z
@@ -33,6 +34,14 @@ export const AseguradoraSchema = z.object({
     .optional()
     .transform((v) => (v === "" ? undefined : v)),
   telefono: optionalTelefono,
+  codigoIntegracion: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined))
+    .refine(
+      (v) => v === undefined || (INSURER_SLUGS as readonly string[]).includes(v),
+      "Integración inválida",
+    ),
 });
 
 export type AseguradoraInput = z.infer<typeof AseguradoraSchema>;

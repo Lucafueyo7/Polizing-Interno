@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/berkley-novedades",
+      "schedule": "0 7 * * *"
+    }
+  ]
+}

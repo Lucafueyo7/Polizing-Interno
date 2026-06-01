@@ -62,6 +62,7 @@ export type AseguradoraListItem = {
   cuit: string;
   email: string | null;
   telefono: string | null;
+  codigoIntegracion: string | null;
   color: string;
   initials: string;
   polizasActivas: number;

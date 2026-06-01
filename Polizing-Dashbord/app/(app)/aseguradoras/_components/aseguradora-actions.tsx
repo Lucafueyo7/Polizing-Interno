@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Edit, More } from "@/components/icons";
+import { Briefcase, Edit, More } from "@/components/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +27,10 @@ export function AseguradoraActions({ id }: { id: number }) {
         >
           <Edit className="w-3.5 h-3.5" />
           Editar
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push(`/aseguradoras/${id}/cartera`)}>
+          <Briefcase className="w-3.5 h-3.5" />
+          Ver cartera
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

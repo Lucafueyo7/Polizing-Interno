@@ -7,7 +7,9 @@ import {
   Field,
   FormFooter,
   FormModalShell,
+  FormSelect,
   SectionLabel,
+  type FormSelectOption,
 } from "@/components/shared/form";
 import { Input } from "@/components/ui/input";
 import { useUrlModal } from "@/lib/hooks/use-url-modal";
@@ -27,13 +29,23 @@ type FormShape = {
   cuit: string;
   email: string;
   telefono: string;
+  codigoIntegracion: string;
 };
+
+const SIN_INTEGRACION = "none";
+
+const INTEGRACION_OPTIONS: ReadonlyArray<FormSelectOption> = [
+  { value: SIN_INTEGRACION, label: "Sin integración" },
+  { value: "berkley", label: "Berkley" },
+  { value: "federacion_patronal", label: "Federación Patronal" },
+];
 
 const EMPTY: FormShape = {
   razonSocial: "",
   cuit: "",
   email: "",
   telefono: "",
+  codigoIntegracion: SIN_INTEGRACION,
 };
 
 function defaultsFromAseguradora(a: AseguradoraListItem): FormShape {
@@ -42,6 +54,7 @@ function defaultsFromAseguradora(a: AseguradoraListItem): FormShape {
     cuit: a.cuit,
     email: a.email ?? "",
     telefono: a.telefono ? formatTelefono(a.telefono) : "",
+    codigoIntegracion: a.codigoIntegracion ?? SIN_INTEGRACION,
   };
 }
 
@@ -51,6 +64,10 @@ function toInput(values: FormShape): AseguradoraInput {
     cuit: values.cuit,
     email: values.email,
     telefono: values.telefono,
+    codigoIntegracion:
+      values.codigoIntegracion === SIN_INTEGRACION
+        ? undefined
+        : values.codigoIntegracion,
   };
 }
 
@@ -152,6 +169,15 @@ export function AseguradoraFormModal(props: Mode) {
             />
           </Field>
         </div>
+
+        <SectionLabel>Integración API</SectionLabel>
+        <FormSelect
+          control={form.control}
+          name="codigoIntegracion"
+          label="Proveedor"
+          options={INTEGRACION_OPTIONS}
+          error={form.formState.errors.codigoIntegracion?.message}
+        />
 
         <FormFooter
           onCancel={close}
