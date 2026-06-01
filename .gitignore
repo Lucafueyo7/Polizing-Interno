@@ -14,5 +14,9 @@ prisma/migrations/
 
 #IA
 .claude
+/.claude/
+**/.claude/
+Polizing-dashbord/.claude/
+Polizing-Whatsapp-Chatbot/.claude/
 .omo
 .vscode
