@@ -1,6 +1,4 @@
-import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
   clienteAvatarLetters,
   clienteIdent,
@@ -84,9 +82,6 @@ function toListItem(row: ClienteRow): ClienteListItem {
 }
 
 async function getAllClientes(): Promise<ClienteListItem[]> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.clientes);
   const rows = await findClientes();
   return rows.map(toListItem);
 }

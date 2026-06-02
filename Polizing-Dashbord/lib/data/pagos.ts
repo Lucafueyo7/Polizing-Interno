@@ -1,6 +1,4 @@
-import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
   aseguradoraRefFromRow,
   clienteRefFromRow,
@@ -89,9 +87,6 @@ function toPolizaRef(p: PagoFullRow["polizas"][number]): PagoPolizaRef {
 }
 
 async function getAllPagos(): Promise<PagoListItem[]> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.pagos);
   const rows = await findPagos();
   return rows.map(toListItem);
 }

@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
   typescript: {
     // HACK: Next.js 16 internal validator bug with catch-all [[...sign-in]] routes.
     // Generated `.next/dev/types/validator.ts` looks for `(auth)/login/page.js`

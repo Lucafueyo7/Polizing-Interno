@@ -1,6 +1,4 @@
-import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import { clienteIdent, clienteLabel } from "@/lib/domain/cliente-helpers";
 import {
   aseguradoraRefFromRow,
@@ -65,9 +63,6 @@ function toListItem(row: PolizaRow): PolizaListItem {
 }
 
 async function getAllPolizas(): Promise<PolizaListItem[]> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.polizas);
   const rows = await findPolizas();
   return rows.map(toListItem);
 }
@@ -141,10 +136,6 @@ export async function getPolizaById(id: number): Promise<PolizaFull | null> {
 }
 
 export async function getPolizaFormRefs(): Promise<PolizaFormRefs> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.clientes, CACHE_TAGS.aseguradoras, CACHE_TAGS.polizas);
-
   const [clientesRows, aseguradorasRows, tiposRows] = await Promise.all([
     prisma.clientes.findMany({
       where: { estado: "activo" },

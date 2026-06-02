@@ -1,7 +1,5 @@
-import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { TODAY_ISO } from "@/lib/format/date";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import { aseguradoraColor } from "@/lib/domain/aseguradora-color";
 import { clienteRefFromRow, isoDateTime } from "./_mappers";
 import type {
@@ -16,10 +14,6 @@ const PENDING_SINIESTROS = ["nuevo", "pendiente_documentacion", "en_tramite"] as
 const COMPUTABLE_POLIZAS = ["vigente", "proxima", "renovada"] as const;
 
 export async function getDashboardKPIs(): Promise<DashboardKPIs> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.dashboard, CACHE_TAGS.clientes, CACHE_TAGS.polizas, CACHE_TAGS.siniestros);
-
   const [clientesActivos, polizasVigentes, siniestrosTramite, primaAgg] =
     await Promise.all([
       prisma.clientes.count({ where: { estado: "activo" } }),
@@ -42,10 +36,6 @@ export async function getDashboardKPIs(): Promise<DashboardKPIs> {
 }
 
 export async function getSidebarBadges(): Promise<SidebarBadges> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.siniestros, CACHE_TAGS.polizas);
-
   const today = new Date(TODAY_ISO);
   const limit = new Date(TODAY_ISO);
   limit.setDate(limit.getDate() + 30);
@@ -65,10 +55,6 @@ export async function getSidebarBadges(): Promise<SidebarBadges> {
 export async function getSiniestrosPendientes(
   limit = 5,
 ): Promise<SiniestroPendiente[]> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.siniestros);
-
   const rows = await prisma.siniestros.findMany({
     where: { estado: "nuevo" },
     orderBy: { fecha_reporte: "desc" },
@@ -100,10 +86,6 @@ export async function getSiniestrosPendientes(
 export async function getDistribucionAseguradoras(): Promise<
   DistribucionAseguradora[]
 > {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.aseguradoras, CACHE_TAGS.polizas);
-
   const aseguradoras = await prisma.empresas_aseguradoras.findMany({
     orderBy: { id: "asc" },
     include: {

@@ -1,6 +1,4 @@
-import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import { aseguradoraColor } from "@/lib/domain/aseguradora-color";
 import type { AseguradoraListItem } from "./types";
 
@@ -20,10 +18,6 @@ function aseguradoraInitials(razonSocial: string): string {
 }
 
 export async function getAseguradoras(): Promise<AseguradoraListItem[]> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.aseguradoras, CACHE_TAGS.polizas);
-
   const [aseguradoras, totalCarteraActiva] = await Promise.all([
     prisma.empresas_aseguradoras.findMany({
       orderBy: { razon_social: "asc" },

@@ -1,6 +1,4 @@
-import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
   clienteIdent,
   clienteLabel,
@@ -137,9 +135,6 @@ async function getLecturasByUser(userId: number | undefined): Promise<Set<number
 }
 
 async function getAllSiniestros(): Promise<Omit<SiniestroListItem, "leidoPorMi">[]> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.siniestros);
   const rows = await findSiniestros();
   return rows.map(toListItemBase);
 }
@@ -230,10 +225,6 @@ export async function getSiniestroById(
 }
 
 export async function getSiniestroFormRefs(): Promise<SiniestroFormRefs> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.clientes, CACHE_TAGS.polizas);
-
   const [clientesRows, polizasRows] = await Promise.all([
     prisma.clientes.findMany({
       where: { estado: "activo" },

@@ -1,5 +1,3 @@
-import { cacheLife, cacheTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
 import { prisma } from "@/lib/prisma";
 import { scrapeAsegurandoDigital } from "@/lib/scrapers/asegurando-digital";
 
@@ -17,13 +15,6 @@ export type NoticiaListItem = {
 const TAKE_LIMIT = 12;
 
 export async function getNoticias(): Promise<NoticiaListItem[]> {
-  "use cache";
-  cacheLife("hours");
-  cacheTag(CACHE_TAGS.noticias);
-
-  // Scraping se ejecuta fuera de este boundary (via refreshNoticias action)
-  // para evitar race conditions en "use cache" con fetch externos lentos.
-
   const rows = await prisma.noticias_scrapeadas.findMany({
     orderBy: [{ publicada_en: "desc" }, { scrapeada_en: "desc" }],
     take: TAKE_LIMIT,
