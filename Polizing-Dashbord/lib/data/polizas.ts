@@ -128,10 +128,6 @@ export async function getPolizaCounts(
 }
 
 export async function getPolizaById(id: number): Promise<PolizaFull | null> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.polizas);
-
   const row = await prisma.polizas.findUnique({
     where: { id },
     include: POLIZA_INCLUDE,

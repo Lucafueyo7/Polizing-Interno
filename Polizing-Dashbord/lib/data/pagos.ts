@@ -149,9 +149,6 @@ export async function getPrimerPago(): Promise<PagoListItem | null> {
 }
 
 export async function getPagoById(id: number): Promise<PagoFull | null> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.pagos);
   const row = await findPagoById(id);
   if (!row) return null;
   const base: PagoListItem = {

@@ -118,10 +118,6 @@ export async function getClientes(
 }
 
 export async function getClienteById(id: number): Promise<ClienteFull | null> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.clientes);
-
   const row = await prisma.clientes.findUnique({
     where: { id },
     include: {
@@ -161,10 +157,6 @@ export async function getClienteById(id: number): Promise<ClienteFull | null> {
 export async function getClienteContrataciones(
   clienteId: number,
 ): Promise<PolizaListItem[]> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.clientes, CACHE_TAGS.polizas);
-
   const rows = await prisma.polizas.findMany({
     where: { cliente_id: clienteId },
     orderBy: { fecha_inicio_vigencia: "desc" },
@@ -200,10 +192,6 @@ export async function getClienteContrataciones(
 export async function getClienteSiniestros(
   clienteId: number,
 ): Promise<SiniestroListItem[]> {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(CACHE_TAGS.clientes, CACHE_TAGS.siniestros);
-
   const rows = await prisma.siniestros.findMany({
     where: { poliza: { cliente_id: clienteId } },
     orderBy: { fecha_reporte: "desc" },
