@@ -150,6 +150,7 @@ export type PolizaListItem = {
 
 export type PolizaFull = PolizaListItem & {
   tipoSeguroId: number;
+  dominio: string | null;
 };
 
 export type SiniestroDoc = {

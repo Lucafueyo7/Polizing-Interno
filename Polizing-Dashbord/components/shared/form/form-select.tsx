@@ -54,8 +54,9 @@ export function FormSelect<T extends FieldValues>({
             value={field.value || ""}
             onValueChange={field.onChange}
             disabled={disabled}
+            items={options}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>

@@ -37,7 +37,9 @@ export function FormModalShell({
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        {children}
+        <div className="overflow-y-auto overflow-x-hidden max-h-[65dvh] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   );

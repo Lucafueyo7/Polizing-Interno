@@ -26,6 +26,7 @@ export const PolizaSchema = z
     fechaFin: isoDateString,
     sumaAsegurada: positiveDecimal("Suma asegurada"),
     primaMensual: positiveDecimal("Prima mensual"),
+    dominio: z.string().trim().max(20).optional(),
   })
   .refine(
     (data) => new Date(data.fechaInicio) <= new Date(data.fechaFin),

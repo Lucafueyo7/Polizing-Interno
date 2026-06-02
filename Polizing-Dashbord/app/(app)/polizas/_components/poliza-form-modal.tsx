@@ -1,17 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useTransition } from "react";
-import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
+import { useEffect, useMemo, useRef, useTransition } from "react";
+import { Controller, useForm, useWatch, type SubmitHandler } from "react-hook-form";
 import {
   Field,
+  FormCombobox,
   FormFooter,
   FormModalShell,
   FormSelect,
   SectionLabel,
   type FormSelectOption,
 } from "@/components/shared/form";
+import { DateInput } from "@/components/ui/date-input";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { useUrlModal } from "@/lib/hooks/use-url-modal";
 import { toastError, toastSuccess } from "@/lib/ui/toast";
 import type { PolizaFormRefs, PolizaFull } from "@/lib/data/types";
@@ -44,6 +47,7 @@ type FormShape = {
   fechaFin: string;
   sumaAsegurada: string;
   primaMensual: string;
+  dominio: string;
 };
 
 function emptyForm(opts: {
@@ -62,6 +66,7 @@ function emptyForm(opts: {
     fechaFin: "",
     sumaAsegurada: "",
     primaMensual: "",
+    dominio: "",
   };
 }
 
@@ -77,6 +82,7 @@ function defaultsFromPoliza(p: PolizaFull): FormShape {
     fechaFin: p.fin,
     sumaAsegurada: String(p.suma),
     primaMensual: String(p.prima),
+    dominio: p.dominio ?? "",
   };
 }
 
@@ -92,6 +98,7 @@ function toInput(values: FormShape): PolizaInput {
     fechaFin: values.fechaFin,
     sumaAsegurada: Number(values.sumaAsegurada),
     primaMensual: Number(values.primaMensual),
+    dominio: values.dominio || undefined,
   };
 }
 
@@ -122,6 +129,11 @@ export function PolizaFormModal(props: Mode) {
     name: "tipoSeguroId",
   });
 
+  const selectedTipo = props.refs.tiposSeguro.find(
+    (t) => t.id === Number(tipoSeguroIdSelected),
+  );
+  const esVehiculo = selectedTipo?.categoria === "auto";
+
   const coberturaOptions: FormSelectOption[] = useMemo(() => {
     const tipoId = Number(tipoSeguroIdSelected);
     if (!tipoId) return [];
@@ -134,7 +146,17 @@ export function PolizaFormModal(props: Mode) {
     }));
   }, [tipoSeguroIdSelected, props.refs.coberturasPorTipo]);
 
-  const clienteOptions: FormSelectOption[] = props.refs.clientes.map((c) => ({
+  // Resetear coberturaId al cambiar el tipo de seguro (no en el primer render)
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    form.setValue("coberturaId", (coberturaOptions[0]?.value ?? "") as never);
+  }, [tipoSeguroIdSelected]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const clienteOptions = props.refs.clientes.map((c) => ({
     value: String(c.id),
     label: `${c.label} · ${c.ident}`,
   }));
@@ -190,12 +212,12 @@ export function PolizaFormModal(props: Mode) {
       >
         <SectionLabel>Vinculación</SectionLabel>
         <div className="grid grid-cols-2 gap-3">
-          <FormSelect
+          <FormCombobox
             control={form.control}
             name="clienteId"
             label="Cliente"
             required
-            placeholder="Seleccionar cliente…"
+            placeholder="Buscar cliente…"
             options={clienteOptions}
             error={form.formState.errors.clienteId?.message}
           />
@@ -245,6 +267,21 @@ export function PolizaFormModal(props: Mode) {
             options={coberturaOptions}
             error={form.formState.errors.coberturaId?.message}
           />
+          {esVehiculo && (
+            <Field
+              label="Dominio / Patente"
+              required
+              error={form.formState.errors.dominio?.message}
+            >
+              <Input
+                {...form.register("dominio", {
+                  required: esVehiculo ? "Requerido para vehículos" : false,
+                })}
+                placeholder="AB123CD"
+                className="font-mono uppercase"
+              />
+            </Field>
+          )}
         </div>
 
         <SectionLabel>Vigencia</SectionLabel>
@@ -263,10 +300,17 @@ export function PolizaFormModal(props: Mode) {
             required
             error={form.formState.errors.fechaInicio?.message}
           >
-            <Input
-              type="date"
-              {...form.register("fechaInicio", { required: "Requerido" })}
-              className="font-mono"
+            <Controller
+              control={form.control}
+              name="fechaInicio"
+              rules={{ required: "Requerido" }}
+              render={({ field }) => (
+                <DateInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
             />
           </Field>
           <Field
@@ -274,10 +318,17 @@ export function PolizaFormModal(props: Mode) {
             required
             error={form.formState.errors.fechaFin?.message}
           >
-            <Input
-              type="date"
-              {...form.register("fechaFin", { required: "Requerido" })}
-              className="font-mono"
+            <Controller
+              control={form.control}
+              name="fechaFin"
+              rules={{ required: "Requerido" }}
+              render={({ field }) => (
+                <DateInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                />
+              )}
             />
           </Field>
         </div>
@@ -289,10 +340,7 @@ export function PolizaFormModal(props: Mode) {
             required
             error={form.formState.errors.sumaAsegurada?.message}
           >
-            <Input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
+            <NumberInput
               {...form.register("sumaAsegurada", { required: "Requerido" })}
               placeholder="18500000"
               className="font-mono"
@@ -303,10 +351,7 @@ export function PolizaFormModal(props: Mode) {
             required
             error={form.formState.errors.primaMensual?.message}
           >
-            <Input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
+            <NumberInput
               {...form.register("primaMensual", { required: "Requerido" })}
               placeholder="38400"
               className="font-mono"

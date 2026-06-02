@@ -27,6 +27,20 @@ export async function updatePoliza(
   }
 
   const data = parsed.data;
+
+  // Guardia server-side: dominio requerido para vehículos (categoría auto)
+  const tipoSeguro = await prisma.tipos_seguro.findUnique({
+    where: { id: data.tipoSeguroId },
+    select: { categoria: true },
+  });
+  if (tipoSeguro?.categoria === "auto" && !data.dominio) {
+    return {
+      ok: false,
+      error: "Datos inválidos",
+      fieldErrors: { dominio: ["Requerido para vehículos"] },
+    };
+  }
+
   const user = await getCurrentUser();
   const audit = user?.id
     ? { modificado_por_id: user.id, modificado_en: new Date() }
@@ -46,6 +60,7 @@ export async function updatePoliza(
         fecha_fin_vigencia: new Date(`${data.fechaFin}T00:00:00Z`),
         suma_asegurada: data.sumaAsegurada,
         prima_mensual: data.primaMensual,
+        dominio: data.dominio ?? null,
       },
     });
 

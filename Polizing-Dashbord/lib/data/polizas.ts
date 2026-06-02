@@ -140,6 +140,7 @@ export async function getPolizaById(id: number): Promise<PolizaFull | null> {
   return {
     ...toListItem(row),
     tipoSeguroId: row.tipo_seguro_id,
+    dominio: row.dominio ?? null,
   };
 }
 
