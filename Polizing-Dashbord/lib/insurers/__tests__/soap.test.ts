@@ -27,10 +27,34 @@ describe("buildSoapEnvelope", () => {
       FechaDesde: "01/01/2026",
       Riesgo: undefined,
     });
-    expect(xml).toContain("<ws:apwsnovedades>");
+    expect(xml).toContain("<apwsnovedades xmlns=");
     expect(xml).toContain("<Usuario>u</Usuario>");
     expect(xml).toContain("<FechaDesde>01/01/2026</FechaDesde>");
     expect(xml).not.toContain("Riesgo");
+  });
+
+  it("declara el namespace por defecto en el elemento del método", () => {
+    const xml = buildSoapEnvelope("PWSNovedades.Execute", {}, "BINet_17");
+    expect(xml).toContain('<PWSNovedades.Execute xmlns="BINet_17">');
+  });
+
+  it("anida objetos (wrapper SDT de GeneXus)", () => {
+    const xml = buildSoapEnvelope(
+      "PWSNovedades.Execute",
+      { Sdt_wsnovedadesin: { Usuario: "u", FechaDesde: "01/01/2026" } },
+      "BINet_17",
+    );
+    expect(xml).toContain("<Sdt_wsnovedadesin>");
+    expect(xml).toContain("<Usuario>u</Usuario>");
+    expect(xml).toContain("</Sdt_wsnovedadesin>");
+  });
+
+  it("repite el tag para colecciones (arrays de objetos)", () => {
+    const xml = buildSoapEnvelope("m", {
+      Riesgos: [{ RiesgoItem: 1 }, { RiesgoItem: 2 }],
+    });
+    expect(xml).toContain("<RiesgoItem>1</RiesgoItem>");
+    expect(xml).toContain("<RiesgoItem>2</RiesgoItem>");
   });
 
   it("escapa caracteres XML en los valores", () => {

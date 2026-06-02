@@ -8,7 +8,6 @@ import { insurerErrorResponse } from "@/lib/insurers/api-errors";
 
 // El sync puede tardar (descarga + parseo de varios archivos).
 export const maxDuration = 300;
-export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;

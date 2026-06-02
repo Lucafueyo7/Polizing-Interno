@@ -26,27 +26,65 @@ function escapeXml(value: string): string {
 }
 
 /**
- * Construye un envelope SOAP. Los campos `undefined` se omiten (ej. `Riesgo` no
- * se envía en pólizas individuales). El orden de inserción se respeta.
+ * Valor de un campo SOAP: escalar, objeto anidado (ej. el wrapper `Entrada` de
+ * GeneXus) o lista de objetos repetidos (ej. la colección `RiesgoCol`).
+ */
+export type SoapFieldValue =
+  | string
+  | number
+  | undefined
+  | SoapFields
+  | SoapFields[];
+export type SoapFields = { [key: string]: SoapFieldValue };
+
+/**
+ * Renderiza los campos recursivamente. Los `undefined` se omiten (ej. `Riesgo`
+ * no se envía en pólizas individuales); los objetos se anidan y los arrays
+ * repiten el tag. El orden de inserción se respeta.
+ */
+function renderFields(fields: SoapFields, indent: string): string {
+  const lines: string[] = [];
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const inner = renderFields(item, indent + "  ");
+        lines.push(`${indent}<${key}>\n${inner}\n${indent}</${key}>`);
+      }
+    } else if (typeof value === "object") {
+      const inner = renderFields(value, indent + "  ");
+      lines.push(
+        inner
+          ? `${indent}<${key}>\n${inner}\n${indent}</${key}>`
+          : `${indent}<${key}/>`,
+      );
+    } else {
+      lines.push(`${indent}<${key}>${escapeXml(String(value))}</${key}>`);
+    }
+  }
+  return lines.join("\n");
+}
+
+/**
+ * Construye un envelope SOAP document/literal. El namespace se declara como
+ * namespace por defecto en el elemento del método, de modo que los hijos quedan
+ * calificados (necesario para servicios con `elementFormDefault="qualified"`,
+ * como los GeneXus de Berkley).
  */
 export function buildSoapEnvelope(
   method: string,
-  fields: Record<string, string | number | undefined>,
+  fields: SoapFields,
   namespace: string = DEFAULT_SOAP_NAMESPACE,
 ): string {
-  const body = Object.entries(fields)
-    .filter(([, v]) => v !== undefined)
-    .map(([k, v]) => `      <${k}>${escapeXml(String(v))}</${k}>`)
-    .join("\n");
+  const body = renderFields(fields, "      ");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:ws="${namespace}">
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
   <soapenv:Header/>
   <soapenv:Body>
-    <ws:${method}>
+    <${method} xmlns="${namespace}">
 ${body}
-    </ws:${method}>
+    </${method}>
   </soapenv:Body>
 </soapenv:Envelope>`;
 }
@@ -101,7 +139,7 @@ export function blockText(
 export type SoapCallParams = {
   url: string;
   method: string;
-  fields: Record<string, string | number | undefined>;
+  fields: SoapFields;
   namespace?: string;
   soapAction?: string;
   timeoutMs?: number;

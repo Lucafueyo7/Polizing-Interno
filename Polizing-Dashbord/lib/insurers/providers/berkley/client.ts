@@ -13,6 +13,14 @@ import { InsurerBusinessError } from "../../errors";
 
 const PROVIDER = "berkley";
 
+/**
+ * Los WS de Berkley son GeneXus: namespace `BINet_17`, método `<Objeto>.Execute`
+ * y SOAPAction `BINet_17action/webservices.<OBJETO>.Execute`. Los parámetros van
+ * envueltos en un SDT (`Sdt_wsnovedadesin` / `Entrada`). Verificado contra el WSDL
+ * (`?wsdl`) de cada endpoint.
+ */
+const NAMESPACE = "BINet_17";
+
 export type NovedadArchivo = {
   archivo: string;
   fechaModificacion: string;
@@ -25,11 +33,15 @@ export async function apwsnovedades(
 ): Promise<NovedadArchivo[]> {
   const $ = await soapCall({
     url: config.novedadesUrl,
-    method: "apwsnovedades",
+    method: "PWSNovedades.Execute",
+    namespace: NAMESPACE,
+    soapAction: "BINet_17action/webservices.APWSNOVEDADES.Execute",
     fields: {
-      Usuario: config.usuario,
-      Password: config.passwordNovedades,
-      FechaDesde: fechaDesde,
+      Sdt_wsnovedadesin: {
+        Usuario: config.usuario,
+        Password: config.passwordNovedades,
+        FechaDesde: fechaDesde,
+      },
     },
     provider: PROVIDER,
   });
@@ -42,7 +54,7 @@ export async function apwsnovedades(
     );
   }
 
-  return soapBlocks($, "Archivos").map((block) => ({
+  return soapBlocks($, "ArchivosItem").map((block) => ({
     archivo: blockText($, block, "Archivo"),
     fechaModificacion: blockText($, block, "FechaUltimaModificacion"),
     link: blockText($, block, "Link"),
@@ -57,6 +69,7 @@ export type WsmobimpFlags = {
   Cuponera: "S" | "N";
   ImprimeSolicitud: "S" | "N";
   TarjetaCirculacion: "S" | "N";
+  SeguroObligAut: "S" | "N";
   EnviaMail: "S" | "N";
 };
 
@@ -83,17 +96,23 @@ export async function awsmobimp(
 ): Promise<WsmobimpDocumento[]> {
   const $ = await soapCall({
     url: config.wsmobimpUrl,
-    method: "awsmobimp_v2",
+    method: "WSMOBImp_v2.Execute",
+    namespace: NAMESPACE,
+    soapAction: "BINet_17action/webservices.AWSMOBIMP_V2.Execute",
     fields: {
-      Usuario: config.usuario,
-      Key: config.keyWsmobimp,
-      Empresa: params.empresa ?? 0,
-      Rama: params.rama,
-      Poliza: params.poliza,
-      Endoso: params.endoso,
-      Riesgo: params.riesgo,
-      Solicitud: params.solicitud,
-      ...params.flags,
+      Entrada: {
+        Usuario: config.usuario,
+        Key: config.keyWsmobimp,
+        Empresa: params.empresa ?? 0,
+        Rama: params.rama,
+        Poliza: params.poliza,
+        Endoso: params.endoso,
+        Riesgo: params.riesgo,
+        Solicitud: params.solicitud,
+        ...params.flags,
+        // Colección opcional de riesgos (vacía: usamos el campo `Riesgo` simple).
+        Riesgos: {},
+      },
     },
     provider: PROVIDER,
   });
@@ -106,7 +125,7 @@ export async function awsmobimp(
     );
   }
 
-  return soapBlocks($, "Documentos").map((block) => ({
+  return soapBlocks($, "ImpresionItem").map((block) => ({
     errorCodigo: blockText($, block, "ErrorCodigo"),
     errorDescripcion: blockText($, block, "ErrorDescripcion"),
     nombre: blockText($, block, "ImpresionNombre"),

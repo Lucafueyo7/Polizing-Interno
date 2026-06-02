@@ -51,6 +51,7 @@ function buildFlags(documentos: DocumentoTipo[]): WsmobimpFlags {
     Cuponera: "N",
     ImprimeSolicitud: "N",
     TarjetaCirculacion: "N",
+    SeguroObligAut: "N",
     EnviaMail: "N", // nunca enviamos mail desde la integración (crítico en TST).
   };
   for (const { tipo, flag } of FLAG_ORDER) {
