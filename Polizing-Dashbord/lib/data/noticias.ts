@@ -21,7 +21,8 @@ export async function getNoticias(): Promise<NoticiaListItem[]> {
   cacheLife("hours");
   cacheTag(CACHE_TAGS.noticias);
 
-  await refreshSnapshot();
+  // Scraping se ejecuta fuera de este boundary (via refreshNoticias action)
+  // para evitar race conditions en "use cache" con fetch externos lentos.
 
   const rows = await prisma.noticias_scrapeadas.findMany({
     orderBy: [{ publicada_en: "desc" }, { scrapeada_en: "desc" }],
@@ -40,7 +41,7 @@ export async function getNoticias(): Promise<NoticiaListItem[]> {
   }));
 }
 
-async function refreshSnapshot(): Promise<void> {
+export async function refreshSnapshot(): Promise<void> {
   try {
     const scraped = await scrapeAsegurandoDigital();
     if (scraped.length === 0) return;
