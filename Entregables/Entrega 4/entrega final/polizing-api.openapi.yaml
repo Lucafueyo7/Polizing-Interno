@@ -8,7 +8,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: https://api.polizing.com/v1
+  - url: https://polizing-interno.vercel.app
     description: Producción
 
 tags:
