@@ -34,7 +34,8 @@ class ConversationEngine:
         if not phone:
             return
 
-        self._store_received(inbound)
+        if not self._store_received(inbound):
+            return
         client = await self.main_system.get_client_by_phone(phone)
         if not client:
             await self.whatsapp.send_text(phone, get_message(self.db, "client_not_found"))
@@ -119,11 +120,14 @@ class ConversationEngine:
         conversation.data_json = "{}"
         self.db.commit()
 
-    def _store_received(self, inbound: dict) -> None:
+    def _store_received(self, inbound: dict) -> bool:
+        msg_id = inbound.get("id")
+        if msg_id and self.db.query(ReceivedMessage).filter(ReceivedMessage.whatsapp_message_id == msg_id).first():
+            return False
         media = inbound.get("media") or {}
         self.db.add(
             ReceivedMessage(
-                whatsapp_message_id=inbound.get("id"),
+                whatsapp_message_id=msg_id,
                 phone=inbound.get("phone") or "",
                 message_type=inbound.get("type") or "unknown",
                 text=inbound.get("text"),
@@ -134,3 +138,4 @@ class ConversationEngine:
             )
         )
         self.db.commit()
+        return True
