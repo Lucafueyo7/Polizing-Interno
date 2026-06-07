@@ -299,8 +299,11 @@ export async function getSiniestroFormRefs(): Promise<SiniestroFormRefs> {
 export async function nextSiniestroNumero(): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = `SIN-${year}-`;
-  const count = await prisma.siniestros.count({
+  const last = await prisma.siniestros.findFirst({
     where: { numero: { startsWith: prefix } },
+    orderBy: { id: "desc" },
+    select: { numero: true },
   });
-  return `${prefix}${String(count + 1).padStart(4, "0")}`;
+  const seq = last ? parseInt(last.numero.slice(prefix.length), 10) : 0;
+  return `${prefix}${String(seq + 1).padStart(4, "0")}`;
 }
