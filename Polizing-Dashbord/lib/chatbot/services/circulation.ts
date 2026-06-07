@@ -57,6 +57,7 @@ export async function refreshAndGetCard(
       aseguradora_id: true,
       tarjeta_circulacion_pdf: true,
       tarjeta_circulacion_mime: true,
+      raw_berkley: true,
     },
   });
   if (!poliza) return null;
@@ -65,12 +66,15 @@ export async function refreshAndGetCard(
     const provider = await getProviderForAseguradora(poliza.aseguradora_id);
     if (!provider.supports("documents")) throw new Error("no documents");
 
-    const parts = poliza.numero_poliza.split("-");
-    if (parts.length !== 3) throw new Error("formato numero_poliza inesperado");
-    const rama = Number(poliza.rama ?? parts[0]);
-    const polizaNum = Number(parts[1]);
-    const endoso = Number(poliza.suplemento ?? parts[2] ?? 0);
-    if (isNaN(rama) || isNaN(polizaNum)) throw new Error("numero_poliza no numérico");
+    // Extraer parámetros Berkley: preferir raw_berkley (más fiable que parsear numero_poliza)
+    const raw = poliza.raw_berkley as { rama?: string; poliza?: string } | null;
+    const rama = Number(raw?.rama ?? poliza.rama);
+    const polizaNum = raw?.poliza ? Number(raw.poliza) : (() => {
+      const parts = poliza.numero_poliza.split("-");
+      return parts.length >= 2 ? Number(parts[1]) : Number(parts[0]);
+    })();
+    const endoso = Number(poliza.suplemento ?? 0);
+    if (isNaN(rama) || isNaN(polizaNum)) throw new Error("no se pudieron determinar los parámetros Berkley");
 
     const docs = await provider.generateDocuments({
       documentos: ["tarjeta_circulacion"],
