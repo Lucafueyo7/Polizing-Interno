@@ -9,7 +9,7 @@ import {
 } from "@/lib/chatbot/responses";
 import { circulationCardBodySchema, formatZodIssues } from "@/lib/chatbot/schemas";
 import { findActiveByTelefono } from "@/lib/chatbot/services/clientes";
-import { getCard } from "@/lib/chatbot/services/circulation";
+import { refreshAndGetCard } from "@/lib/chatbot/services/circulation";
 
 export async function POST(request: NextRequest) {
   const auth = requireApiKey(request);
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   try {
     const cliente = await findActiveByTelefono(parsed.data.phone);
     if (!cliente) return notFound("Cliente no encontrado");
-    const card = await getCard(cliente.id, parsed.data.policy_id);
+    const card = await refreshAndGetCard(cliente.id, parsed.data.policy_id);
     if (!card) return notFound("Tarjeta de circulación no disponible");
     return jsonOk(card);
   } catch (err) {
