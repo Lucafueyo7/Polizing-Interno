@@ -75,7 +75,7 @@ function toListItem(row: ClienteRow): ClienteListItem {
     desde: isoDate(row.fecha_alta),
     polizasActivas: polizasActivas.length,
     primaMensual: polizasActivas.reduce(
-      (s, p) => s + Number(p.prima_mensual),
+      (s, p) => s + Number(p.prima_mensual ?? 0),
       0,
     ),
   };
@@ -133,7 +133,7 @@ export async function getClienteById(id: number): Promise<ClienteFull | null> {
   const base = toListItem(row);
   const primaAnualizada = row.polizas
     .filter((p) => p.estado !== "anulada" && p.estado !== "vencida")
-    .reduce((s, p) => s + Number(p.prima_mensual) * 12, 0);
+    .reduce((s, p) => s + Number(p.prima_mensual ?? 0) * 12, 0);
 
   return {
     ...base,
@@ -171,12 +171,12 @@ export async function getClienteContrataciones(
   return rows.map((row) => ({
     id: row.id,
     numero: row.numero_poliza,
-    tipo: row.tipo_seguro.nombre,
-    cobertura: { id: row.cobertura.id, nombre: row.cobertura.nombre },
-    inicio: isoDate(row.fecha_inicio_vigencia),
-    fin: isoDate(row.fecha_fin_vigencia),
-    suma: Number(row.suma_asegurada),
-    prima: Number(row.prima_mensual),
+    tipo: row.tipo_seguro?.nombre ?? "",
+    cobertura: row.cobertura ? { id: row.cobertura.id, nombre: row.cobertura.nombre } : { id: 0, nombre: "" },
+    inicio: isoDate(row.fecha_inicio_vigencia ?? null),
+    fin: isoDate(row.fecha_fin_vigencia ?? null),
+    suma: Number(row.suma_asegurada ?? 0),
+    prima: Number(row.prima_mensual ?? 0),
     estado: row.estado,
     diasHastaVencimiento: vencimientoDays(row.fecha_fin_vigencia),
     cliente: clienteRefFromRow(row.cliente),

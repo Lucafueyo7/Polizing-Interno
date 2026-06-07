@@ -58,6 +58,7 @@ export {
   TrendingDown as TrendDown,
   TrendingUp as TrendUp,
   User,
+  UserPlus,
   Users,
   Wallet,
   X as Close,

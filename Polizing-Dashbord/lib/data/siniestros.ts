@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { signedUrlForDoc } from "@/lib/storage/supabase";
 import {
   clienteIdent,
   clienteLabel,
@@ -90,39 +91,55 @@ function toListItemBase(row: SiniestroListRow): Omit<SiniestroListItem, "leidoPo
   };
 }
 
-function toDoc(d: {
+type ResolvedDoc = {
   id: number;
   tipo: "img" | "pdf";
   nombre: string;
-  url: string | null;
+  resolvedUrl: string | null;
   tamano_bytes: number | null;
-}): SiniestroDoc {
+};
+
+function toDoc(d: ResolvedDoc): SiniestroDoc {
   return {
     id: d.id,
     tipo: d.tipo,
     nombre: d.nombre,
-    url: d.url ?? "",
+    url: d.resolvedUrl ?? "",
     tamano: fmtBytes(d.tamano_bytes),
     /** Por ahora la integración con la API de IA es aspiracional. */
     procesadoIA: false,
   };
 }
 
-function toFull(row: SiniestroFullRow, leidoPorMi: boolean): SiniestroFull {
+function toFull(row: SiniestroFullRow, docs: ResolvedDoc[], leidoPorMi: boolean): SiniestroFull {
   return {
     ...toListItemBase(row),
     leidoPorMi,
     fechaOcurrencia: isoDate(row.fecha_ocurrencia),
-    docs: row.documentos.map(toDoc),
+    docs: docs.map(toDoc),
     poliza: {
       id: row.poliza.id,
       numero: row.poliza.numero_poliza,
-      tipo: row.poliza.tipo_seguro.nombre,
-      cobertura: toCoberturaRef(row.poliza.cobertura),
-      suma: Number(row.poliza.suma_asegurada),
+      tipo: row.poliza.tipo_seguro?.nombre ?? "",
+      cobertura: row.poliza.cobertura ? toCoberturaRef(row.poliza.cobertura) : { id: 0, nombre: "" },
+      suma: Number(row.poliza.suma_asegurada ?? 0),
       aseguradora: aseguradoraRefFromRow(row.poliza.aseguradora),
     },
   };
+}
+
+async function resolveDocUrls(
+  docs: Array<{ id: number; tipo: "img" | "pdf"; nombre: string; url: string | null; tamano_bytes: number | null }>,
+): Promise<ResolvedDoc[]> {
+  return Promise.all(
+    docs.map(async (d) => ({
+      id: d.id,
+      tipo: d.tipo,
+      nombre: d.nombre,
+      resolvedUrl: d.url ? ((await signedUrlForDoc(d.url)) ?? d.url) : null,
+      tamano_bytes: d.tamano_bytes,
+    })),
+  );
 }
 
 async function getLecturasByUser(userId: number | undefined): Promise<Set<number>> {
@@ -221,7 +238,8 @@ export async function getSiniestroById(
     });
     leidoPorMi = lectura !== null;
   }
-  return toFull(row, leidoPorMi);
+  const docs = await resolveDocUrls(row.documentos);
+  return toFull(row, docs, leidoPorMi);
 }
 
 export async function getSiniestroFormRefs(): Promise<SiniestroFormRefs> {
@@ -260,8 +278,8 @@ export async function getSiniestroFormRefs(): Promise<SiniestroFormRefs> {
     id: p.id,
     numero: p.numero_poliza,
     clienteId: p.cliente_id,
-    tipo: p.tipo_seguro.nombre,
-    cobertura: { id: p.cobertura.id, nombre: p.cobertura.nombre },
+    tipo: p.tipo_seguro?.nombre ?? "",
+    cobertura: p.cobertura ? { id: p.cobertura.id, nombre: p.cobertura.nombre } : { id: 0, nombre: "" },
   }));
 
   return { clientes, polizas };

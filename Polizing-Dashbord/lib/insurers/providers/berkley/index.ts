@@ -126,28 +126,46 @@ export class BerkleyProvider extends BaseInsurerProvider {
   }
 
   override async getCartera(): Promise<Cartera> {
-    const [clientes, polizas] = await Promise.all([
-      prisma.berkley_cartera_clientes.findMany(),
-      prisma.berkley_cartera_polizas.findMany(),
+    // Lee clientes y pólizas que provienen del sync de Berkley desde las tablas de dominio.
+    const [clientesRows, polizasRows] = await Promise.all([
+      prisma.clientes.findMany({
+        where: { codigo_asegurado_berkley: { not: null } },
+        include: {
+          clientes_corporativos: true,
+          clientes_no_corporativos: true,
+        },
+      }),
+      prisma.polizas.findMany({
+        where: {
+          aseguradora: { codigo_integracion: "berkley" },
+          rama: { not: null },
+        },
+        include: {
+          cliente: { select: { codigo_asegurado_berkley: true } },
+        },
+      }),
     ]);
 
     return {
       source: "synced",
       generatedAt: new Date().toISOString(),
-      clientes: clientes.map((c) => ({
-        documento: c.numero_documento ?? undefined,
-        nombre: c.nombre ?? undefined,
-        cuit: c.cuit ?? undefined,
+      clientes: clientesRows.map((c) => ({
+        documento: c.clientes_no_corporativos?.dni ?? undefined,
+        nombre:
+          c.clientes_no_corporativos?.nombre ??
+          c.clientes_corporativos?.razon_social ??
+          undefined,
+        cuit: c.clientes_corporativos?.cuit ?? undefined,
         email: c.email ?? undefined,
         telefono: c.telefono ?? undefined,
       })),
-      polizas: polizas.map((p) => ({
-        numeroPoliza: `${p.rama}-${p.poliza}`,
-        rama: p.rama,
-        estado: p.anulada ? "anulada" : "vigente",
-        vigenciaInicio: p.vigencia_inicio?.toISOString(),
-        vigenciaFin: p.vigencia_fin?.toISOString(),
-        clienteDocumento: p.codigo_asegurado ?? undefined,
+      polizas: polizasRows.map((p) => ({
+        numeroPoliza: p.numero_poliza,
+        rama: p.rama ?? undefined,
+        estado: p.estado,
+        vigenciaInicio: p.fecha_inicio_vigencia?.toISOString(),
+        vigenciaFin: p.fecha_fin_vigencia?.toISOString(),
+        clienteDocumento: p.cliente.codigo_asegurado_berkley ?? undefined,
       })),
     };
   }

@@ -93,14 +93,15 @@ export function clienteCoreFromRow(row: {
   return null;
 }
 
-export function isoDate(d: Date): string {
-  return d.toISOString().slice(0, 10);
+export function isoDate(d: Date | null | undefined): string {
+  return d ? d.toISOString().slice(0, 10) : "";
 }
 
 export function isoDateTime(d: Date): string {
   return d.toISOString();
 }
 
-export function vencimientoDays(fin: Date): number | null {
+export function vencimientoDays(fin: Date | null | undefined): number | null {
+  if (!fin) return null;
   return daysUntilExpiry(fin.toISOString().slice(0, 10));
 }

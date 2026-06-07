@@ -98,7 +98,7 @@ export function Sidebar({ user, badges = {} }: SidebarProps) {
           </div>
         )}
         <nav className="flex flex-col px-2.5 py-1 gap-0.5 flex-1 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
+          {NAV_ITEMS.filter((item) => !item.adminOnly || user.role === "Administrativo").map((item) => {
             const Icon = item.icon;
             const active = pathname.startsWith(item.matchPrefix);
             const badge = badges[item.id];

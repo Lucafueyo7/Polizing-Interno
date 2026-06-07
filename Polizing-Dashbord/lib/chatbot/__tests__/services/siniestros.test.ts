@@ -11,6 +11,9 @@ vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
 vi.mock("@/lib/data/siniestros", () => ({
   nextSiniestroNumero: vi.fn().mockResolvedValue("SIN-2026-0001"),
 }));
+vi.mock("@/lib/storage/supabase", () => ({
+  uploadSiniestroDoc: vi.fn().mockImplementation((path: string) => Promise.resolve(path)),
+}));
 
 import { createWithDocuments } from "../../services/siniestros";
 import { revalidateTag } from "next/cache";
@@ -57,7 +60,9 @@ describe("createWithDocuments", () => {
     const docs = tx.siniestro_documentos.createMany.mock.calls[0][0].data;
     expect(docs).toHaveLength(3);
     expect(docs.every((d: any) => d.tipo === "img")).toBe(true);
-    expect(docs.every((d: any) => d.contenido instanceof Uint8Array)).toBe(true);
+    // Los docs ahora van al bucket: `url` contiene el path y `contenido` es null.
+    expect(docs.every((d: any) => typeof d.url === "string" && d.url.length > 0)).toBe(true);
+    expect(docs.every((d: any) => d.contenido === null)).toBe(true);
     expect(revalidateTag).toHaveBeenCalledWith("siniestros", "minutes");
   });
 

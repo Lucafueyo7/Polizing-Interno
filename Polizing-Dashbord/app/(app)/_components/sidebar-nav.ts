@@ -1,5 +1,6 @@
 import {
   Dashboard,
+  UserPlus,
   Users,
   Building,
   Shield,
@@ -16,7 +17,8 @@ export type NavItemId =
   | "polizas"
   | "siniestros"
   | "pagos"
-  | "noticias";
+  | "noticias"
+  | "usuarios";
 
 export type NavItem = {
   id: NavItemId;
@@ -28,6 +30,8 @@ export type NavItem = {
    * sección incluye varias rutas (`/clientes`, `/clientes/[id]`).
    */
   matchPrefix: string;
+  /** Si es true, solo se muestra a usuarios con rol Administrativo. */
+  adminOnly?: boolean;
 };
 
 export const NAV_ITEMS: ReadonlyArray<NavItem> = [
@@ -79,5 +83,13 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     href: "/noticias",
     icon: Newspaper,
     matchPrefix: "/noticias",
+  },
+  {
+    id: "usuarios",
+    label: "Usuarios",
+    href: "/usuarios",
+    icon: UserPlus,
+    matchPrefix: "/usuarios",
+    adminOnly: true,
   },
 ];

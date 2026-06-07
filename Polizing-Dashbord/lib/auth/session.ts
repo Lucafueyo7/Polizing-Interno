@@ -17,18 +17,6 @@ function deriveName(email: string): string {
     .join(" ");
 }
 
-async function resolveUserId(email: string): Promise<number | undefined> {
-  try {
-    const dbUser = await prisma.usuarios.findUnique({
-      where: { email },
-      select: { id: true },
-    });
-    return dbUser?.id;
-  } catch {
-    return undefined;
-  }
-}
-
 export async function getCurrentUser(): Promise<SessionUser | null> {
   const { userId } = await auth();
   if (!userId) return null;
@@ -42,10 +30,23 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     "";
   if (!email) return null;
 
+  // El usuario debe estar sincronizado en la BD (lo crea el webhook de Clerk en
+  // `user.created`). Si no existe, no tiene acceso → la UI muestra el cartel.
+  let dbUser: { id: number } | null = null;
+  try {
+    dbUser = await prisma.usuarios.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+  } catch {
+    return null;
+  }
+  if (!dbUser) return null;
+
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
   const name = fullName || deriveName(email);
   const metadataRole = (user.publicMetadata?.role as Role | undefined) ?? null;
   const role: Role = metadataRole ?? inferRole(email);
 
-  return { id: await resolveUserId(email), email, name, role };
+  return { id: dbUser.id, email, name, role };
 }

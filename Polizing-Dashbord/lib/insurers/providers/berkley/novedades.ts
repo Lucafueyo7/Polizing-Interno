@@ -6,7 +6,7 @@
  *  2. apwsnovedades → lista de archivos + links.
  *  3. Descargar cada archivo, loguear (hash, tamaño) en berkley_sync_archivos.
  *  4. Parsear los archivos clave; detectar altas/cambios (berkley_novedades) y
- *     persistir la cartera local (berkley_cartera_*).
+ *     hacer upsert a las tablas de dominio (clientes / polizas).
  *  5. Avanzar ultimaCorrida SOLO si todo el pipeline tuvo éxito (idempotente).
  *
  * No hace upsert a las tablas de dominio (polizas/clientes): eso queda para una
@@ -123,22 +123,54 @@ async function syncAsegur(buf: Buffer, novedades: Novedad[]): Promise<void> {
   for (const r of rows) {
     const codigo = r.codigo_asegurado;
     if (!codigo) continue;
-    const existing = await prisma.berkley_cartera_clientes.findUnique({
-      where: { codigo_asegurado: codigo },
+
+    // ¿Ya existe un cliente vinculado a este código Berkley?
+    const existing = await prisma.clientes.findUnique({
+      where: { codigo_asegurado_berkley: codigo },
+      select: { id: true },
     });
-    const data = {
-      nombre: r.nombre || null,
-      cuit: r.cuit || null,
-      numero_documento: r.numero_documento || null,
+
+    // Heurística de tipo: si tiene CUIT → corporativo; si no → persona.
+    const esCorporativo = !!(r.cuit && String(r.cuit).trim());
+    const tipo: "corporativo" | "persona" = esCorporativo ? "corporativo" : "persona";
+
+    const clienteBase = {
+      tipo,
+      email: r.email || null,
       telefono: r.telefono || null,
-      raw: r,
+      codigo_asegurado_berkley: codigo,
+      raw_berkley: r as unknown as Prisma.InputJsonValue,
     };
-    await prisma.berkley_cartera_clientes.upsert({
-      where: { codigo_asegurado: codigo },
-      create: { codigo_asegurado: codigo, ...data },
-      update: data,
-    });
+
     if (!existing) {
+      // Alta: crear cliente + sub-tabla.
+      try {
+        const nuevo = await prisma.clientes.create({
+          data: {
+            ...clienteBase,
+            fecha_alta: new Date(),
+          },
+          select: { id: true },
+        });
+        await upsertSubtable(nuevo.id, esCorporativo, r);
+      } catch {
+        // Puede haber colisión en cuit/dni únicos (cliente que ya existía sin código Berkley).
+        // En ese caso, intentamos vincular al existente por cuit o documento.
+        const vinculado = await vincularClienteExistente(codigo, esCorporativo, r);
+        if (!vinculado) {
+          // No se pudo vincular: registrar como novedad para revisión manual.
+          novedades.push({
+            tipo: "alta",
+            archivo: "asegur",
+            rama: null,
+            poliza: null,
+            suplemento: null,
+            payload: { ...r, _error: "no_vinculado" },
+            detectadaEn: new Date().toISOString(),
+          });
+          continue;
+        }
+      }
       novedades.push({
         tipo: "alta",
         archivo: "asegur",
@@ -148,35 +180,162 @@ async function syncAsegur(buf: Buffer, novedades: Novedad[]): Promise<void> {
         payload: r,
         detectadaEn: new Date().toISOString(),
       });
+    } else {
+      // Actualización: sync campos básicos + raw_berkley.
+      await prisma.clientes.update({
+        where: { id: existing.id },
+        data: {
+          email: clienteBase.email,
+          telefono: clienteBase.telefono,
+          raw_berkley: clienteBase.raw_berkley,
+        },
+      });
     }
   }
 }
 
+/** Intenta vincular un cliente ya existente (por cuit/dni) al código Berkley. */
+async function vincularClienteExistente(
+  codigo: string,
+  esCorporativo: boolean,
+  r: Record<string, string | null | undefined>,
+): Promise<boolean> {
+  let clienteId: number | null = null;
+
+  if (esCorporativo && r.cuit) {
+    const corp = await prisma.clientes_corporativos.findUnique({
+      where: { cuit: String(r.cuit) },
+      select: { cliente_id: true },
+    });
+    if (corp) clienteId = corp.cliente_id;
+  } else if (!esCorporativo && r.numero_documento) {
+    const nocorp = await prisma.clientes_no_corporativos.findUnique({
+      where: { dni: String(r.numero_documento) },
+      select: { cliente_id: true },
+    });
+    if (nocorp) clienteId = nocorp.cliente_id;
+  }
+
+  if (!clienteId) return false;
+
+  await prisma.clientes.update({
+    where: { id: clienteId },
+    data: {
+      codigo_asegurado_berkley: codigo,
+      raw_berkley: r as unknown as Prisma.InputJsonValue,
+    },
+  });
+  return true;
+}
+
+/** Crea o actualiza la sub-tabla corporativo/persona para el cliente de Berkley. */
+async function upsertSubtable(
+  clienteId: number,
+  esCorporativo: boolean,
+  r: Record<string, string | null | undefined>,
+): Promise<void> {
+  if (esCorporativo) {
+    const cuit = String(r.cuit ?? "").trim();
+    const razonSocial = String(r.nombre ?? "").trim() || cuit;
+    if (!cuit) return;
+    await prisma.clientes_corporativos.upsert({
+      where: { cliente_id: clienteId },
+      create: { cliente_id: clienteId, cuit, razon_social: razonSocial },
+      update: { cuit, razon_social: razonSocial },
+    });
+  } else {
+    const dni = String(r.numero_documento ?? r.codigo_asegurado ?? "").trim();
+    const nombre = String(r.nombre ?? "").trim() || "Sin nombre";
+    if (!dni) return;
+    await prisma.clientes_no_corporativos.upsert({
+      where: { cliente_id: clienteId },
+      create: { cliente_id: clienteId, dni, nombre, apellido: "" },
+      update: { dni, nombre },
+    });
+  }
+}
+
+/** Resuelve (y cachea en el run) el ID de la aseguradora Berkley. */
+async function getBerkleyAseguradoraId(): Promise<number | null> {
+  const row = await prisma.empresas_aseguradoras.findFirst({
+    where: { codigo_integracion: "berkley" },
+    select: { id: true },
+  });
+  return row?.id ?? null;
+}
+
 async function syncPolizas2(buf: Buffer, novedades: Novedad[]): Promise<void> {
   const rows = parseFixedWidth(buf, POLIZAS2_LAYOUT);
+  const aseguradoraId = await getBerkleyAseguradoraId();
+  if (!aseguradoraId) {
+    // Sin aseguradora Berkley configurada en la BD, no se pueden insertar pólizas.
+    novedades.push({
+      tipo: "alta",
+      archivo: "polizas2",
+      rama: null,
+      poliza: null,
+      suplemento: null,
+      payload: { _error: "aseguradora_berkley_no_encontrada" },
+      detectadaEn: new Date().toISOString(),
+    });
+    return;
+  }
+
   for (const r of rows) {
     const rama = r.rama;
     const poliza = r.poliza;
     const suplemento = "0"; // Polizas2 no trae suplemento; el alta original es 0.
     if (!rama || !poliza) continue;
 
-    const existing = await prisma.berkley_cartera_polizas.findUnique({
-      where: { rama_poliza_suplemento: { rama, poliza, suplemento } },
-    });
-    const data = {
-      codigo_asegurado: r.asegurado || null,
-      vigencia_inicio: parseFechaAAAAMMDD(r.vig_inicial),
-      vigencia_fin: parseFechaAAAAMMDD(r.vig_final),
-      anulada: r.anulada?.toUpperCase() === "S",
-      raw: r,
-    };
-    await prisma.berkley_cartera_polizas.upsert({
-      where: { rama_poliza_suplemento: { rama, poliza, suplemento } },
-      create: { rama, poliza, suplemento, ...data },
-      update: data,
+    const numeroPoliza = `${rama}-${poliza}-${suplemento}`;
+    const existing = await prisma.polizas.findUnique({
+      where: { numero_poliza: numeroPoliza },
+      select: { id: true, raw_berkley: true },
     });
 
+    // Resolver cliente_id por codigo_asegurado_berkley (puede ser null si no synced aún).
+    let clienteId: number | null = null;
+    if (r.asegurado) {
+      const cli = await prisma.clientes.findUnique({
+        where: { codigo_asegurado_berkley: r.asegurado },
+        select: { id: true },
+      });
+      clienteId = cli?.id ?? null;
+    }
+
+    const estado: "vigente" | "anulada" = r.anulada?.toUpperCase() === "S" ? "anulada" : "vigente";
+    const polizaData = {
+      rama,
+      suplemento,
+      raw_berkley: r as unknown as Prisma.InputJsonValue,
+      estado,
+      fecha_inicio_vigencia: parseFechaAAAAMMDD(r.vig_inicial) ?? undefined,
+      fecha_fin_vigencia: parseFechaAAAAMMDD(r.vig_final) ?? undefined,
+    };
+
     if (!existing) {
+      if (!clienteId) {
+        // Sin cliente match: registrar novedad para revisión manual y continuar.
+        novedades.push({
+          tipo: "alta",
+          archivo: "polizas2",
+          rama,
+          poliza,
+          suplemento,
+          payload: { ...r, _error: "cliente_no_encontrado" },
+          detectadaEn: new Date().toISOString(),
+        });
+        continue;
+      }
+      // Alta de póliza parcial (tipo/cobertura/suma/prima quedan null hasta completarse a mano).
+      await prisma.polizas.create({
+        data: {
+          numero_poliza: numeroPoliza,
+          cliente_id: clienteId,
+          aseguradora_id: aseguradoraId,
+          ...polizaData,
+        },
+      });
       novedades.push({
         tipo: "alta",
         archivo: "polizas2",
@@ -186,16 +345,25 @@ async function syncPolizas2(buf: Buffer, novedades: Novedad[]): Promise<void> {
         payload: r,
         detectadaEn: new Date().toISOString(),
       });
-    } else if (JSON.stringify(existing.raw) !== JSON.stringify(r)) {
-      novedades.push({
-        tipo: "cambio",
-        archivo: "polizas2",
-        rama,
-        poliza,
-        suplemento,
-        payload: r,
-        detectadaEn: new Date().toISOString(),
-      });
+    } else {
+      // Actualización: solo campos que la cartera provee.
+      const rawAnterior = JSON.stringify(existing.raw_berkley);
+      const rawNuevo = JSON.stringify(r);
+      if (rawAnterior !== rawNuevo) {
+        await prisma.polizas.update({
+          where: { id: existing.id },
+          data: polizaData,
+        });
+        novedades.push({
+          tipo: "cambio",
+          archivo: "polizas2",
+          rama,
+          poliza,
+          suplemento,
+          payload: r,
+          detectadaEn: new Date().toISOString(),
+        });
+      }
     }
   }
 }

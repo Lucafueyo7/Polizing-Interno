@@ -2,6 +2,7 @@ import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { nextSiniestroNumero } from "@/lib/data/siniestros";
+import { uploadSiniestroDoc } from "@/lib/storage/supabase";
 import type { DecodedFile } from "../files";
 
 export type ClaimFiles = {
@@ -28,6 +29,19 @@ export async function createWithDocuments(args: {
 
   const documentos = collectDocuments(args.files);
 
+  // Subimos al bucket ANTES de la transacción: si falla una subida, abortamos
+  // sin dejar el siniestro creado. El `numero` (ya generado) es la carpeta.
+  const uploaded = await Promise.all(
+    documentos.map(async (d, i) => ({
+      doc: d,
+      path: await uploadSiniestroDoc(
+        `${numero}/${i}-${sanitizeFilename(d.filename)}`,
+        new Uint8Array(d.bytes),
+        d.mime,
+      ),
+    })),
+  );
+
   await prisma.$transaction(async (tx) => {
     const siniestro = await tx.siniestros.create({
       data: {
@@ -40,16 +54,16 @@ export async function createWithDocuments(args: {
       },
       select: { id: true },
     });
-    if (documentos.length > 0) {
+    if (uploaded.length > 0) {
       await tx.siniestro_documentos.createMany({
-        data: documentos.map((d) => ({
+        data: uploaded.map(({ doc, path }) => ({
           siniestro_id: siniestro.id,
-          tipo: d.mime.startsWith("image/") ? ("img" as const) : ("pdf" as const),
-          nombre: d.filename,
-          mime_type: d.mime,
-          tamano_bytes: d.size,
-          contenido: new Uint8Array(d.bytes),
-          url: null,
+          tipo: doc.mime.startsWith("image/") ? ("img" as const) : ("pdf" as const),
+          nombre: doc.filename,
+          mime_type: doc.mime,
+          tamano_bytes: doc.size,
+          contenido: null,
+          url: path,
         })),
       });
     }
@@ -77,6 +91,14 @@ function composeDescription(args: {
   const tp = args.third_parties.trim();
   const terceros = tp && tp.toUpperCase() !== "NO" ? `Terceros: ${tp}` : "Sin terceros";
   return `Lugar: ${args.place}. ${args.description}. ${terceros}.`;
+}
+
+/** Normaliza el nombre para usarlo como object key del bucket (sin espacios ni acentos). */
+function sanitizeFilename(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
 function collectDocuments(files: ClaimFiles): DecodedFile[] {

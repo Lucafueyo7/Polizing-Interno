@@ -19,11 +19,17 @@ model clientes {
   updated_at               DateTime                  @updatedAt @db.Timestamptz(6)
   modificado_por_id        Int?
   modificado_en            DateTime?                 @db.Timestamptz(6)
+  /// Código de asegurado en la cartera de Berkley (sync diario). Null = cliente
+  /// que no proviene de Berkley. Unique para poder upsert por este código.
+  codigo_asegurado_berkley String?                   @unique
+  /// Fila cruda original del archivo `asegur` de Berkley (respaldo del sync).
+  raw_berkley              Json?
   modificado_por           usuarios?                 @relation("ClienteModificadoPor", fields: [modificado_por_id], references: [id])
   clientes_corporativos    clientes_corporativos?
   clientes_no_corporativos clientes_no_corporativos?
   pagos                    pagos[]
   polizas                  polizas[]
+  poliza_clientes          poliza_clientes[]
   solicitudes_polizas      solicitudes_polizas[]
 
   @@index([tipo])
@@ -92,31 +98,39 @@ model polizas {
   numero_poliza         String                @unique
   cliente_id            Int
   aseguradora_id        Int
-  tipo_seguro_id        Int
-  cobertura_id          Int
+  /// Nullable: las pólizas importadas de la cartera Berkley entran como datos
+  /// parciales (borrador) sin tipo/cobertura/suma/prima hasta completarse a mano.
+  tipo_seguro_id        Int?
+  cobertura_id          Int?
   pago_id               Int?
   estado                PolizaEstado
-  fecha_inicio_vigencia DateTime              @db.Timestamptz(6)
-  fecha_fin_vigencia    DateTime              @db.Timestamptz(6)
-  suma_asegurada        Decimal               @db.Decimal(15, 2)
+  fecha_inicio_vigencia DateTime?             @db.Timestamptz(6)
+  fecha_fin_vigencia    DateTime?             @db.Timestamptz(6)
+  suma_asegurada        Decimal?              @db.Decimal(15, 2)
   /// Cuota mensual fija que el cliente abona para mantener la póliza vigente.
   /// Capturada al momento de la emisión.
-  prima_mensual         Decimal               @db.Decimal(15, 2)
+  prima_mensual         Decimal?              @db.Decimal(15, 2)
   moneda                String                @default("ARS") @db.Char(3)
   dominio                  String?
   tarjeta_circulacion_pdf  Bytes?
   tarjeta_circulacion_mime String?
+  /// Datos específicos de la cartera Berkley (sync diario). Null = póliza que no
+  /// proviene de Berkley. La clave natural Berkley es rama + poliza + suplemento.
+  rama                  String?
+  suplemento            String?
+  raw_berkley           Json?
   created_at            DateTime              @default(now()) @db.Timestamptz(6)
   updated_at            DateTime              @updatedAt @db.Timestamptz(6)
   modificado_por_id     Int?
   modificado_en         DateTime?             @db.Timestamptz(6)
   aseguradora           empresas_aseguradoras @relation(fields: [aseguradora_id], references: [id])
   cliente               clientes              @relation(fields: [cliente_id], references: [id])
-  cobertura             coberturas            @relation(fields: [cobertura_id], references: [id])
+  cobertura             coberturas?           @relation(fields: [cobertura_id], references: [id])
   modificado_por        usuarios?             @relation("PolizaModificadaPor", fields: [modificado_por_id], references: [id])
   pago                  pagos?                @relation(fields: [pago_id], references: [id])
-  tipo_seguro           tipos_seguro          @relation(fields: [tipo_seguro_id], references: [id])
+  tipo_seguro           tipos_seguro?         @relation(fields: [tipo_seguro_id], references: [id])
   siniestros            siniestros[]
+  poliza_clientes       poliza_clientes[]
 
   @@index([cliente_id])
   @@index([aseguradora_id])
@@ -126,6 +140,20 @@ model polizas {
   @@index([fecha_fin_vigencia])
   @@index([pago_id])
   @@index([estado, fecha_fin_vigencia])
+}
+
+/// Clientes adicionales (co-asegurados) vinculados a una póliza, además del
+/// titular principal en `polizas.cliente_id`. Permite asociar una póliza a más
+/// de un cliente.
+model poliza_clientes {
+  poliza_id  Int
+  cliente_id Int
+  es_titular Boolean  @default(false)
+  poliza     polizas  @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
+  cliente    clientes @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+
+  @@id([poliza_id, cliente_id])
+  @@index([cliente_id])
 }
 
 model siniestros {
@@ -299,8 +327,9 @@ model berkley_novedades {
   @@index([detectada_en(sort: Desc)])
 }
 
-/// Cartera de clientes sincronizada desde el archivo `asegur` (Berkley no tiene
-/// WS de cartera en vivo). Respaldo de getCartera para Berkley.
+
+/// Cartera de clientes sincronizada desde el archivo `asegur` (Berkley).
+/// Se conserva temporalmente hasta terminar la migración a la tabla `clientes`.
 model berkley_cartera_clientes {
   codigo_asegurado String   @id
   nombre           String?
@@ -313,18 +342,18 @@ model berkley_cartera_clientes {
 }
 
 /// Cartera de pólizas sincronizada desde el archivo `Polizas2`.
-/// Clave natural: rama + póliza + suplemento.
+/// Se conserva temporalmente hasta terminar la migración a la tabla `polizas`.
 model berkley_cartera_polizas {
-  id               Int      @id @default(autoincrement())
+  id               Int       @id @default(autoincrement())
   rama             String
   poliza           String
   suplemento       String
   codigo_asegurado String?
   vigencia_inicio  DateTime? @db.Timestamptz(6)
   vigencia_fin     DateTime? @db.Timestamptz(6)
-  anulada          Boolean  @default(false)
+  anulada          Boolean   @default(false)
   raw              Json?
-  actualizado_en   DateTime @updatedAt @db.Timestamptz(6)
+  actualizado_en   DateTime  @updatedAt @db.Timestamptz(6)
 
   @@unique([rama, poliza, suplemento])
   @@index([codigo_asegurado])

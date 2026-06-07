@@ -9,11 +9,10 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, badges] = await Promise.all([
-    getCurrentUser(),
-    getSidebarBadges(),
-  ]);
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  const badges = await getSidebarBadges();
 
   return (
     <div className="grid grid-cols-[auto_1fr] min-h-svh bg-background">
