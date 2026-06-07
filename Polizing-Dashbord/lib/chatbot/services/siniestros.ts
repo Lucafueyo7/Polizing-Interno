@@ -25,7 +25,7 @@ export async function createWithDocuments(args: {
   const fechaOcurrencia = parseArDateTime(args.date, args.time);
   const numero = await nextSiniestroNumero();
   const titulo = `Siniestro reportado vía chatbot — póliza ${args.numeroPoliza}`;
-  const descripcion = composeDescription(args);
+  const descripcionTexto = composeDescription(args);
 
   const documentos = collectDocuments(args.files);
 
@@ -48,6 +48,7 @@ export async function createWithDocuments(args: {
         poliza_id: args.policyId,
         numero,
         titulo,
+        descripcion: descripcionTexto,
         fecha_ocurrencia: fechaOcurrencia,
         fecha_reporte: new Date(),
         estado: "nuevo",
@@ -67,10 +68,6 @@ export async function createWithDocuments(args: {
         })),
       });
     }
-    // El descripcion compuesto no tiene columna propia en `siniestros`;
-    // queda capturado en el título y en los archivos. Para futuro, conviene
-    // sumar `descripcion` al modelo.
-    void descripcion;
   });
 
   revalidateTag(CACHE_TAGS.siniestros, "minutes");

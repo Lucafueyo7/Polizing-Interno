@@ -17,6 +17,14 @@ export const CreateUsuarioSchema = z.object({
 
 export type CreateUsuarioInput = z.infer<typeof CreateUsuarioSchema>;
 
+export const UpdateUsuarioSchema = z.object({
+  id: z.number().int().positive(),
+  nombreCompleto: z.string().trim().min(2, "Requerido").max(120, "Máximo 120 caracteres"),
+  rol: z.enum(["productor", "administrativo"]),
+});
+
+export type UpdateUsuarioInput = z.infer<typeof UpdateUsuarioSchema>;
+
 export type ActionResult =
   | { ok: true }
   | { ok: false; error: string; fieldErrors?: Record<string, string[]> };

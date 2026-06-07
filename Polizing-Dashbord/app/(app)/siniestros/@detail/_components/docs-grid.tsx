@@ -42,7 +42,7 @@ export function DocsGrid({ docs }: { docs: SiniestroDoc[] }) {
       )}
 
       <Dialog open={selected !== null} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="w-full max-w-[min(calc(100%-2rem),380px)]">
+        <DialogContent className="w-full max-w-[min(calc(100%-2rem),680px)]">
           <DialogHeader>
             <DialogTitle className="truncate pr-8">{selected?.nombre}</DialogTitle>
           </DialogHeader>
@@ -50,11 +50,13 @@ export function DocsGrid({ docs }: { docs: SiniestroDoc[] }) {
           {selected && (
             <div className="flex flex-col gap-3 min-w-0">
               {selected.tipo === "img" ? (
-                <img
-                  src={selected.url}
-                  alt={selected.nombre}
-                  className="w-full h-auto max-h-[70dvh] object-contain rounded-lg"
-                />
+                <div className="flex items-center justify-center bg-secondary rounded-lg overflow-hidden">
+                  <img
+                    src={selected.url}
+                    alt={selected.nombre}
+                    className="max-w-full max-h-[70dvh] object-contain"
+                  />
+                </div>
               ) : (
                 <iframe
                   src={selected.url}

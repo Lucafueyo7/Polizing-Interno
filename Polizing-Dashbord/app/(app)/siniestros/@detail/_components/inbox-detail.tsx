@@ -75,6 +75,15 @@ export function InboxDetail({ siniestro }: { siniestro: SiniestroFull }) {
       <div className="px-6 py-5 flex flex-col gap-6 overflow-y-auto">
         <PolizaVinculada poliza={siniestro.poliza} />
 
+        {siniestro.descripcion && (
+          <section>
+            <h4 className="text-[12px] font-semibold tracking-[0.04em] uppercase text-muted-foreground mb-1.5">
+              Descripción
+            </h4>
+            <p className="text-[13px] leading-relaxed">{siniestro.descripcion}</p>
+          </section>
+        )}
+
         <DocsGrid docs={siniestro.docs} />
 
         <Timeline siniestro={siniestro} />

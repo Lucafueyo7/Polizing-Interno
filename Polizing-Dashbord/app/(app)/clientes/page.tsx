@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { PageHeader } from "@/components/shared/page-header";
 import {
+  CLIENTES_PAGE_SIZE,
   getClientes,
   type ClientesFilters,
 } from "@/lib/data/clientes";
@@ -16,6 +17,7 @@ type SearchParams = Promise<{
   estado?: string;
   modal?: string;
   id?: string;
+  page?: string;
 }>;
 
 function parseFilters(params: Awaited<SearchParams>): ClientesFilters {
@@ -26,6 +28,16 @@ function parseFilters(params: Awaited<SearchParams>): ClientesFilters {
   return filters;
 }
 
+function buildHref(filters: ClientesFilters, page: number): string {
+  const sp = new URLSearchParams();
+  if (filters.q) sp.set("q", filters.q);
+  if (filters.tipo) sp.set("tipo", filters.tipo);
+  if (filters.estado) sp.set("estado", filters.estado);
+  if (page > 0) sp.set("page", String(page));
+  const qs = sp.toString();
+  return qs ? `/clientes?${qs}` : "/clientes";
+}
+
 export default async function ClientesPage({
   searchParams,
 }: {
@@ -33,14 +45,14 @@ export default async function ClientesPage({
 }) {
   const params = await searchParams;
   const filters = parseFilters(params);
+  const page = Math.max(0, Number(params.page) || 0);
 
-  const [rows, allRows] = await Promise.all([
-    getClientes(filters),
-    getClientes(),
-  ]);
+  const [{ rows, total: totalFiltered }, { rows: allRows, total: totalAll }] =
+    await Promise.all([getClientes(filters, page), getClientes()]);
 
   const corporativos = allRows.filter((c) => c.tipo === "corp").length;
-  const particulares = allRows.length - corporativos;
+  const particulares = totalAll - corporativos;
+  const totalPages = Math.ceil(totalFiltered / CLIENTES_PAGE_SIZE);
 
   const showCreate = params.modal === "create";
 
@@ -48,7 +60,7 @@ export default async function ClientesPage({
     <>
       <PageHeader
         title="Clientes"
-        subtitle={`${fmtNum(allRows.length)} clientes registrados · ${fmtNum(corporativos)} corporativos · ${fmtNum(particulares)} particulares`}
+        subtitle={`${fmtNum(totalAll)} clientes registrados · ${fmtNum(corporativos)} corporativos · ${fmtNum(particulares)} particulares`}
         actions={<ClientesPageActions />}
       />
 
@@ -59,7 +71,14 @@ export default async function ClientesPage({
           initialEstado={filters.estado ?? "all"}
         />
         <div className="border-t border-border">
-          <ClientesTable rows={rows} total={allRows.length} />
+          <ClientesTable
+            rows={rows}
+            total={totalFiltered}
+            page={page}
+            totalPages={totalPages}
+            prevHref={page > 0 ? buildHref(filters, page - 1) : null}
+            nextHref={page < totalPages - 1 ? buildHref(filters, page + 1) : null}
+          />
         </div>
       </Card>
 

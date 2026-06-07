@@ -4,6 +4,7 @@ import {
   getPolizaCounts,
   getPolizaFormRefs,
   getPolizas,
+  POLIZAS_PAGE_SIZE,
 } from "@/lib/data/polizas";
 import { fmtNum } from "@/lib/format/number";
 import type { PolizaTab, PolizasFilters } from "@/lib/data/types";
@@ -36,7 +37,20 @@ type SearchParams = Promise<{
   aseguradora?: string;
   modal?: string;
   newForCliente?: string;
+  page?: string;
 }>;
+
+function buildHref(filters: PolizasFilters, page: number): string {
+  const sp = new URLSearchParams();
+  if (filters.tab && filters.tab !== "all") sp.set("tab", filters.tab);
+  if (filters.q) sp.set("q", filters.q);
+  if (filters.tipo) sp.set("tipo", filters.tipo);
+  if (filters.aseguradoraId !== undefined)
+    sp.set("aseguradora", String(filters.aseguradoraId));
+  if (page > 0) sp.set("page", String(page));
+  const qs = sp.toString();
+  return qs ? `/polizas?${qs}` : "/polizas";
+}
 
 export default async function PolizasPage({
   searchParams,
@@ -51,9 +65,10 @@ export default async function PolizasPage({
     tipo: sp.tipo || undefined,
     aseguradoraId: sp.aseguradora ? Number(sp.aseguradora) : undefined,
   };
+  const page = Math.max(0, Number(sp.page) || 0);
 
-  const [rows, counts, refs] = await Promise.all([
-    getPolizas(filters),
+  const [{ rows, total: totalFiltered }, counts, refs] = await Promise.all([
+    getPolizas(filters, page),
     getPolizaCounts({
       q: filters.q,
       tipo: filters.tipo,
@@ -62,10 +77,10 @@ export default async function PolizasPage({
     getPolizaFormRefs(),
   ]);
 
+  const totalPages = Math.ceil(totalFiltered / POLIZAS_PAGE_SIZE);
+
   const showCreate = sp.modal === "create";
-  const newForCliente = sp.newForCliente
-    ? Number(sp.newForCliente)
-    : undefined;
+  const newForCliente = sp.newForCliente ? Number(sp.newForCliente) : undefined;
 
   return (
     <>
@@ -87,7 +102,14 @@ export default async function PolizasPage({
           aseguradoras={refs.aseguradoras}
         />
         <div className="border-t border-border">
-          <PolizasTable rows={rows} total={counts.all} />
+          <PolizasTable
+            rows={rows}
+            total={totalFiltered}
+            page={page}
+            totalPages={totalPages}
+            prevHref={page > 0 ? buildHref(filters, page - 1) : null}
+            nextHref={page < totalPages - 1 ? buildHref(filters, page + 1) : null}
+          />
         </div>
       </Card>
 

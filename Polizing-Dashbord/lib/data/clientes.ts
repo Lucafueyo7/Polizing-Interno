@@ -104,12 +104,25 @@ function matchesFilters(c: ClienteListItem, f: ClientesFilters): boolean {
   return true;
 }
 
+export const CLIENTES_PAGE_SIZE = 20;
+
+export type ClientesPage = {
+  rows: ClienteListItem[];
+  total: number;
+};
+
 export async function getClientes(
   filters: ClientesFilters = {},
-): Promise<ClienteListItem[]> {
+  page?: number,
+): Promise<ClientesPage> {
   const all = await getAllClientes();
   const isEmpty = !filters.q && !filters.tipo && !filters.estado;
-  return isEmpty ? all : all.filter((c) => matchesFilters(c, filters));
+  const filtered = isEmpty ? all : all.filter((c) => matchesFilters(c, filters));
+  if (page === undefined) {
+    return { rows: filtered, total: filtered.length };
+  }
+  const start = page * CLIENTES_PAGE_SIZE;
+  return { rows: filtered.slice(start, start + CLIENTES_PAGE_SIZE), total: filtered.length };
 }
 
 export async function getClienteById(id: number): Promise<ClienteFull | null> {

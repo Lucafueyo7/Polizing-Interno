@@ -94,16 +94,29 @@ function matchesFilters(p: PolizaListItem, f: PolizasFilters): boolean {
   return true;
 }
 
+export const POLIZAS_PAGE_SIZE = 20;
+
+export type PolizasPage = {
+  rows: PolizaListItem[];
+  total: number;
+};
+
 export async function getPolizas(
   filters: PolizasFilters = {},
-): Promise<PolizaListItem[]> {
+  page?: number,
+): Promise<PolizasPage> {
   const all = await getAllPolizas();
   const isEmpty =
     !filters.q &&
     (!filters.tab || filters.tab === "all") &&
     !filters.tipo &&
     filters.aseguradoraId === undefined;
-  return isEmpty ? all : all.filter((p) => matchesFilters(p, filters));
+  const filtered = isEmpty ? all : all.filter((p) => matchesFilters(p, filters));
+  if (page === undefined) {
+    return { rows: filtered, total: filtered.length };
+  }
+  const start = page * POLIZAS_PAGE_SIZE;
+  return { rows: filtered.slice(start, start + POLIZAS_PAGE_SIZE), total: filtered.length };
 }
 
 export async function getPolizaCounts(

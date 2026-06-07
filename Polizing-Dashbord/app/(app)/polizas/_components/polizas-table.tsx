@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Search } from "@/components/icons";
+import { ChevronLeft, ChevronRight, Search } from "@/components/icons";
 import { ClienteAvatar } from "@/components/shared/cliente-avatar";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PolizaBadge } from "@/components/shared/status-badges/poliza-badge";
 import { VencimientoHint } from "@/components/shared/vencimiento-hint";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -19,9 +20,17 @@ import type { PolizaListItem } from "@/lib/data/types";
 export function PolizasTable({
   rows,
   total,
+  page,
+  totalPages,
+  prevHref,
+  nextHref,
 }: {
   rows: PolizaListItem[];
   total: number;
+  page: number;
+  totalPages: number;
+  prevHref: string | null;
+  nextHref: string | null;
 }) {
   if (rows.length === 0) {
     return (
@@ -118,10 +127,41 @@ export function PolizasTable({
         <span>
           Mostrando <b className="text-foreground">{rows.length}</b> de {total}
         </span>
-        <span>
-          Prima total:{" "}
-          <b className="font-mono text-foreground">{fmtAR(primaTotal)}</b>
-        </span>
+        <div className="flex items-center gap-4">
+          <span>
+            Prima total:{" "}
+            <b className="font-mono text-foreground">{fmtAR(primaTotal)}</b>
+          </span>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              {prevHref ? (
+                <Link
+                  href={prevHref}
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </Link>
+              ) : (
+                <span className={buttonVariants({ variant: "ghost", size: "sm" }) + " opacity-40 pointer-events-none"}>
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </span>
+              )}
+              <span className="font-mono px-1">{page + 1} / {totalPages}</span>
+              {nextHref ? (
+                <Link
+                  href={nextHref}
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              ) : (
+                <span className={buttonVariants({ variant: "ghost", size: "sm" }) + " opacity-40 pointer-events-none"}>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

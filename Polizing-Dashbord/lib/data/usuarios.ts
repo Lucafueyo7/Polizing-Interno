@@ -9,6 +9,23 @@ export type UsuarioListItem = {
   rol: "productor" | "administrativo";
 };
 
+export async function getUsuarioById(
+  id: number,
+): Promise<UsuarioListItem | null> {
+  const row = await prisma.usuarios.findUnique({
+    where: { id },
+    select: { id: true, nombre_completo: true, email: true, dni: true, rol: true },
+  });
+  if (!row) return null;
+  return {
+    id: row.id,
+    nombreCompleto: row.nombre_completo,
+    email: row.email,
+    dni: row.dni,
+    rol: row.rol,
+  };
+}
+
 export async function getUsuarios(): Promise<UsuarioListItem[]> {
   const rows = await prisma.usuarios.findMany({
     orderBy: { nombre_completo: "asc" },

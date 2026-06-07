@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 import type { SiniestroCounts, SiniestroTab } from "@/lib/data/types";
 
@@ -18,9 +18,17 @@ export function InboxTabs({ counts }: { counts: SiniestroCounts }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
-  const active = (searchParams.get("tab") as SiniestroTab) ?? "all";
+  const urlTab = (searchParams.get("tab") as SiniestroTab) ?? "all";
+  const [localTab, setLocalTab] = useState<SiniestroTab>(urlTab);
+
+  useEffect(() => {
+    setLocalTab(urlTab);
+  }, [urlTab]);
+
+  const active = localTab;
 
   const goToTab = (tab: SiniestroTab) => {
+    setLocalTab(tab);
     const params = new URLSearchParams(searchParams.toString());
     if (tab === "all") params.delete("tab");
     else params.set("tab", tab);
