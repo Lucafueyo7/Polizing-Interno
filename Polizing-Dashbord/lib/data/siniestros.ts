@@ -118,7 +118,6 @@ function toFull(row: SiniestroFullRow, docs: ResolvedDoc[], leidoPorMi: boolean)
     ...toListItemBase(row),
     leidoPorMi,
     fechaOcurrencia: isoDate(row.fecha_ocurrencia),
-    descripcion: row.descripcion ?? null,
     docs: docs.map(toDoc),
     poliza: {
       id: row.poliza.id,
