@@ -1,5 +1,5 @@
 from app.intents.base import BaseFlowHandler
-from app.intents.utils import valid_media
+from app.intents.utils import is_keyword, normalize_date, normalize_time, valid_media
 from app.main_system_client import media_payload
 from app.messages import get_message
 from app.models import Conversation
@@ -19,10 +19,18 @@ class ClaimHandler(BaseFlowHandler):
             data["additional_files"] = []
             await self._advance(conversation, data, "date", "claim_date_prompt")
         elif step == "date":
-            data["date"] = text
+            normalized = normalize_date(text)
+            if normalized is None:
+                await self.whatsapp.send_text(conversation.phone, get_message(self.db, "claim_date_invalid"))
+                return
+            data["date"] = normalized
             await self._advance(conversation, data, "time", "claim_time_prompt")
         elif step == "time":
-            data["time"] = text
+            normalized = normalize_time(text)
+            if normalized is None:
+                await self.whatsapp.send_text(conversation.phone, get_message(self.db, "claim_time_invalid"))
+                return
+            data["time"] = normalized
             await self._advance(conversation, data, "place", "claim_place_prompt")
         elif step == "place":
             data["place"] = text
@@ -46,11 +54,11 @@ class ClaimHandler(BaseFlowHandler):
             data["vehicle_card"] = media_payload(media, await self.whatsapp.download_media(media["id"]))
             await self._advance(conversation, data, "third_parties", "claim_third_parties_prompt")
         elif step == "third_parties":
-            data["third_parties"] = "" if text.upper() == "NO" else text
+            data["third_parties"] = "" if is_keyword(text, "NO") else text.strip()
             await self._advance(conversation, data, "police_report", "claim_police_report_prompt")
         elif step == "police_report":
             media = inbound.get("media")
-            if text.upper() == "NO":
+            if is_keyword(text, "NO"):
                 data["police_report"] = None
             elif valid_media(media):
                 data["police_report"] = media_payload(media, await self.whatsapp.download_media(media["id"]))
@@ -60,7 +68,7 @@ class ClaimHandler(BaseFlowHandler):
             await self._advance(conversation, data, "photos", "claim_photos_prompt")
         elif step == "photos":
             media = inbound.get("media")
-            if text.upper() == "FINALIZAR":
+            if is_keyword(text, "FINALIZAR"):
                 result = await self.main_system.register_claim(conversation.phone, data)
                 self._reset(conversation)
                 await self.whatsapp.send_text(conversation.phone, get_message(self.db, "claim_success", reference=result["reference"]))

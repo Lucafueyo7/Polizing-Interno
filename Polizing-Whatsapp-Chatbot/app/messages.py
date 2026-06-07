@@ -37,6 +37,8 @@ DEFAULT_MESSAGES = {
     "claim_third_parties_prompt": ("Terceros siniestro", "Indique datos de terceros involucrados o responda NO."),
     "claim_police_report_prompt": ("Denuncia siniestro", "Adjunte denuncia policial si corresponde, o responda NO."),
     "claim_photos_prompt": ("Fotos siniestro", "Adjunte fotos/documentos adicionales o responda FINALIZAR."),
+    "claim_date_invalid": ("Fecha invalida", "No entendi la fecha. Indique con formato DD/MM/AAAA, por ejemplo: 15/03/2024."),
+    "claim_time_invalid": ("Hora invalida", "No entendi la hora. Indique con formato HH:MM, por ejemplo: 21:30."),
     "claim_success": ("Siniestro registrado", "El siniestro fue registrado correctamente. Numero de siniestro: {reference}."),
     "policy_request_type_prompt": (
         "Tipo seguro solicitud",
