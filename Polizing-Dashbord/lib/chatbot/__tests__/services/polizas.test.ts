@@ -37,6 +37,20 @@ describe("listVigentesByClienteId", () => {
     (prisma.polizas.findMany as any).mockResolvedValue([]);
     expect(await listVigentesByClienteId(99)).toEqual([]);
   });
+
+  it("lista polizas parciales importadas sin tipo/cobertura", async () => {
+    (prisma.polizas.findMany as any).mockResolvedValue([
+      { ...polizaRow, tipo_seguro: null, cobertura: null },
+    ]);
+    const out = await listVigentesByClienteId(1);
+    expect(out[0]).toMatchObject({
+      policy_number: "AUTO-1001",
+      insurance_type: "Tipo de seguro pendiente",
+      category: "sin_categoria",
+      coverage: "Cobertura pendiente",
+      description: "La Caja - Cobertura pendiente",
+    });
+  });
 });
 
 describe("getOwnedById", () => {
