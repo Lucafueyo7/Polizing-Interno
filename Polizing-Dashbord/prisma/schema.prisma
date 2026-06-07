@@ -327,38 +327,6 @@ model berkley_novedades {
   @@index([detectada_en(sort: Desc)])
 }
 
-
-/// Cartera de clientes sincronizada desde el archivo `asegur` (Berkley).
-/// Se conserva temporalmente hasta terminar la migración a la tabla `clientes`.
-model berkley_cartera_clientes {
-  codigo_asegurado String   @id
-  nombre           String?
-  cuit             String?
-  numero_documento String?
-  email            String?
-  telefono         String?
-  raw              Json?
-  actualizado_en   DateTime @updatedAt @db.Timestamptz(6)
-}
-
-/// Cartera de pólizas sincronizada desde el archivo `Polizas2`.
-/// Se conserva temporalmente hasta terminar la migración a la tabla `polizas`.
-model berkley_cartera_polizas {
-  id               Int       @id @default(autoincrement())
-  rama             String
-  poliza           String
-  suplemento       String
-  codigo_asegurado String?
-  vigencia_inicio  DateTime? @db.Timestamptz(6)
-  vigencia_fin     DateTime? @db.Timestamptz(6)
-  anulada          Boolean   @default(false)
-  raw              Json?
-  actualizado_en   DateTime  @updatedAt @db.Timestamptz(6)
-
-  @@unique([rama, poliza, suplemento])
-  @@index([codigo_asegurado])
-}
-
 enum BerkleyNovedadTipo {
   alta
   cambio

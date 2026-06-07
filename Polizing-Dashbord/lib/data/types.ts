@@ -158,6 +158,8 @@ export type SiniestroDoc = {
   tipo: "img" | "pdf";
   nombre: string;
   url: string;
+  /** Signed URL que fuerza la descarga (Content-Disposition: attachment). */
+  downloadUrl: string;
   tamano: string | null;
   procesadoIA: boolean;
 };

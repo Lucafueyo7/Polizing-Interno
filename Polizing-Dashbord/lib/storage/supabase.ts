@@ -49,14 +49,19 @@ export async function uploadSiniestroDoc(
   return path;
 }
 
-/** Genera una signed URL temporal para visualizar/descargar un documento. */
+/**
+ * Genera una signed URL temporal para un documento.
+ * Si `download` es un string, la URL fuerza la descarga con ese nombre de archivo
+ * (Content-Disposition: attachment); si es undefined, la URL es para visualizar.
+ */
 export async function signedUrlForDoc(
   path: string,
-  expiresInSec: number = SIGNED_URL_TTL_SECONDS,
+  options: { expiresInSec?: number; download?: string } = {},
 ): Promise<string | null> {
+  const { expiresInSec = SIGNED_URL_TTL_SECONDS, download } = options;
   const { data, error } = await getClient()
     .storage.from(SINIESTROS_BUCKET)
-    .createSignedUrl(path, expiresInSec);
+    .createSignedUrl(path, expiresInSec, download ? { download } : undefined);
   if (error || !data) return null;
   return data.signedUrl;
 }

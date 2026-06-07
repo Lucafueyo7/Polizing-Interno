@@ -96,6 +96,7 @@ type ResolvedDoc = {
   tipo: "img" | "pdf";
   nombre: string;
   resolvedUrl: string | null;
+  resolvedDownloadUrl: string | null;
   tamano_bytes: number | null;
 };
 
@@ -105,6 +106,7 @@ function toDoc(d: ResolvedDoc): SiniestroDoc {
     tipo: d.tipo,
     nombre: d.nombre,
     url: d.resolvedUrl ?? "",
+    downloadUrl: d.resolvedDownloadUrl ?? d.resolvedUrl ?? "",
     tamano: fmtBytes(d.tamano_bytes),
     /** Por ahora la integración con la API de IA es aspiracional. */
     procesadoIA: false,
@@ -132,13 +134,22 @@ async function resolveDocUrls(
   docs: Array<{ id: number; tipo: "img" | "pdf"; nombre: string; url: string | null; tamano_bytes: number | null }>,
 ): Promise<ResolvedDoc[]> {
   return Promise.all(
-    docs.map(async (d) => ({
-      id: d.id,
-      tipo: d.tipo,
-      nombre: d.nombre,
-      resolvedUrl: d.url ? ((await signedUrlForDoc(d.url)) ?? d.url) : null,
-      tamano_bytes: d.tamano_bytes,
-    })),
+    docs.map(async (d) => {
+      const [view, download] = d.url
+        ? await Promise.all([
+            signedUrlForDoc(d.url),
+            signedUrlForDoc(d.url, { download: d.nombre }),
+          ])
+        : [null, null];
+      return {
+        id: d.id,
+        tipo: d.tipo,
+        nombre: d.nombre,
+        resolvedUrl: view ?? (d.url || null),
+        resolvedDownloadUrl: download ?? view ?? (d.url || null),
+        tamano_bytes: d.tamano_bytes,
+      };
+    }),
   );
 }
 

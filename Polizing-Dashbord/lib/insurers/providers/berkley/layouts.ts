@@ -11,6 +11,9 @@ import type { FixedLayout } from "../../fixed-width";
 /** §4.3.11 asegur — Asegurados (clientes). Usar nombre/teléfono "nuevos" (largos). */
 export const ASEGUR_LAYOUT: FixedLayout = [
   { name: "codigo_asegurado", desde: 1, longitud: 8 },
+  { name: "calle", desde: 34, longitud: 24 },
+  { name: "codigo_postal", desde: 58, longitud: 4 },
+  { name: "localidad", desde: 62, longitud: 20 },
   { name: "cuit", desde: 82, longitud: 11 },
   { name: "numero_documento", desde: 113, longitud: 12 },
   { name: "telefono", desde: 213, longitud: 30 },

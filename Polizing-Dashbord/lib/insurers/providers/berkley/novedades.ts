@@ -15,6 +15,7 @@
 
 import "server-only";
 import { createHash } from "node:crypto";
+import { unzipSync } from "fflate";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/app/generated/prisma/client";
 import { loadBerkleyConfig } from "../../config";
@@ -26,6 +27,34 @@ import {
   POLIZAS2_LAYOUT,
   layoutKeyFromFilename,
 } from "./layouts";
+
+/** Archivos GD que sí parseamos a tablas de dominio. */
+const PARSED_KEYS = new Set(["asegur", "polizas2"]);
+
+/** Magic bytes de un ZIP (`PK\x03\x04`). */
+function isZip(buf: Buffer): boolean {
+  return buf.length >= 4 && buf[0] === 0x50 && buf[1] === 0x4b && buf[2] === 0x03 && buf[3] === 0x04;
+}
+
+/**
+ * Los archivos de novedades de Berkley (`GDxxxxxx.NNNN`) son ZIPs que contienen
+ * los archivos lógicos (`asegur.txt`, `polizas2.txt`, etc.). Devuelve los
+ * contenidos que nos interesan como pares [clave_layout, buffer]. Si el archivo
+ * no es un ZIP, se trata como archivo único con su propio nombre.
+ */
+function extractParsedFiles(buf: Buffer, archivo: string): Array<[string, Buffer]> {
+  if (isZip(buf)) {
+    const entries = unzipSync(buf, {
+      filter: (f) => PARSED_KEYS.has(layoutKeyFromFilename(f.name)),
+    });
+    return Object.entries(entries).map(([name, data]) => [
+      layoutKeyFromFilename(name),
+      Buffer.from(data),
+    ]);
+  }
+  const key = layoutKeyFromFilename(archivo);
+  return PARSED_KEYS.has(key) ? [[key, buf]] : [];
+}
 
 const OVERLAP_DAYS = 1;
 const DEFAULT_BACKFILL_DAYS = 7;
@@ -84,11 +113,14 @@ export async function runBerkleySync(
       },
     });
 
-    const key = layoutKeyFromFilename(a.archivo);
-    if (key === "asegur") await syncAsegur(buf, novedades);
-    else if (key === "polizas2") await syncPolizas2(buf, novedades);
-    // movimi/cdp/pagos: descargados y logueados; parseo disponible vía layouts,
-    // sin convertir a novedades en esta iteración.
+    // El GD es un ZIP: extraemos los archivos lógicos que parseamos a dominio.
+    // Primero asegur (crea clientes), luego polizas2 (linkea por codigo_asegurado).
+    const archivosInternos = extractParsedFiles(buf, a.archivo);
+    const asegur = archivosInternos.find(([k]) => k === "asegur");
+    const polizas2 = archivosInternos.find(([k]) => k === "polizas2");
+    if (asegur) await syncAsegur(asegur[1], novedades);
+    if (polizas2) await syncPolizas2(polizas2[1], novedades);
+    // movimi/cdp/pagos y demás: quedan dentro del ZIP, sin parsear en esta iteración.
   }
 
   if (novedades.length > 0) {
@@ -118,140 +150,137 @@ export async function runBerkleySync(
   };
 }
 
+/** DNI a usar para una persona: el documento real, o el código Berkley si viene
+ * vacío/"0" (en asegur el documento suele ser "0"). El código es único en asegur. */
+function dniDeAsegur(r: Record<string, string | null | undefined>): string {
+  const doc = String(r.numero_documento ?? "").trim();
+  return doc && doc !== "0" ? doc : String(r.codigo_asegurado ?? "").trim();
+}
+
+/** Compone la dirección a partir de calle, localidad y CP de asegur. Null si vacía. */
+function direccionDeAsegur(r: Record<string, string | null | undefined>): string | null {
+  const calle = String(r.calle ?? "").trim();
+  const localidad = String(r.localidad ?? "").trim();
+  const cp = String(r.codigo_postal ?? "").trim();
+  const base = [calle, localidad].filter(Boolean).join(", ");
+  const full = cp ? `${base}${base ? " " : ""}(CP ${cp})` : base;
+  return full || null;
+}
+
+/** Busca un cliente ya existente por su documento (cuit o dni). */
+async function findClienteByDoc(
+  esCorporativo: boolean,
+  r: Record<string, string | null | undefined>,
+): Promise<number | null> {
+  if (esCorporativo) {
+    const cuit = String(r.cuit ?? "").trim();
+    if (!cuit) return null;
+    const corp = await prisma.clientes_corporativos.findUnique({
+      where: { cuit },
+      select: { cliente_id: true },
+    });
+    return corp?.cliente_id ?? null;
+  }
+  const dni = dniDeAsegur(r);
+  if (!dni) return null;
+  const nocorp = await prisma.clientes_no_corporativos.findUnique({
+    where: { dni },
+    select: { cliente_id: true },
+  });
+  return nocorp?.cliente_id ?? null;
+}
+
+function pushNovedadAsegur(
+  novedades: Novedad[],
+  r: Record<string, string | null | undefined>,
+  error?: string,
+): void {
+  novedades.push({
+    tipo: "alta",
+    archivo: "asegur",
+    rama: null,
+    poliza: null,
+    suplemento: null,
+    payload: error ? { ...r, _error: error } : r,
+    detectadaEn: new Date().toISOString(),
+  });
+}
+
 async function syncAsegur(buf: Buffer, novedades: Novedad[]): Promise<void> {
   const rows = parseFixedWidth(buf, ASEGUR_LAYOUT);
   for (const r of rows) {
     const codigo = r.codigo_asegurado;
     if (!codigo) continue;
 
-    // ¿Ya existe un cliente vinculado a este código Berkley?
-    const existing = await prisma.clientes.findUnique({
+    const esCorporativo = !!(r.cuit && String(r.cuit).trim());
+    const raw = r as unknown as Prisma.InputJsonValue;
+    const email = r.email || null;
+    const telefono = r.telefono || null;
+    const direccion = direccionDeAsegur(r);
+
+    // 1. ¿Ya vinculado por código Berkley? → actualizar campos básicos.
+    const byCodigo = await prisma.clientes.findUnique({
       where: { codigo_asegurado_berkley: codigo },
       select: { id: true },
     });
-
-    // Heurística de tipo: si tiene CUIT → corporativo; si no → persona.
-    const esCorporativo = !!(r.cuit && String(r.cuit).trim());
-    const tipo: "corporativo" | "persona" = esCorporativo ? "corporativo" : "persona";
-
-    const clienteBase = {
-      tipo,
-      email: r.email || null,
-      telefono: r.telefono || null,
-      codigo_asegurado_berkley: codigo,
-      raw_berkley: r as unknown as Prisma.InputJsonValue,
-    };
-
-    if (!existing) {
-      // Alta: crear cliente + sub-tabla.
-      try {
-        const nuevo = await prisma.clientes.create({
-          data: {
-            ...clienteBase,
-            fecha_alta: new Date(),
-          },
-          select: { id: true },
-        });
-        await upsertSubtable(nuevo.id, esCorporativo, r);
-      } catch {
-        // Puede haber colisión en cuit/dni únicos (cliente que ya existía sin código Berkley).
-        // En ese caso, intentamos vincular al existente por cuit o documento.
-        const vinculado = await vincularClienteExistente(codigo, esCorporativo, r);
-        if (!vinculado) {
-          // No se pudo vincular: registrar como novedad para revisión manual.
-          novedades.push({
-            tipo: "alta",
-            archivo: "asegur",
-            rama: null,
-            poliza: null,
-            suplemento: null,
-            payload: { ...r, _error: "no_vinculado" },
-            detectadaEn: new Date().toISOString(),
-          });
-          continue;
-        }
-      }
-      novedades.push({
-        tipo: "alta",
-        archivo: "asegur",
-        rama: null,
-        poliza: null,
-        suplemento: null,
-        payload: r,
-        detectadaEn: new Date().toISOString(),
-      });
-    } else {
-      // Actualización: sync campos básicos + raw_berkley.
+    if (byCodigo) {
       await prisma.clientes.update({
-        where: { id: existing.id },
+        where: { id: byCodigo.id },
+        data: { email, telefono, direccion, raw_berkley: raw },
+      });
+      continue;
+    }
+
+    // 2. ¿Existe un cliente con el mismo documento (cuit/dni)? → vincularlo.
+    const existingId = await findClienteByDoc(esCorporativo, r);
+    if (existingId) {
+      try {
+        await prisma.clientes.update({
+          where: { id: existingId },
+          data: { codigo_asegurado_berkley: codigo, email, telefono, direccion, raw_berkley: raw },
+        });
+      } catch {
+        // El cliente ya tiene otro código Berkley (dos códigos con el mismo doc).
+        pushNovedadAsegur(novedades, r, "doc_duplicado");
+      }
+      continue;
+    }
+
+    // 3. Alta nueva: cliente + sub-tabla en una sola operación atómica.
+    try {
+      await prisma.clientes.create({
         data: {
-          email: clienteBase.email,
-          telefono: clienteBase.telefono,
-          raw_berkley: clienteBase.raw_berkley,
+          tipo: esCorporativo ? "corporativo" : "persona",
+          email,
+          telefono,
+          direccion,
+          codigo_asegurado_berkley: codigo,
+          raw_berkley: raw,
+          fecha_alta: new Date(),
+          ...(esCorporativo
+            ? {
+                clientes_corporativos: {
+                  create: {
+                    cuit: String(r.cuit).trim(),
+                    razon_social: String(r.nombre ?? "").trim() || String(r.cuit).trim(),
+                  },
+                },
+              }
+            : {
+                clientes_no_corporativos: {
+                  create: {
+                    dni: dniDeAsegur(r),
+                    nombre: String(r.nombre ?? "").trim() || "Sin nombre",
+                    apellido: "",
+                  },
+                },
+              }),
         },
       });
+      pushNovedadAsegur(novedades, r);
+    } catch {
+      pushNovedadAsegur(novedades, r, "no_creado");
     }
-  }
-}
-
-/** Intenta vincular un cliente ya existente (por cuit/dni) al código Berkley. */
-async function vincularClienteExistente(
-  codigo: string,
-  esCorporativo: boolean,
-  r: Record<string, string | null | undefined>,
-): Promise<boolean> {
-  let clienteId: number | null = null;
-
-  if (esCorporativo && r.cuit) {
-    const corp = await prisma.clientes_corporativos.findUnique({
-      where: { cuit: String(r.cuit) },
-      select: { cliente_id: true },
-    });
-    if (corp) clienteId = corp.cliente_id;
-  } else if (!esCorporativo && r.numero_documento) {
-    const nocorp = await prisma.clientes_no_corporativos.findUnique({
-      where: { dni: String(r.numero_documento) },
-      select: { cliente_id: true },
-    });
-    if (nocorp) clienteId = nocorp.cliente_id;
-  }
-
-  if (!clienteId) return false;
-
-  await prisma.clientes.update({
-    where: { id: clienteId },
-    data: {
-      codigo_asegurado_berkley: codigo,
-      raw_berkley: r as unknown as Prisma.InputJsonValue,
-    },
-  });
-  return true;
-}
-
-/** Crea o actualiza la sub-tabla corporativo/persona para el cliente de Berkley. */
-async function upsertSubtable(
-  clienteId: number,
-  esCorporativo: boolean,
-  r: Record<string, string | null | undefined>,
-): Promise<void> {
-  if (esCorporativo) {
-    const cuit = String(r.cuit ?? "").trim();
-    const razonSocial = String(r.nombre ?? "").trim() || cuit;
-    if (!cuit) return;
-    await prisma.clientes_corporativos.upsert({
-      where: { cliente_id: clienteId },
-      create: { cliente_id: clienteId, cuit, razon_social: razonSocial },
-      update: { cuit, razon_social: razonSocial },
-    });
-  } else {
-    const dni = String(r.numero_documento ?? r.codigo_asegurado ?? "").trim();
-    const nombre = String(r.nombre ?? "").trim() || "Sin nombre";
-    if (!dni) return;
-    await prisma.clientes_no_corporativos.upsert({
-      where: { cliente_id: clienteId },
-      create: { cliente_id: clienteId, dni, nombre, apellido: "" },
-      update: { dni, nombre },
-    });
   }
 }
 
