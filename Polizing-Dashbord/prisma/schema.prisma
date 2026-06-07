@@ -163,6 +163,7 @@ model siniestros {
   /// aplicación con prefijo + secuencia al crear el siniestro. Distinto del id interno.
   numero            String                 @unique
   titulo            String
+  descripcion       String
   fecha_ocurrencia  DateTime               @db.Timestamptz(6)
   fecha_reporte     DateTime               @db.Timestamptz(6)
   estado            SiniestroEstado        @default(nuevo)

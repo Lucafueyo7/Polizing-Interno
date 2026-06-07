@@ -48,6 +48,7 @@ export async function createWithDocuments(args: {
         poliza_id: args.policyId,
         numero,
         titulo,
+        descripcion,
         fecha_ocurrencia: fechaOcurrencia,
         fecha_reporte: new Date(),
         estado: "nuevo",
@@ -67,10 +68,6 @@ export async function createWithDocuments(args: {
         })),
       });
     }
-    // El descripcion compuesto no tiene columna propia en `siniestros`;
-    // queda capturado en el título y en los archivos. Para futuro, conviene
-    // sumar `descripcion` al modelo.
-    void descripcion;
   });
 
   revalidateTag(CACHE_TAGS.siniestros, "minutes");

@@ -206,6 +206,7 @@ export type SiniestroListItem = {
 
 export type SiniestroFull = SiniestroListItem & {
   fechaOcurrencia: string;
+  descripcion: string;
   docs: SiniestroDoc[];
   poliza: {
     id: number;
