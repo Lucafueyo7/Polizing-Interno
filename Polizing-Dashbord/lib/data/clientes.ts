@@ -30,7 +30,7 @@ function findClientes() {
     include: {
       clientes_corporativos: true,
       clientes_no_corporativos: true,
-      polizas: { select: { estado: true, prima_mensual: true } },
+      polizas: { select: { estado: true, prima_mensual: true, aseguradora_id: true } },
     },
   });
 }
@@ -81,15 +81,23 @@ function toListItem(row: ClienteRow): ClienteListItem {
   };
 }
 
-async function getAllClientes(): Promise<ClienteListItem[]> {
+async function getAllClientes(aseguradoraId?: string): Promise<ClienteListItem[]> {
   const rows = await findClientes();
-  return rows.map(toListItem);
+  const filteredRows = aseguradoraId
+    ? rows.filter((row) =>
+        row.polizas.some((p) => String(p.aseguradora_id) === aseguradoraId),
+      )
+    : rows;
+  return filteredRows.map(toListItem);
 }
 
 export type ClientesFilters = {
   q?: string;
   tipo?: ClienteTipo;
   estado?: ClienteListItem["estado"];
+  aseguradoraId?: string;
+  sortBy?: "label" | "ident" | "prima" | "polizas";
+  sortDir?: "asc" | "desc";
 };
 
 function matchesFilters(c: ClienteListItem, f: ClientesFilters): boolean {
@@ -115,9 +123,30 @@ export async function getClientes(
   filters: ClientesFilters = {},
   page?: number,
 ): Promise<ClientesPage> {
-  const all = await getAllClientes();
-  const isEmpty = !filters.q && !filters.tipo && !filters.estado;
+  const all = await getAllClientes(filters.aseguradoraId);
+  const isEmpty = !filters.q && !filters.tipo && !filters.estado && !filters.aseguradoraId;
   const filtered = isEmpty ? all : all.filter((c) => matchesFilters(c, filters));
+  if (filters.sortBy) {
+    const direction = filters.sortDir === "desc" ? -1 : 1;
+    filtered.sort((a, b) => {
+      let cmp = 0;
+      switch (filters.sortBy) {
+        case "label":
+          cmp = a.label.localeCompare(b.label);
+          break;
+        case "ident":
+          cmp = a.ident.localeCompare(b.ident);
+          break;
+        case "prima":
+          cmp = a.primaMensual - b.primaMensual;
+          break;
+        case "polizas":
+          cmp = a.polizasActivas - b.polizasActivas;
+          break;
+      }
+      return cmp * direction;
+    });
+  }
   if (page === undefined) {
     return { rows: filtered, total: filtered.length };
   }

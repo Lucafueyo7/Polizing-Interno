@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Search } from "@/components/icons";
+import { ChevronLeft, ChevronRight, Search, Sort } from "@/components/icons";
 import { ClienteAvatar } from "@/components/shared/cliente-avatar";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ClienteTipoBadge } from "@/components/shared/status-badges/cliente-tipo-badge";
@@ -18,6 +18,8 @@ import { fmtDate } from "@/lib/format/date";
 import { formatTelefono } from "@/lib/format/telefono";
 import type { ClienteListItem } from "@/lib/data/types";
 
+type SortField = "label" | "ident" | "prima" | "polizas";
+
 export function ClientesTable({
   rows,
   total,
@@ -25,6 +27,9 @@ export function ClientesTable({
   totalPages,
   prevHref,
   nextHref,
+  sortBy,
+  sortDir,
+  buildSortHref,
 }: {
   rows: ClienteListItem[];
   total: number;
@@ -32,6 +37,9 @@ export function ClientesTable({
   totalPages: number;
   prevHref: string | null;
   nextHref: string | null;
+  sortBy?: SortField;
+  sortDir?: "asc" | "desc";
+  buildSortHref: (sortBy: SortField, sortDir: "asc" | "desc") => string;
 }) {
   if (rows.length === 0) {
     return (
@@ -48,11 +56,45 @@ export function ClientesTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Cliente</TableHead>
-            <TableHead>Identificación</TableHead>
+            <TableHead>
+              <SortHeader
+                label="Cliente"
+                sortField="label"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                buildSortHref={buildSortHref}
+              />
+            </TableHead>
+            <TableHead>
+              <SortHeader
+                label="Identificación"
+                sortField="ident"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                buildSortHref={buildSortHref}
+              />
+            </TableHead>
             <TableHead>Contacto</TableHead>
-            <TableHead className="text-right">Pólizas</TableHead>
-            <TableHead className="text-right">Prima mensual</TableHead>
+            <TableHead className="text-right">
+              <SortHeader
+                label="Pólizas"
+                sortField="polizas"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                alignRight
+                buildSortHref={buildSortHref}
+              />
+            </TableHead>
+            <TableHead className="text-right">
+              <SortHeader
+                label="Prima mensual"
+                sortField="prima"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                alignRight
+                buildSortHref={buildSortHref}
+              />
+            </TableHead>
             <TableHead>Estado</TableHead>
           </TableRow>
         </TableHeader>
@@ -145,5 +187,39 @@ export function ClientesTable({
         )}
       </div>
     </>
+  );
+}
+
+function SortHeader({
+  label,
+  sortField,
+  sortBy,
+  sortDir,
+  buildSortHref,
+  alignRight = false,
+}: {
+  label: string;
+  sortField: SortField;
+  sortBy?: SortField;
+  sortDir?: "asc" | "desc";
+  buildSortHref: (sortBy: SortField, sortDir: "asc" | "desc") => string;
+  alignRight?: boolean;
+}) {
+  const active = sortBy === sortField;
+  const nextDir = active && sortDir === "asc" ? "desc" : "asc";
+
+  return (
+    <Link
+      href={buildSortHref(sortField, nextDir)}
+      aria-label={`Ordenar por ${label} ${nextDir === "asc" ? "ascendente" : "descendente"}`}
+      className={
+        alignRight
+          ? "inline-flex items-center justify-end gap-1.5 w-full"
+          : "inline-flex items-center gap-1.5"
+      }
+    >
+      <span>{label}</span>
+      <Sort className={sortBy === sortField ? "w-3.5 h-3.5 text-foreground" : "w-3.5 h-3.5 text-muted-foreground"} />
+    </Link>
   );
 }

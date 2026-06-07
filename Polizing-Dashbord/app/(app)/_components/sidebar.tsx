@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SignOutButton } from "@clerk/nextjs";
-import { ChevronsLeft, ChevronsRight, Settings, Help, Logout } from "@/components/icons";
+import { ChevronsLeft, ChevronsRight, Settings, Logout } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import type { SessionUser } from "@/lib/auth/types";
 import { NAV_ITEMS, type NavItemId } from "./sidebar-nav";
@@ -150,17 +150,6 @@ export function Sidebar({ user, badges = {} }: SidebarProps) {
           >
             <Settings className="w-[17px] h-[17px] shrink-0" />
             {!collapsed && <span>Ajustes</span>}
-          </button>
-          <button
-            type="button"
-            title={collapsed ? "Ayuda" : undefined}
-            className={cn(
-              "w-full flex items-center gap-3 px-2.5 py-2 rounded-md text-[13.5px] font-medium text-brand-fg-2 hover:bg-brand-surface-hover hover:text-foreground",
-              collapsed && "justify-center",
-            )}
-          >
-            <Help className="w-[17px] h-[17px] shrink-0" />
-            {!collapsed && <span>Ayuda</span>}
           </button>
         </div>
 

@@ -15,6 +15,11 @@ import {
 } from "@/components/ui/select";
 import type { ClienteEstado } from "@/lib/data/types";
 
+export type AseguradoraOption = {
+  id: number;
+  razonSocial: string;
+};
+
 const TIPO_OPTIONS = [
   { value: "all", label: "Todos" },
   { value: "normal", label: "Particulares" },
@@ -28,12 +33,22 @@ type ClientesFilterbarProps = {
   initialQ: string;
   initialTipo: TipoFilter;
   initialEstado: EstadoFilter;
+  aseguradoras: ReadonlyArray<AseguradoraOption>;
+  initialAseguradoraId: string;
+};
+
+const ESTADO_LABELS: Record<string, string> = {
+  all: "Todos los estados",
+  activo: "Activos",
+  baja: "De baja",
 };
 
 export function ClientesFilterbar({
   initialQ,
   initialTipo,
   initialEstado,
+  aseguradoras,
+  initialAseguradoraId,
 }: ClientesFilterbarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -67,6 +82,7 @@ export function ClientesFilterbar({
     initialTipo === "normal" || initialTipo === "corp" ? initialTipo : "all";
   const estado: EstadoFilter =
     initialEstado === "activo" || initialEstado === "baja" ? initialEstado : "all";
+  const aseguradora = initialAseguradoraId || "all";
 
   return (
     <Filterbar>
@@ -98,12 +114,35 @@ export function ClientesFilterbar({
         }
       >
         <SelectTrigger className="w-[170px]" aria-label="Filtrar por estado">
-          <SelectValue />
+          <SelectValue>
+            {(value: string) => <span>{ESTADO_LABELS[value] ?? value}</span>}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos los estados</SelectItem>
           <SelectItem value="activo">Activos</SelectItem>
           <SelectItem value="baja">De baja</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={aseguradora}
+        onValueChange={(v) =>
+          updateParam({ aseguradoraId: v === "all" ? null : v })
+        }
+      >
+        <SelectTrigger className="w-[220px]" aria-label="Filtrar por aseguradora">
+          <SelectValue>
+            {(value: string) => <span>{value === "all" ? "Todas las aseguradoras" : aseguradoras.find((a) => String(a.id) === value)?.razonSocial ?? value}</span>}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todas las aseguradoras</SelectItem>
+          {aseguradoras.map((a) => (
+            <SelectItem key={a.id} value={String(a.id)}>
+              {a.razonSocial}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
     </Filterbar>
