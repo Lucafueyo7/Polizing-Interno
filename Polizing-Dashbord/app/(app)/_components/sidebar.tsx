@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -72,15 +73,26 @@ export function Sidebar({ user, badges = {} }: SidebarProps) {
         )}
       >
         <div className="flex items-center gap-2.5 px-[18px] py-4 border-b border-border min-h-16">
-          <div className="w-[30px] h-[30px] rounded-lg grid place-items-center text-white font-bold text-[13px] tracking-tight shrink-0 bg-[linear-gradient(135deg,var(--primary)_0%,#1e3a5f_60%,#2a5a93_100%)] shadow-[inset_0_-2px_0_rgba(0,0,0,.18),0_1px_2px_rgba(15,39,68,.2)]">
-            P
-          </div>
-          {!collapsed && (
-            <div className="font-semibold text-[15px] tracking-[-0.01em] text-foreground whitespace-nowrap overflow-hidden">
-              Polizing
-              <small className="block font-normal text-[11px] text-muted-foreground tracking-[0.02em] uppercase mt-px">
-                Software
-              </small>
+          {collapsed ? (
+            <div className="w-[30px] h-[30px] rounded-lg grid place-items-center overflow-hidden shrink-0 bg-card">
+              <Image
+                src="/favicon-dark.png"
+                alt="Polizing"
+                width={30}
+                height={30}
+                className="object-contain"
+              />
+            </div>
+          ) : (
+            <div className="flex-1 min-w-0">
+              <Image
+                src="/logo-horizontal.png"
+                alt="Polizing"
+                width={180}
+                height={36}
+                className="object-contain h-9 w-auto"
+                priority
+              />
             </div>
           )}
           <button

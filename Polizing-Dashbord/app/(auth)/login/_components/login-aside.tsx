@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export function LoginAside() {
   return (
     <aside className="hidden lg:flex relative overflow-hidden flex-col justify-between p-14 text-[#e7ecf3] bg-[radial-gradient(1200px_600px_at_-10%_-20%,rgba(255,255,255,0.08),transparent_60%),radial-gradient(800px_600px_at_110%_110%,rgba(120,180,255,0.12),transparent_50%),linear-gradient(155deg,#0c2140_0%,#0f2744_35%,#163659_100%)]">
@@ -6,16 +8,15 @@ export function LoginAside() {
         className="absolute inset-0 [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:40px_40px] [mask-image:radial-gradient(ellipse_80%_70%_at_50%_40%,#000_30%,transparent_80%)]"
       />
 
-      <div className="relative flex items-center gap-3">
-        <div className="w-10 h-10 rounded-[10px] grid place-items-center text-white font-bold text-base bg-[linear-gradient(135deg,#4a82d9_0%,#2a5a93_60%,#1e3a5f_100%)] shadow-[inset_0_-3px_0_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.3)]">
-          P
-        </div>
-        <div>
-          <small className="block text-[11px] opacity-60 tracking-[0.08em] uppercase">
-            Software
-          </small>
-          <b className="text-[18px] tracking-[-0.015em]">Polizing</b>
-        </div>
+      <div className="relative">
+        <Image
+          src="/logo-horizontal.png"
+          alt="Polizing"
+          width={200}
+          height={40}
+          className="object-contain h-10 w-auto brightness-0 invert opacity-90"
+          priority
+        />
       </div>
 
       <div className="relative max-w-[480px]">

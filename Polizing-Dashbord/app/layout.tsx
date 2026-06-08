@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { FaviconTheme } from "@/components/favicon-theme";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/theme-script";
 
@@ -22,6 +23,9 @@ export const metadata: Metadata = {
   title: "Polizing — Software de gestión integral",
   description:
     "Gestión centralizada para tu productora de seguros. Pólizas, clientes, aseguradoras y siniestros en un solo panel.",
+  icons: {
+    icon: "/favicon-dark.png",
+  },
 };
 
 export default function RootLayout({
@@ -43,6 +47,7 @@ export default function RootLayout({
           <ThemeProvider>
             <Suspense>{children}</Suspense>
             <Toaster position="bottom-right" richColors closeButton />
+            <FaviconTheme />
           </ThemeProvider>
         </body>
       </html>
