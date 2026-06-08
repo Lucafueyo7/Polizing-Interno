@@ -78,7 +78,9 @@ export function PolizasFilterbar({
         onValueChange={(v) => updateParam({ tipo: v === "all" ? null : v })}
       >
         <SelectTrigger className="w-[200px]" aria-label="Filtrar por tipo">
-          <SelectValue />
+          <SelectValue>
+            {(value: string) => <span>{value === "all" ? "Todos los tipos" : value}</span>}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todos los tipos</SelectItem>
@@ -100,7 +102,9 @@ export function PolizasFilterbar({
           className="w-[220px]"
           aria-label="Filtrar por aseguradora"
         >
-          <SelectValue />
+          <SelectValue>
+            {(value: string) => <span>{value === "all" ? "Todas las aseguradoras" : aseguradoras.find((a) => String(a.id) === value)?.razonSocial ?? value}</span>}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Todas las aseguradoras</SelectItem>

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { createCachedGetter, CACHE_TAGS } from "./cache";
 export type ActivityType = "siniestro" | "poliza" | "pago";
 
 export type ActivityItem = {
@@ -30,7 +31,17 @@ function labelFromCliente(cliente: {
   return "Cliente";
 }
 
+const getActividadRecienteCached = createCachedGetter(
+  getActividadRecienteImpl,
+  ["actividad", "reciente"],
+  CACHE_TAGS.actividad,
+);
+
 export async function getActividadReciente(limit = 10): Promise<ActivityItem[]> {
+  return getActividadRecienteCached(limit);
+}
+
+async function getActividadRecienteImpl(limit = 10): Promise<ActivityItem[]> {
   const [siniestros, polizas, pagos] = await Promise.all([
     prisma.siniestros.findMany({
       orderBy: { fecha_reporte: "desc" },

@@ -1,3 +1,4 @@
+import { createCachedGetter, CACHE_TAGS } from "./cache";
 import { prisma } from "@/lib/prisma";
 import { TODAY_ISO } from "@/lib/format/date";
 import { aseguradoraColor } from "@/lib/domain/aseguradora-color";
@@ -13,7 +14,17 @@ const ACTIVE_POLIZAS = ["vigente", "proxima"] as const;
 const PENDING_SINIESTROS = ["nuevo", "pendiente_documentacion", "en_tramite"] as const;
 const COMPUTABLE_POLIZAS = ["vigente", "proxima", "renovada"] as const;
 
+const getDashboardKPIsCached = createCachedGetter(
+  getDashboardKPIsImpl,
+  ["kpis", "dashboard"],
+  CACHE_TAGS.kpis,
+);
+
 export async function getDashboardKPIs(): Promise<DashboardKPIs> {
+  return getDashboardKPIsCached();
+}
+
+async function getDashboardKPIsImpl(): Promise<DashboardKPIs> {
   const [clientesActivos, polizasVigentes, siniestrosTramite, primaAgg] =
     await Promise.all([
       prisma.clientes.count({ where: { estado: "activo" } }),
@@ -35,7 +46,17 @@ export async function getDashboardKPIs(): Promise<DashboardKPIs> {
   };
 }
 
+const getSidebarBadgesCached = createCachedGetter(
+  getSidebarBadgesImpl,
+  ["kpis", "sidebar-badges"],
+  CACHE_TAGS.kpis,
+);
+
 export async function getSidebarBadges(): Promise<SidebarBadges> {
+  return getSidebarBadgesCached();
+}
+
+async function getSidebarBadgesImpl(): Promise<SidebarBadges> {
   const today = new Date(TODAY_ISO);
   const limit = new Date(TODAY_ISO);
   limit.setDate(limit.getDate() + 30);
@@ -52,7 +73,19 @@ export async function getSidebarBadges(): Promise<SidebarBadges> {
   return { siniestrosNuevos, polizasPorVencer };
 }
 
+const getSiniestrosPendientesCached = createCachedGetter(
+  getSiniestrosPendientesImpl,
+  ["kpis", "siniestros-pendientes"],
+  CACHE_TAGS.kpis,
+);
+
 export async function getSiniestrosPendientes(
+  limit = 5,
+): Promise<SiniestroPendiente[]> {
+  return getSiniestrosPendientesCached(limit);
+}
+
+async function getSiniestrosPendientesImpl(
   limit = 5,
 ): Promise<SiniestroPendiente[]> {
   const rows = await prisma.siniestros.findMany({
@@ -83,7 +116,19 @@ export async function getSiniestrosPendientes(
   }));
 }
 
+const getDistribucionAseguradorasCached = createCachedGetter(
+  getDistribucionAseguradorasImpl,
+  ["kpis", "distribucion"],
+  CACHE_TAGS.kpis,
+);
+
 export async function getDistribucionAseguradoras(): Promise<
+  DistribucionAseguradora[]
+> {
+  return getDistribucionAseguradorasCached();
+}
+
+async function getDistribucionAseguradorasImpl(): Promise<
   DistribucionAseguradora[]
 > {
   const aseguradoras = await prisma.empresas_aseguradoras.findMany({

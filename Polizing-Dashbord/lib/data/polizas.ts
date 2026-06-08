@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { createCachedGetter, CACHE_TAGS } from "./cache";
 import { clienteIdent, clienteLabel } from "@/lib/domain/cliente-helpers";
 import {
   aseguradoraRefFromRow,
@@ -67,6 +68,12 @@ async function getAllPolizas(): Promise<PolizaListItem[]> {
   return rows.map(toListItem);
 }
 
+const getAllPolizasCached = createCachedGetter(
+  getAllPolizas,
+  ["polizas", "all"],
+  CACHE_TAGS.polizas,
+);
+
 function isPorVencer(p: PolizaListItem): boolean {
   if (p.estado !== "vigente" && p.estado !== "proxima") return false;
   if (p.diasHastaVencimiento === null) return false;
@@ -105,13 +112,31 @@ export async function getPolizas(
   filters: PolizasFilters = {},
   page?: number,
 ): Promise<PolizasPage> {
-  const all = await getAllPolizas();
+  const all = await getAllPolizasCached();
   const isEmpty =
     !filters.q &&
     (!filters.tab || filters.tab === "all") &&
     !filters.tipo &&
     filters.aseguradoraId === undefined;
   const filtered = isEmpty ? all : all.filter((p) => matchesFilters(p, filters));
+  if (filters.sortBy) {
+    const direction = filters.sortDir === "desc" ? -1 : 1;
+    filtered.sort((a, b) => {
+      let cmp = 0;
+      switch (filters.sortBy) {
+        case "numero":
+          cmp = a.numero.localeCompare(b.numero);
+          break;
+        case "cliente":
+          cmp = a.cliente.label.localeCompare(b.cliente.label);
+          break;
+        case "aseguradora":
+          cmp = a.aseguradora.razonSocial.localeCompare(b.aseguradora.razonSocial);
+          break;
+      }
+      return cmp * direction;
+    });
+  }
   if (page === undefined) {
     return { rows: filtered, total: filtered.length };
   }
@@ -122,7 +147,7 @@ export async function getPolizas(
 export async function getPolizaCounts(
   filters: Omit<PolizasFilters, "tab"> = {},
 ): Promise<PolizaCounts> {
-  const all = await getAllPolizas();
+  const all = await getAllPolizasCached();
   const scoped = all.filter((p) => matchesFilters(p, { ...filters, tab: "all" }));
   return {
     all: scoped.length,
@@ -148,7 +173,7 @@ export async function getPolizaById(id: number): Promise<PolizaFull | null> {
   };
 }
 
-export async function getPolizaFormRefs(): Promise<PolizaFormRefs> {
+const getPolizaFormRefsUncached = async function (): Promise<PolizaFormRefs> {
   const [clientesRows, aseguradorasRows, tiposRows] = await Promise.all([
     prisma.clientes.findMany({
       where: { estado: "activo" },
@@ -206,4 +231,10 @@ export async function getPolizaFormRefs(): Promise<PolizaFormRefs> {
     })),
     coberturasPorTipo,
   };
-}
+};
+
+export const getPolizaFormRefs = createCachedGetter(
+  getPolizaFormRefsUncached,
+  ["polizas", "form-refs"],
+  CACHE_TAGS.polizas,
+);

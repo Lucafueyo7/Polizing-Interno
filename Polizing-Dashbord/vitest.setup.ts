@@ -1,3 +1,14 @@
+import { vi } from "vitest";
+
+// `unstable_cache` requires a server runtime with incrementalCache.
+// In tests, just call through directly (no caching).
+vi.mock("next/cache", () => ({
+  unstable_cache: <TArgs extends unknown[], TResult>(
+    fn: (...args: TArgs) => Promise<TResult>,
+  ): ((...args: TArgs) => Promise<TResult>) => fn,
+  revalidateTag: vi.fn(),
+}));
+
 process.env.CHATBOT_API_KEY = "test-key";
 
 // Env dummy para que los adapters de aseguradoras se instancien en los tests

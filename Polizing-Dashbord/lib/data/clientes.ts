@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { createCachedGetter, CACHE_TAGS } from "./cache";
 import {
   clienteAvatarLetters,
   clienteIdent,
@@ -81,7 +82,13 @@ function toListItem(row: ClienteRow): ClienteListItem {
   };
 }
 
-async function getAllClientes(aseguradoraId?: string): Promise<ClienteListItem[]> {
+const getAllClientesCached = createCachedGetter(
+  getAllClientesImpl,
+  ["clientes", "all"],
+  CACHE_TAGS.clientes,
+);
+
+async function getAllClientesImpl(aseguradoraId?: string): Promise<ClienteListItem[]> {
   const rows = await findClientes();
   const filteredRows = aseguradoraId
     ? rows.filter((row) =>
@@ -89,6 +96,10 @@ async function getAllClientes(aseguradoraId?: string): Promise<ClienteListItem[]
       )
     : rows;
   return filteredRows.map(toListItem);
+}
+
+async function getAllClientes(aseguradoraId?: string): Promise<ClienteListItem[]> {
+  return getAllClientesCached(aseguradoraId);
 }
 
 export type ClientesFilters = {

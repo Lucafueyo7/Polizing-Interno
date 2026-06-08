@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { createCachedGetter, CACHE_TAGS } from "./cache";
 import {
   aseguradoraRefFromRow,
   clienteRefFromRow,
@@ -86,9 +87,19 @@ function toPolizaRef(p: PagoFullRow["polizas"][number]): PagoPolizaRef {
   };
 }
 
-async function getAllPagos(): Promise<PagoListItem[]> {
+const getAllPagosCached = createCachedGetter(
+  getAllPagosImpl,
+  ["pagos", "all"],
+  CACHE_TAGS.pagos,
+);
+
+async function getAllPagosImpl(): Promise<PagoListItem[]> {
   const rows = await findPagos();
   return rows.map(toListItem);
+}
+
+async function getAllPagos(): Promise<PagoListItem[]> {
+  return getAllPagosCached();
 }
 
 function matchesTab(p: PagoListItem, tab: PagoTab | undefined): boolean {

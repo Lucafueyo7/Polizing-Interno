@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Search } from "@/components/icons";
+import { ChevronLeft, ChevronRight, Search, Sort } from "@/components/icons";
 import { ClienteAvatar } from "@/components/shared/cliente-avatar";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PolizaBadge } from "@/components/shared/status-badges/poliza-badge";
@@ -17,6 +17,8 @@ import { fmtAR } from "@/lib/format/currency";
 import { fmtDate } from "@/lib/format/date";
 import type { PolizaListItem } from "@/lib/data/types";
 
+type SortField = "numero" | "cliente" | "aseguradora";
+
 export function PolizasTable({
   rows,
   total,
@@ -24,6 +26,9 @@ export function PolizasTable({
   totalPages,
   prevHref,
   nextHref,
+  sortBy,
+  sortDir,
+  buildSortHref,
 }: {
   rows: PolizaListItem[];
   total: number;
@@ -31,6 +36,9 @@ export function PolizasTable({
   totalPages: number;
   prevHref: string | null;
   nextHref: string | null;
+  sortBy?: SortField;
+  sortDir?: "asc" | "desc";
+  buildSortHref: (sortBy: SortField, sortDir: "asc" | "desc") => string;
 }) {
   if (rows.length === 0) {
     return (
@@ -46,12 +54,37 @@ export function PolizasTable({
 
   return (
     <>
+      <div className="overflow-x-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>N° Póliza</TableHead>
-            <TableHead>Cliente</TableHead>
-            <TableHead>Aseguradora</TableHead>
+            <TableHead>
+              <SortHeader
+                label="N° Póliza"
+                sortField="numero"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                buildSortHref={buildSortHref}
+              />
+            </TableHead>
+            <TableHead>
+              <SortHeader
+                label="Cliente"
+                sortField="cliente"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                buildSortHref={buildSortHref}
+              />
+            </TableHead>
+            <TableHead>
+              <SortHeader
+                label="Aseguradora"
+                sortField="aseguradora"
+                sortBy={sortBy}
+                sortDir={sortDir}
+                buildSortHref={buildSortHref}
+              />
+            </TableHead>
             <TableHead>Tipo / Cobertura</TableHead>
             <TableHead>Vigencia</TableHead>
             <TableHead className="text-right">Suma asegurada</TableHead>
@@ -123,6 +156,7 @@ export function PolizasTable({
           ))}
         </TableBody>
       </Table>
+      </div>
       <div className="flex items-center justify-between px-5 py-3 border-t border-border bg-brand-surface-2 text-[12.5px] text-muted-foreground">
         <span>
           Mostrando <b className="text-foreground">{rows.length}</b> de {total}
@@ -166,3 +200,32 @@ export function PolizasTable({
     </>
   );
 }
+
+function SortHeader({
+  label,
+  sortField,
+  sortBy,
+  sortDir,
+  buildSortHref,
+}: {
+  label: string;
+  sortField: SortField;
+  sortBy?: SortField;
+  sortDir?: "asc" | "desc";
+  buildSortHref: (sortBy: SortField, sortDir: "asc" | "desc") => string;
+}) {
+  const active = sortBy === sortField;
+  const nextDir = active && sortDir === "asc" ? "desc" : "asc";
+
+  return (
+    <Link
+      href={buildSortHref(sortField, nextDir)}
+      aria-label={`Ordenar por ${label} ${nextDir === "asc" ? "ascendente" : "descendente"}`}
+      className="inline-flex items-center gap-1.5"
+    >
+      <span>{label}</span>
+      <Sort className={sortBy === sortField ? "w-3.5 h-3.5 text-foreground" : "w-3.5 h-3.5 text-muted-foreground"} />
+    </Link>
+  );
+}
+

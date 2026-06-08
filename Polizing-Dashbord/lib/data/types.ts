@@ -98,6 +98,8 @@ export type PolizasFilters = {
   tab?: PolizaTab;
   tipo?: string;
   aseguradoraId?: number;
+  sortBy?: "numero" | "cliente" | "aseguradora";
+  sortDir?: "asc" | "desc";
 };
 
 export type PolizaCounts = Record<PolizaTab, number>;

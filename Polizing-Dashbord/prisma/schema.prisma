@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../app/generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -11,7 +12,7 @@ model clientes {
   id                       Int                       @id @default(autoincrement())
   tipo                     ClienteTipo
   email                    String?
-  telefono                 String?
+  telefono                 String?                   @unique(map: "clientes_telefono_activo_uniq", where: raw("((estado = 'activo'::\"ClienteEstado\") AND (telefono IS NOT NULL))"))
   direccion                String?
   estado                   ClienteEstado             @default(activo)
   fecha_alta               DateTime                  @default(now()) @db.Timestamptz(6)
@@ -28,8 +29,8 @@ model clientes {
   clientes_corporativos    clientes_corporativos?
   clientes_no_corporativos clientes_no_corporativos?
   pagos                    pagos[]
-  polizas                  polizas[]
   poliza_clientes          poliza_clientes[]
+  polizas                  polizas[]
   solicitudes_polizas      solicitudes_polizas[]
 
   @@index([tipo])
@@ -54,20 +55,20 @@ model clientes_no_corporativos {
 }
 
 model empresas_aseguradoras {
-  id                Int       @id @default(autoincrement())
-  razon_social      String
-  cuit              String    @unique
-  telefono          String?
-  email             String?
+  id                 Int       @id @default(autoincrement())
+  razon_social       String
+  cuit               String    @unique
+  telefono           String?
+  email              String?
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime  @updatedAt @db.Timestamptz(6)
+  modificado_por_id  Int?
+  modificado_en      DateTime? @db.Timestamptz(6)
   /// Slug del adapter de integración (ej. "berkley", "federacion_patronal").
   /// Null = aseguradora sin integración API. Las credenciales viven en env vars.
   codigo_integracion String?
-  created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
-  modificado_por_id Int?
-  modificado_en     DateTime? @db.Timestamptz(6)
-  modificado_por    usuarios? @relation("AseguradoraModificadaPor", fields: [modificado_por_id], references: [id])
-  polizas           polizas[]
+  modificado_por     usuarios? @relation("AseguradoraModificadaPor", fields: [modificado_por_id], references: [id])
+  polizas            polizas[]
 }
 
 model tipos_seguro {
@@ -94,43 +95,43 @@ model coberturas {
 }
 
 model polizas {
-  id                    Int                   @id @default(autoincrement())
-  numero_poliza         String                @unique
-  cliente_id            Int
-  aseguradora_id        Int
+  id                       Int                   @id @default(autoincrement())
+  numero_poliza            String                @unique
+  cliente_id               Int
+  aseguradora_id           Int
   /// Nullable: las pólizas importadas de la cartera Berkley entran como datos
   /// parciales (borrador) sin tipo/cobertura/suma/prima hasta completarse a mano.
-  tipo_seguro_id        Int?
-  cobertura_id          Int?
-  pago_id               Int?
-  estado                PolizaEstado
-  fecha_inicio_vigencia DateTime?             @db.Timestamptz(6)
-  fecha_fin_vigencia    DateTime?             @db.Timestamptz(6)
-  suma_asegurada        Decimal?              @db.Decimal(15, 2)
+  tipo_seguro_id           Int?
+  cobertura_id             Int?
+  pago_id                  Int?
+  estado                   PolizaEstado
+  fecha_inicio_vigencia    DateTime?             @db.Timestamptz(6)
+  fecha_fin_vigencia       DateTime?             @db.Timestamptz(6)
+  suma_asegurada           Decimal?              @db.Decimal(15, 2)
   /// Cuota mensual fija que el cliente abona para mantener la póliza vigente.
   /// Capturada al momento de la emisión.
-  prima_mensual         Decimal?              @db.Decimal(15, 2)
-  moneda                String                @default("ARS") @db.Char(3)
+  prima_mensual            Decimal?              @db.Decimal(15, 2)
+  moneda                   String                @default("ARS") @db.Char(3)
+  created_at               DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime              @updatedAt @db.Timestamptz(6)
+  modificado_por_id        Int?
+  modificado_en            DateTime?             @db.Timestamptz(6)
   dominio                  String?
-  tarjeta_circulacion_pdf  Bytes?
   tarjeta_circulacion_mime String?
+  tarjeta_circulacion_pdf  String?
   /// Datos específicos de la cartera Berkley (sync diario). Null = póliza que no
   /// proviene de Berkley. La clave natural Berkley es rama + poliza + suplemento.
-  rama                  String?
-  suplemento            String?
-  raw_berkley           Json?
-  created_at            DateTime              @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime              @updatedAt @db.Timestamptz(6)
-  modificado_por_id     Int?
-  modificado_en         DateTime?             @db.Timestamptz(6)
-  aseguradora           empresas_aseguradoras @relation(fields: [aseguradora_id], references: [id])
-  cliente               clientes              @relation(fields: [cliente_id], references: [id])
-  cobertura             coberturas?           @relation(fields: [cobertura_id], references: [id])
-  modificado_por        usuarios?             @relation("PolizaModificadaPor", fields: [modificado_por_id], references: [id])
-  pago                  pagos?                @relation(fields: [pago_id], references: [id])
-  tipo_seguro           tipos_seguro?         @relation(fields: [tipo_seguro_id], references: [id])
-  siniestros            siniestros[]
-  poliza_clientes       poliza_clientes[]
+  rama                     String?
+  raw_berkley              Json?
+  suplemento               String?
+  poliza_clientes          poliza_clientes[]
+  aseguradora              empresas_aseguradoras @relation(fields: [aseguradora_id], references: [id])
+  cliente                  clientes              @relation(fields: [cliente_id], references: [id])
+  cobertura                coberturas?           @relation(fields: [cobertura_id], references: [id])
+  modificado_por           usuarios?             @relation("PolizaModificadaPor", fields: [modificado_por_id], references: [id])
+  pago                     pagos?                @relation(fields: [pago_id], references: [id])
+  tipo_seguro              tipos_seguro?         @relation(fields: [tipo_seguro_id], references: [id])
+  siniestros               siniestros[]
 
   @@index([cliente_id])
   @@index([aseguradora_id])
@@ -149,8 +150,8 @@ model poliza_clientes {
   poliza_id  Int
   cliente_id Int
   es_titular Boolean  @default(false)
-  poliza     polizas  @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
   cliente    clientes @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+  poliza     polizas  @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
 
   @@id([poliza_id, cliente_id])
   @@index([cliente_id])
@@ -163,7 +164,6 @@ model siniestros {
   /// aplicación con prefijo + secuencia al crear el siniestro. Distinto del id interno.
   numero            String                 @unique
   titulo            String
-  descripcion       String
   fecha_ocurrencia  DateTime               @db.Timestamptz(6)
   fecha_reporte     DateTime               @db.Timestamptz(6)
   estado            SiniestroEstado        @default(nuevo)
@@ -171,6 +171,7 @@ model siniestros {
   updated_at        DateTime               @updatedAt @db.Timestamptz(6)
   modificado_por_id Int?
   modificado_en     DateTime?              @db.Timestamptz(6)
+  descripcion       String
   documentos        siniestro_documentos[]
   lecturas          siniestro_lecturas[]
   modificado_por    usuarios?              @relation("SiniestroModificadoPor", fields: [modificado_por_id], references: [id])
@@ -187,10 +188,10 @@ model siniestro_documentos {
   tipo         DocumentoTipo
   nombre       String
   url          String?
-  contenido    Bytes?
   mime_type    String
   tamano_bytes Int?
   created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  contenido    Bytes?
   siniestro    siniestros    @relation(fields: [siniestro_id], references: [id], onDelete: Cascade)
 
   @@index([siniestro_id])
@@ -210,23 +211,23 @@ model siniestro_lecturas {
 }
 
 model pagos {
-  id                Int         @id @default(autoincrement())
-  cliente_id        Int
-  monto             Decimal     @db.Decimal(15, 2)
-  fecha_pago        DateTime?   @db.Timestamptz(6)
-  estado            PagoEstado  @default(pendiente)
-  metodo_pago       MetodoPago?
-  moneda            String      @default("ARS") @db.Char(3)
-  comprobante_nombre    String?
-  comprobante_mime      String?
+  id                    Int         @id @default(autoincrement())
+  cliente_id            Int
+  monto                 Decimal     @db.Decimal(15, 2)
+  fecha_pago            DateTime?   @db.Timestamptz(6)
+  estado                PagoEstado  @default(pendiente)
+  metodo_pago           MetodoPago?
+  moneda                String      @default("ARS") @db.Char(3)
+  created_at            DateTime    @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime    @updatedAt @db.Timestamptz(6)
+  modificado_por_id     Int?
+  modificado_en         DateTime?   @db.Timestamptz(6)
   comprobante_contenido Bytes?
-  created_at        DateTime    @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime    @updatedAt @db.Timestamptz(6)
-  modificado_por_id Int?
-  modificado_en     DateTime?   @db.Timestamptz(6)
-  cliente           clientes    @relation(fields: [cliente_id], references: [id])
-  modificado_por    usuarios?   @relation("PagoModificadoPor", fields: [modificado_por_id], references: [id])
-  polizas           polizas[]
+  comprobante_mime      String?
+  comprobante_nombre    String?
+  cliente               clientes    @relation(fields: [cliente_id], references: [id])
+  modificado_por        usuarios?   @relation("PagoModificadoPor", fields: [modificado_por_id], references: [id])
+  polizas               polizas[]
 
   @@index([cliente_id])
   @@index([estado])
@@ -280,7 +281,7 @@ model solicitudes_polizas {
   estado         SolicitudPolizaEstado @default(nueva)
   created_at     DateTime              @default(now()) @db.Timestamptz(6)
   updated_at     DateTime              @updatedAt @db.Timestamptz(6)
-  cliente        clientes?             @relation(fields: [cliente_id], references: [id], onDelete: SetNull)
+  cliente        clientes?             @relation(fields: [cliente_id], references: [id])
 
   @@index([cliente_id])
   @@index([telefono])
@@ -291,20 +292,20 @@ model solicitudes_polizas {
 /// Estado del sync diario de Berkley (singleton: una sola fila).
 /// `ultima_corrida` es el FechaDesde de la próxima llamada a apwsnovedades.
 model berkley_sync_state {
-  id            Int      @id @default(1)
+  id             Int       @id @default(1)
   ultima_corrida DateTime? @db.Timestamptz(6)
-  updated_at    DateTime  @updatedAt @db.Timestamptz(6)
+  updated_at     DateTime  @updatedAt @db.Timestamptz(6)
 }
 
 /// Log de cada archivo GD descargado en una corrida del sync.
 model berkley_sync_archivos {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
   nombre             String
   link               String
   fecha_modificacion DateTime? @db.Timestamptz(6)
   hash               String?
   tamano_bytes       Int?
-  descargado_en      DateTime @default(now()) @db.Timestamptz(6)
+  descargado_en      DateTime  @default(now()) @db.Timestamptz(6)
 
   @@index([nombre])
   @@index([descargado_en(sort: Desc)])
@@ -313,15 +314,15 @@ model berkley_sync_archivos {
 /// Cambios detectados al parsear los archivos GD (altas y modificaciones).
 /// Iteración 1: se registran para revisión, sin upsert a las tablas de dominio.
 model berkley_novedades {
-  id           Int                 @id @default(autoincrement())
+  id           Int                @id @default(autoincrement())
   tipo         BerkleyNovedadTipo
   archivo      String
   rama         String?
   poliza       String?
   suplemento   String?
   payload      Json
-  detectada_en DateTime            @default(now()) @db.Timestamptz(6)
-  procesada    Boolean             @default(false)
+  detectada_en DateTime           @default(now()) @db.Timestamptz(6)
+  procesada    Boolean            @default(false)
 
   @@index([tipo])
   @@index([procesada])

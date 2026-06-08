@@ -1,4 +1,4 @@
-import { ArrowUpRight, Calendar, Tag } from "@/components/icons";
+import { ArrowUpRight, Calendar, Newspaper, Tag } from "@/components/icons";
 import { Card } from "@/components/ui/card";
 import { timeAgo } from "@/lib/format/time-ago";
 import type { NoticiaListItem } from "@/lib/data/noticias";
@@ -23,7 +23,9 @@ export function NoticiaCard({ n }: { n: NoticiaListItem }) {
             />
           </div>
         ) : (
-          <div className="aspect-[16/9] w-full bg-gradient-to-br from-secondary to-muted" />
+          <div className="aspect-[16/9] w-full bg-gradient-to-br from-secondary to-muted flex items-center justify-center">
+            <Newspaper className="w-12 h-12 text-muted-foreground/40" />
+          </div>
         )}
 
         <div className="px-5 py-4 flex flex-col gap-2.5">
