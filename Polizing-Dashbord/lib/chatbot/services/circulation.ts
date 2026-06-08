@@ -1,43 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { getProviderForAseguradora } from "@/lib/insurers/registry";
 
-export type CirculationCard = {
+export type CirculationCardResponse = {
+  mode: "link";
+  source_url: string;
   filename: string;
   mime_type: string;
-  content_base64: string;
 };
-
-export type CirculationCardResponse =
-  | { mode: "link"; source_url: string; filename: string; mime_type: string }
-  | { mode: "document"; filename: string; mime_type: string; content_base64: string };
-
-export async function getCard(
-  clienteId: number,
-  policyId: number,
-): Promise<CirculationCard | null> {
-  const poliza = await prisma.polizas.findFirst({
-    where: {
-      id: policyId,
-      cliente_id: clienteId,
-      estado: { in: ["vigente", "proxima"] },
-    },
-    select: {
-      numero_poliza: true,
-      tarjeta_circulacion_pdf: true,
-      tarjeta_circulacion_mime: true,
-    },
-  });
-  if (!poliza) return null;
-  const pdf = poliza.tarjeta_circulacion_pdf;
-  if (!pdf) return null;
-  const mime = poliza.tarjeta_circulacion_mime ?? "application/pdf";
-  const ext = mime.includes("pdf") ? "pdf" : mime.split("/")[1] ?? "bin";
-  return {
-    filename: `tarjeta-${poliza.numero_poliza}.${ext}`,
-    mime_type: mime,
-    content_base64: Buffer.from(pdf).toString("base64"),
-  };
-}
 
 export async function refreshAndGetCard(
   clienteId: number,
@@ -56,17 +25,18 @@ export async function refreshAndGetCard(
       suplemento: true,
       aseguradora_id: true,
       tarjeta_circulacion_pdf: true,
-      tarjeta_circulacion_mime: true,
       raw_berkley: true,
     },
   });
   if (!poliza) return null;
 
+  const mime = "application/pdf";
+  const fallbackFilename = `tarjeta-${poliza.numero_poliza}.pdf`;
+
   try {
     const provider = await getProviderForAseguradora(poliza.aseguradora_id);
     if (!provider.supports("documents")) throw new Error("no documents");
 
-    // Extraer parámetros Berkley: preferir raw_berkley (más fiable que parsear numero_poliza)
     const raw = poliza.raw_berkley as { rama?: string; poliza?: string } | null;
     const rama = Number(raw?.rama ?? poliza.rama);
     const polizaNum = raw?.poliza ? Number(raw.poliza) : (() => {
@@ -83,31 +53,27 @@ export async function refreshAndGetCard(
     const doc = docs[0];
     if (!doc?.source_url) throw new Error("Berkley no devolvió source_url");
 
-    const { bytes, mime_type } = await provider.downloadDocument(doc.source_url);
     await prisma.polizas.update({
       where: { id: poliza.id },
-      data: { tarjeta_circulacion_pdf: bytes, tarjeta_circulacion_mime: mime_type },
+      data: { tarjeta_circulacion_pdf: doc.source_url, tarjeta_circulacion_mime: mime },
     });
 
-    const ext = mime_type.includes("pdf") ? "pdf" : mime_type.split("/")[1] ?? "bin";
     return {
       mode: "link",
       source_url: doc.source_url,
-      filename: doc.filename || `tarjeta-${poliza.numero_poliza}.${ext}`,
-      mime_type,
+      filename: doc.filename || fallbackFilename,
+      mime_type: mime,
     };
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    console.warn("[circulation] refresh desde Berkley fallido, usando caché. Error:", errMsg, err);
-    const pdf = poliza.tarjeta_circulacion_pdf;
-    if (!pdf) throw err; // DEBUG: exponer error cuando no hay caché
-    const mime = poliza.tarjeta_circulacion_mime ?? "application/pdf";
-    const ext = mime.includes("pdf") ? "pdf" : mime.split("/")[1] ?? "bin";
+    console.warn("[circulation] refresh desde Berkley fallido, usando caché. Error:", errMsg);
+    const cachedUrl = poliza.tarjeta_circulacion_pdf;
+    if (!cachedUrl) return null;
     return {
-      mode: "document",
-      filename: `tarjeta-${poliza.numero_poliza}.${ext}`,
+      mode: "link",
+      source_url: cachedUrl,
+      filename: fallbackFilename,
       mime_type: mime,
-      content_base64: Buffer.from(pdf).toString("base64"),
     };
   }
 }
