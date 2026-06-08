@@ -6,7 +6,7 @@ from app.models import EditableMessage
 DEFAULT_MESSAGES = {
     "welcome_menu": (
         "Menu principal",
-        "Bienvenido. Seleccione una opcion:\n\n1. Obtener tarjeta de circulacion\n2. Adjuntar comprobante de pago\n3. Registrar siniestro\n4. Solicitar nueva poliza\n\nResponda con el numero de la opcion.",
+        "Bienvenido. Seleccione una opcion:\n\n1. Obtener tarjeta de circulacion\n2. Adjuntar comprobante de pago\n3. Registrar siniestro\n\nResponda con el numero de la opcion.",
     ),
     "invalid_option": ("Opcion invalida", "No pudimos interpretar su respuesta. Por favor seleccione una opcion valida."),
     "client_not_found": (
@@ -22,6 +22,7 @@ DEFAULT_MESSAGES = {
     "policy_list_prompt": ("Seleccion poliza", "Seleccione una poliza:\n\n{policies}"),
     "policy_list_empty": ("Sin polizas", "No encontramos polizas activas asociadas a su numero."),
     "card_success": ("Tarjeta enviada", "Encontramos la tarjeta de circulacion. Se la enviaremos por este medio."),
+    "card_link": ("Tarjeta enviada", "Su tarjeta de circulacion: {link}"),
     "card_not_found": ("Tarjeta no encontrada", "No se pudo obtener la tarjeta de circulacion solicitada."),
     "payment_policy_prompt": ("Poliza pago", "Seleccione la poliza a la que corresponde el comprobante:\n\n{policies}"),
     "payment_file_prompt": ("Archivo pago", "Adjunte el comprobante de pago en imagen o PDF."),

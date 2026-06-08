@@ -74,20 +74,9 @@ class ConversationEngine:
             await self._start_policy_selection(conversation, "payment_receipt", "select_policy", "payment_policy_prompt")
         elif option == "3":
             await self._start_policy_selection(conversation, "claim", "select_policy", "claim_policy_prompt")
-        elif option == "4":
-            await self._start_policy_request(conversation)
         else:
             await self.whatsapp.send_text(conversation.phone, get_message(self.db, "invalid_option"))
             await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
-
-    async def _start_policy_request(self, conversation: Conversation) -> None:
-        conversation.current_flow = "policy_request"
-        conversation.current_step = "insurance_type"
-        conversation.data_json = "{}"
-        self.db.commit()
-        await self.whatsapp.send_text(
-            conversation.phone, get_message(self.db, "policy_request_type_prompt")
-        )
 
     async def _start_policy_selection(self, conversation: Conversation, flow: str, step: str, message_key: str) -> None:
         policies = await self.main_system.list_policies(conversation.phone)

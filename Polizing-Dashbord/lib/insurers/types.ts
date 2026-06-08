@@ -106,12 +106,18 @@ export type NovedadesResult = {
   novedades: Novedad[];
 };
 
+export type DownloadedDocument = {
+  bytes: Buffer;
+  mime_type: string;
+};
+
 export interface InsurerProvider {
   readonly slug: string;
   readonly displayName: string;
   readonly capabilities: ReadonlySet<Capability>;
   supports(cap: Capability): boolean;
   generateDocuments(req: DocumentRequest): Promise<GeneratedDocument[]>;
+  downloadDocument(sourceUrl: string): Promise<DownloadedDocument>;
   getCartera(req: CarteraRequest): Promise<Cartera>;
   getNovedades?(req: NovedadesRequest): Promise<NovedadesResult>;
 }
@@ -138,6 +144,11 @@ export abstract class BaseInsurerProvider implements InsurerProvider {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   generateDocuments(_req: DocumentRequest): Promise<GeneratedDocument[]> {
+    return this.notSupported("documents");
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  downloadDocument(_sourceUrl: string): Promise<DownloadedDocument> {
     return this.notSupported("documents");
   }
 

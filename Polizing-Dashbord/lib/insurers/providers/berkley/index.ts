@@ -20,7 +20,7 @@ import {
 } from "../../types";
 import { InsurerBusinessError } from "../../errors";
 import { loadBerkleyConfig, type BerkleyConfig } from "../../config";
-import { awsmobimp, type WsmobimpFlags } from "./client";
+import { awsmobimp, downloadFile, type WsmobimpFlags } from "./client";
 import { runBerkleySync } from "./novedades";
 
 /** Orden canónico de documentos = orden de los flags en el envelope WSMOBImp. */
@@ -123,6 +123,11 @@ export class BerkleyProvider extends BaseInsurerProvider {
         source_url: doc.link,
       };
     });
+  }
+
+  override async downloadDocument(sourceUrl: string) {
+    const bytes = await downloadFile(this.config, sourceUrl);
+    return { bytes, mime_type: "application/pdf" };
   }
 
   override async getCartera(): Promise<Cartera> {
