@@ -16,6 +16,7 @@ export default async function UsuariosPage({
 }) {
   const user = await getCurrentUser();
   if (!user) redirect("/dashboard");
+  if (user.role === "Administrativo") redirect("/dashboard");
 
   const [usuarios, params] = await Promise.all([getUsuarios(), searchParams]);
 

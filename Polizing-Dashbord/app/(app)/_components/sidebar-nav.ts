@@ -9,6 +9,7 @@ import {
   Newspaper,
 } from "@/components/icons";
 import type { ComponentType, SVGProps } from "react";
+import type { Role } from "@/lib/auth/types";
 
 export type NavItemId =
   | "dashboard"
@@ -30,8 +31,8 @@ export type NavItem = {
    * sección incluye varias rutas (`/clientes`, `/clientes/[id]`).
    */
   matchPrefix: string;
-  /** Si es true, solo se muestra a usuarios con rol Administrativo. */
-  adminOnly?: boolean;
+  /** Si se especifica, solo se muestra a usuarios con estos roles. */
+  roles?: Role[];
 };
 
 export const NAV_ITEMS: ReadonlyArray<NavItem> = [
@@ -90,6 +91,6 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     href: "/usuarios",
     icon: UserPlus,
     matchPrefix: "/usuarios",
-    adminOnly: true,
+    roles: ["Productor"],
   },
 ];

@@ -15,9 +15,9 @@ export async function createUsuario(input: CreateUsuarioInput): Promise<ActionRe
     };
   }
 
-  // Solo admins pueden crear usuarios.
+  // Solo productores pueden crear usuarios.
   const currentUser = await getCurrentUser();
-  if (currentUser?.role !== "Administrativo") {
+  if (currentUser?.role !== "Productor") {
     return { ok: false, error: "No tenés permiso para crear usuarios." };
   }
 
