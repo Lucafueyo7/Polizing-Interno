@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
+  getPolizaById,
   getPolizaCounts,
   getPolizaFormRefs,
   getPolizas,
@@ -33,6 +34,7 @@ type SearchParams = Promise<{
   tipo?: string;
   aseguradora?: string;
   modal?: string;
+  id?: string;
   newForCliente?: string;
   page?: string;
   sortBy?: string;
@@ -100,7 +102,13 @@ export default async function PolizasPage({
   const totalPages = Math.ceil(totalFiltered / POLIZAS_PAGE_SIZE);
 
   const showCreate = sp.modal === "create";
+  const showEdit = sp.modal === "edit" && sp.id;
   const newForCliente = sp.newForCliente ? Number(sp.newForCliente) : undefined;
+
+  let editPoliza = undefined;
+  if (showEdit) {
+    editPoliza = await getPolizaById(Number(sp.id));
+  }
 
   return (
     <>
@@ -161,6 +169,9 @@ export default async function PolizasPage({
 
       {showCreate && (
         <PolizaFormModal mode="create" refs={refs} newForCliente={newForCliente} />
+      )}
+      {showEdit && editPoliza && (
+        <PolizaFormModal mode="edit" refs={refs} poliza={editPoliza} />
       )}
     </>
   );
