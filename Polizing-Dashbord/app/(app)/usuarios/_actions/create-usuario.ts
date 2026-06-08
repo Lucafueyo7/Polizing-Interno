@@ -1,6 +1,7 @@
 "use server";
 
 import { clerkClient } from "@clerk/nextjs/server";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth/session";
 import { CreateUsuarioSchema, type ActionResult, type CreateUsuarioInput } from "./schemas";
@@ -50,6 +51,10 @@ export async function createUsuario(input: CreateUsuarioInput): Promise<ActionRe
     });
     clerkId = clerkUser.id;
   } catch (e: unknown) {
+    if (isClerkAPIResponseError(e)) {
+      const detail = e.errors.map((err) => err.longMessage || err.message).join(". ");
+      return { ok: false, error: detail || e.message };
+    }
     const msg = e instanceof Error ? e.message : "Error al crear el usuario en Clerk.";
     return { ok: false, error: msg };
   }
