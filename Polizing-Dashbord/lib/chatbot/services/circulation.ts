@@ -97,9 +97,10 @@ export async function refreshAndGetCard(
       mime_type,
     };
   } catch (err) {
-    console.warn("[circulation] refresh desde Berkley fallido, usando caché", err);
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.warn("[circulation] refresh desde Berkley fallido, usando caché. Error:", errMsg, err);
     const pdf = poliza.tarjeta_circulacion_pdf;
-    if (!pdf) return null;
+    if (!pdf) throw err; // DEBUG: exponer error cuando no hay caché
     const mime = poliza.tarjeta_circulacion_mime ?? "application/pdf";
     const ext = mime.includes("pdf") ? "pdf" : mime.split("/")[1] ?? "bin";
     return {

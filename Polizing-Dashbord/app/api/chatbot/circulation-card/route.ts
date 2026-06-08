@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     return jsonOk(card);
   } catch (err) {
     console.error("[chatbot/circulation-card]", err);
-    return serverError();
+    const msg = err instanceof Error ? err.message : String(err);
+    return serverError(msg);
   }
 }
