@@ -101,7 +101,7 @@ function parseFechaFlexible(value: string): Date | null {
 // Mapas de enriquecimiento construidos en memoria por corrida
 // ---------------------------------------------------------------------------
 
-type MovimiEntry = { premio: string | null };
+type MovimiEntry = { premio: string | null; suplemento: string };
 type RieautEntry = {
   suma_asegurada: string | null;
   dominio: string | null;
@@ -119,7 +119,7 @@ function polizaKey(rama: string, poliza: string): string {
  */
 function buildMovimiMap(buf: Buffer): Map<string, MovimiEntry> {
   const rows = parseFixedWidth(buf, MOVIMI_LAYOUT);
-  const map = new Map<string, { endoso: number; premio: string | null }>();
+  const map = new Map<string, { endoso: number; premio: string | null; suplemento: string }>();
   for (const r of rows) {
     if (!r.rama || !r.poliza) continue;
     const key = polizaKey(r.rama, r.poliza);
@@ -129,13 +129,15 @@ function buildMovimiMap(buf: Buffer): Map<string, MovimiEntry> {
       map.set(key, {
         endoso,
         premio: parseDecimalGD(r.premio ?? ""),
+        // Normalizar "001" → "1", "000" → "0"
+        suplemento: String(Number(String(r.suplemento ?? "").trim()) || 0),
       });
     }
   }
   // Convertir al tipo de retorno limpio.
   const result = new Map<string, MovimiEntry>();
   for (const [k, v] of map) {
-    result.set(k, { premio: v.premio });
+    result.set(k, { premio: v.premio, suplemento: v.suplemento });
   }
   return result;
 }
@@ -221,13 +223,31 @@ const RAMA_A_TIPO: Record<
   string,
   { nombre: string; categoria: string; rama: string }
 > = {
-  "01": { nombre: "Automotor",           categoria: "auto",     rama: "automotor"         },
-  "07": { nombre: "Flota Automotor",     categoria: "auto",     rama: "flota_automotor"   },
-  "02": { nombre: "Hogar",              categoria: "hogar",    rama: "hogar"             },
-  "03": { nombre: "ART",               categoria: "art",      rama: "art"               },
-  "05": { nombre: "Incendio",           categoria: "hogar",    rama: "incendio"          },
-  "13": { nombre: "Integral de Comercio", categoria: "comercio", rama: "integral_comercio" },
-  "16": { nombre: "Vida Individual",    categoria: "vida",     rama: "vida_individual"   },
+  "01": { nombre: "Accidentes del Trabajo",            categoria: "art",      rama: "accidentes_trabajo"            },
+  "02": { nombre: "Cascos Embarcaciones",              categoria: "otros",    rama: "cascos_embarcaciones"          },
+  "03": { nombre: "Responsabilidad Civil",             categoria: "otros",    rama: "responsabilidad_civil"         },
+  "04": { nombre: "Automotores",                       categoria: "auto",     rama: "automotores"                   },
+  "05": { nombre: "Cristales",                         categoria: "hogar",    rama: "cristales"                     },
+  "06": { nombre: "Mercaderías",                       categoria: "comercio", rama: "mercaderias"                   },
+  "07": { nombre: "Granizo",                           categoria: "agricola", rama: "granizo"                       },
+  "08": { nombre: "Incendio",                          categoria: "hogar",    rama: "incendio"                      },
+  "09": { nombre: "Accidentes Personales",             categoria: "otros",    rama: "accidentes_personales"         },
+  "10": { nombre: "Riesgos del Trabajo",               categoria: "art",      rama: "riesgos_trabajo"               },
+  "11": { nombre: "Robo",                              categoria: "otros",    rama: "robo"                          },
+  "12": { nombre: "Riesgos Varios",                    categoria: "otros",    rama: "riesgos_varios"                },
+  "13": { nombre: "Integral de Consorcio",             categoria: "comercio", rama: "integral_consorcio"            },
+  "14": { nombre: "Caución",                           categoria: "otros",    rama: "caucion"                       },
+  "15": { nombre: "Seguros Técnicos",                  categoria: "otros",    rama: "seguros_tecnicos"              },
+  "16": { nombre: "Ganado",                            categoria: "agricola", rama: "ganado"                        },
+  "17": { nombre: "Vida Colectivo",                    categoria: "vida",     rama: "vida_colectivo"                },
+  "18": { nombre: "Combinado Familiar",                categoria: "vida",     rama: "combinado_familiar"            },
+  "19": { nombre: "Vida Obligatorio",                  categoria: "vida",     rama: "vida_obligatorio"              },
+  "20": { nombre: "Alta Complejidad Médica",           categoria: "salud",    rama: "alta_complejidad_medica"       },
+  "21": { nombre: "Combinado Individual y Comercial",  categoria: "comercio", rama: "combinado_ind_com"             },
+  "22": { nombre: "Vida Individual",                   categoria: "vida",     rama: "vida_individual"               },
+  "23": { nombre: "Liability",                         categoria: "otros",    rama: "liability"                     },
+  "24": { nombre: "Responsabilidad Civil Patronal",    categoria: "otros",    rama: "responsabilidad_civil_patronal" },
+  "25": { nombre: "Motovehículos",                     categoria: "auto",     rama: "motovehiculos"                 },
 };
 
 /**
@@ -339,6 +359,32 @@ async function resolveCoberturaId(
   return row.id;
 }
 
+/** Inicio del día de hoy en UTC (ms). Polizas con fecha_fin < este valor están vencidas. */
+function startOfTodayUTC(): number {
+  const h = new Date();
+  return Date.UTC(h.getUTCFullYear(), h.getUTCMonth(), h.getUTCDate());
+}
+
+/**
+ * Resuelve (creando si hace falta) la cobertura "Sin especificar" para un
+ * tipo_seguro dado. Se usa como fallback cuando Berkley no incluye cobertura
+ * en rieaut para esa póliza.
+ */
+async function resolveCoberturaFallbackId(tipoSeguroId: number): Promise<number> {
+  const nombre = "Sin especificar";
+  const cacheKey = `${tipoSeguroId}:${nombre}`;
+  if (coberturaCache.has(cacheKey)) return coberturaCache.get(cacheKey)!;
+  const coberturaGenericaId = await resolveCoberturaGenericaId(nombre);
+  const row = await prisma.coberturas.upsert({
+    where: { tipo_seguro_id_nombre: { tipo_seguro_id: tipoSeguroId, nombre } },
+    create: { tipo_seguro_id: tipoSeguroId, nombre, cobertura_generica_id: coberturaGenericaId },
+    update: {},
+    select: { id: true },
+  });
+  coberturaCache.set(cacheKey, row.id);
+  return row.id;
+}
+
 // ---------------------------------------------------------------------------
 // Punto de entrada principal
 // ---------------------------------------------------------------------------
@@ -409,6 +455,14 @@ export async function runBerkleySync(
       })),
     });
   }
+
+  // Eliminar pólizas Berkley que hayan vencido (cascadea a siniestros).
+  await prisma.polizas.deleteMany({
+    where: {
+      aseguradora: { codigo_integracion: "berkley" },
+      fecha_fin_vigencia: { lt: new Date(startOfTodayUTC()) },
+    },
+  });
 
   // Avanzar el estado solo si llegamos hasta acá sin excepciones.
   await prisma.berkley_sync_state.upsert({
@@ -490,11 +544,10 @@ async function syncAsegur(buf: Buffer, novedades: Novedad[]): Promise<void> {
     const codigo = r.codigo_asegurado;
     if (!codigo) continue;
 
-    // Usar el clasificador oficial F/J; fallback a heurística por CUIT si viene vacío.
-    const tipoPersona = String(r.tipo_persona ?? "").trim().toUpperCase();
-    const esCorporativo = tipoPersona
-      ? tipoPersona === "J"
-      : !!(r.cuit && String(r.cuit).trim());
+    // Corporativo si tiene CUIT válido (no vacío, no todo ceros).
+    const cuit = String(r.cuit ?? "").trim();
+    const tieneCuit = cuit.length > 0 && !/^0+$/.test(cuit);
+    const esCorporativo = tieneCuit;
 
     const raw = r as unknown as Prisma.InputJsonValue;
     const email = r.email || null;
@@ -544,8 +597,8 @@ async function syncAsegur(buf: Buffer, novedades: Novedad[]): Promise<void> {
             ? {
                 clientes_corporativos: {
                   create: {
-                    cuit: String(r.cuit).trim(),
-                    razon_social: String(r.nombre ?? "").trim() || String(r.cuit).trim(),
+                    cuit,
+                    razon_social: String(r.nombre ?? "").trim() || cuit,
                   },
                 },
               }
@@ -606,10 +659,16 @@ async function syncPolizas2(
   for (const r of rows) {
     const rama = r.rama;
     const poliza = r.poliza;
-    const suplemento = "0"; // Polizas2 no trae suplemento; el alta original es 0.
     if (!rama || !poliza) continue;
 
-    const numeroPoliza = `${rama}-${poliza}-${suplemento}`;
+    // Número de póliza: solo el número (el segmento entre guiones).
+    // Rama y suplemento viven en columnas propias.
+    const numeroPoliza = poliza.trim();
+
+    // Descartar pólizas vencidas antes de cualquier escritura.
+    const fechaFin = parseFechaAAAAMMDD(r.vig_final ?? "");
+    if (fechaFin && fechaFin.getTime() < startOfTodayUTC()) continue;
+
     const existing = await prisma.polizas.findUnique({
       where: { numero_poliza: numeroPoliza },
       select: {
@@ -618,6 +677,7 @@ async function syncPolizas2(
         prima_mensual: true,
         suma_asegurada: true,
         dominio: true,
+        cobertura_id: true,
       },
     });
 
@@ -641,9 +701,18 @@ async function syncPolizas2(
     const movimi = movimiMap.get(key);
     const rieaut = rieautMap.get(key);
 
+    // Suplemento vigente: del movimiento de mayor endoso; "0" si no viene en este ZIP.
+    const suplemento = movimi?.suplemento ?? "0";
+
+    const ramaCode = rama.trim().padStart(2, "0");
+    const esRamaConDominio = RAMA_A_TIPO[ramaCode]?.categoria === "auto";
+
     const tipoSeguroId = await resolveTipoSeguroId(rama, ramasMap);
-    const coberturaId = rieaut?.codigo_cobertura && tipoSeguroId
-      ? await resolveCoberturaId(tipoSeguroId, rieaut.codigo_cobertura, cobertMap)
+    // Toda póliza debe tener cobertura: si Berkley no manda código, usamos el fallback.
+    const coberturaId = tipoSeguroId
+      ? (rieaut?.codigo_cobertura
+          ? await resolveCoberturaId(tipoSeguroId, rieaut.codigo_cobertura, cobertMap)
+          : await resolveCoberturaFallbackId(tipoSeguroId))
       : null;
 
     const polizaData = {
@@ -656,11 +725,12 @@ async function syncPolizas2(
       // Enriquecimiento — se setea si viene del archivo complementario, se deja
       // sin cambios (undefined) si no llegó en este ZIP para no sobrescribir datos
       // válidos de una corrida anterior.
-      ...(movimi?.premio != null    && { prima_mensual:   movimi.premio    }),
-      ...(rieaut?.suma_asegurada    && { suma_asegurada:  rieaut.suma_asegurada }),
-      ...(rieaut?.dominio           && { dominio:         rieaut.dominio   }),
-      ...(tipoSeguroId              && { tipo_seguro_id:  tipoSeguroId     }),
-      ...(coberturaId               && { cobertura_id:    coberturaId      }),
+      ...(movimi?.premio != null                       && { prima_mensual:  movimi.premio       }),
+      ...(rieaut?.suma_asegurada                       && { suma_asegurada: rieaut.suma_asegurada }),
+      // Dominio solo para ramas de la categoría "auto" (automotor, flota, etc.).
+      ...(rieaut?.dominio && esRamaConDominio          && { dominio:        rieaut.dominio      }),
+      ...(tipoSeguroId                                 && { tipo_seguro_id: tipoSeguroId        }),
+      ...(coberturaId                                  && { cobertura_id:   coberturaId         }),
     };
 
     if (!existing) {
@@ -701,7 +771,8 @@ async function syncPolizas2(
       const needsEnrich =
         (existing.prima_mensual == null && movimi?.premio != null) ||
         (existing.suma_asegurada == null && rieaut?.suma_asegurada != null) ||
-        (existing.dominio == null && rieaut?.dominio != null);
+        (existing.dominio == null && rieaut?.dominio != null && esRamaConDominio) ||
+        (existing.cobertura_id == null && coberturaId != null);
 
       if (rawAnterior !== rawNuevo || needsEnrich) {
         await prisma.polizas.update({

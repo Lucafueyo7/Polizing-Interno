@@ -11,9 +11,13 @@ const ACTIVE_STATES = ["vigente", "proxima"] as const;
 
 export async function listVigentesByClienteId(clienteId: number): Promise<PolicyChatbotShape[]> {
   const polizas = await prisma.polizas.findMany({
-    where: { cliente_id: clienteId, estado: { in: [...ACTIVE_STATES] } },
+    where: {
+      cliente_id: clienteId,
+      estado: { in: [...ACTIVE_STATES] },
+      tipo_seguro: { categoria: "auto" },
+    },
     include: POLIZA_INCLUDE,
-    orderBy: { id: "asc" },
+    orderBy: { dominio: "asc" },
   });
   return polizas.map(mapPolizaToChatbot);
 }

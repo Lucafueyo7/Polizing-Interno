@@ -21,7 +21,7 @@ const polizaRow = {
 describe("listVigentesByClienteId", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("filtra por estado in [vigente,proxima] y mapea", async () => {
+  it("filtra por estado in [vigente,proxima], categoría auto, y ordena por dominio", async () => {
     (prisma.polizas.findMany as any).mockResolvedValue([polizaRow]);
     const out = await listVigentesByClienteId(1);
     expect(out).toHaveLength(1);
@@ -31,6 +31,8 @@ describe("listVigentesByClienteId", () => {
     const call = (prisma.polizas.findMany as any).mock.calls[0][0];
     expect(call.where.cliente_id).toBe(1);
     expect(call.where.estado).toEqual({ in: ["vigente", "proxima"] });
+    expect(call.where.tipo_seguro).toEqual({ categoria: "auto" });
+    expect(call.orderBy).toEqual({ dominio: "asc" });
   });
 
   it("devuelve [] si no hay pólizas", async () => {
