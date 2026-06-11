@@ -5,6 +5,28 @@ export type PolizaEstado =
   | "anulada"
   | "renovada";
 
+/**
+ * Deriva el estado real de una póliza en tiempo de lectura.
+ * - "anulada" y "renovada" son estados manuales persistidos: se respetan siempre.
+ * - Si hay fecha de fin de vigencia: calcula vigente/proxima/vencida contra `now`.
+ *   Proxima = entre hoy y 60 días; Vencida = fecha ya pasó.
+ * - Sin fecha: devuelve el estado guardado.
+ */
+export function derivePolizaEstado(
+  stored: PolizaEstado,
+  finVigencia: Date | null | undefined,
+  now: Date = new Date(),
+): PolizaEstado {
+  if (stored === "anulada" || stored === "renovada") return stored;
+  if (!finVigencia) return stored;
+  const finMs = finVigencia.getTime();
+  const nowMs = now.getTime();
+  if (finMs < nowMs) return "vencida";
+  const diasRestantes = Math.round((finMs - nowMs) / 86_400_000);
+  if (diasRestantes <= 60) return "proxima";
+  return "vigente";
+}
+
 export type StatusTone = "success" | "warn" | "danger" | "neutral" | "info";
 
 export const POLIZA_STATUS: Record<

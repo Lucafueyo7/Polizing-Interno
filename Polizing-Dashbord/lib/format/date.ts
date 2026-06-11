@@ -1,6 +1,6 @@
 /**
- * "Fecha de hoy" del producto. El seed y todas las cuentas de vencimiento la usan
- * como ancla. Cambiar acá implica reseedear: la coherencia visual depende de esto.
+ * Ancla de fecha para el seed de demo. NO usar para cálculos de vencimiento en
+ * producción — usar `new Date()` o `daysUntilExpiry` (que usa la fecha real).
  */
 export const TODAY_ISO = "2026-05-08";
 
@@ -19,7 +19,8 @@ export function daysBetween(fromIso: string, toIso: string): number {
 }
 
 export function daysUntilExpiry(finIso: string): number {
-  return daysBetween(TODAY_ISO, finIso);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  return daysBetween(todayIso, finIso);
 }
 
 /**

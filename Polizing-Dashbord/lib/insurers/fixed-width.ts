@@ -59,6 +59,25 @@ export function parseFechaAAAAMMDD(value: string): Date | null {
   return Number.isFinite(d.getTime()) ? d : null;
 }
 
+/**
+ * Parsea un importe de ancho fijo del formato GD de Berkley.
+ * Los importes vienen como strings numéricos sin punto decimal, con `decimals`
+ * decimales implícitos (por defecto 2). Retorna un string con punto decimal
+ * compatible con Prisma Decimal(15,2), o null si el valor es vacío/cero.
+ */
+export function parseDecimalGD(value: string, decimals = 2): string | null {
+  const s = value.trim();
+  if (!s) return null;
+  // Si ya trae punto decimal (defensivo), parsear directamente.
+  if (s.includes(".")) {
+    const n = Number(s);
+    return Number.isFinite(n) && n !== 0 ? n.toFixed(2) : null;
+  }
+  const n = Number(s);
+  if (!Number.isFinite(n) || n === 0) return null;
+  return (n / Math.pow(10, decimals)).toFixed(2);
+}
+
 /** Convierte una fecha numérica DDMMAAAA (usado puntualmente, ej. RieCer). */
 export function parseFechaDDMMAAAA(value: string): Date | null {
   const s = value.trim();

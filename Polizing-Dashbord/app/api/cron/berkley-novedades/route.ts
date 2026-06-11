@@ -19,8 +19,12 @@ export async function GET(request: Request) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
 
+  // Soporta ?fechaDesde=DD/MM/YYYY para re-correr con ventana histórica (backfill).
+  const { searchParams } = new URL(request.url);
+  const fechaDesdeParsed = searchParams.get("fechaDesde") ?? undefined;
+
   try {
-    const result = await runBerkleySync();
+    const result = await runBerkleySync(fechaDesdeParsed ? { fechaDesde: new Date(fechaDesdeParsed.split("/").reverse().join("-")) } : {});
     return Response.json({ ok: true, ...result });
   } catch (err) {
     return insurerErrorResponse("cron/berkley-novedades", err);

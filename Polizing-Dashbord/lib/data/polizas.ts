@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { createCachedGetter, CACHE_TAGS } from "./cache";
 import { clienteIdent, clienteLabel } from "@/lib/domain/cliente-helpers";
+import { derivePolizaEstado } from "@/lib/domain/poliza-status";
 import {
   aseguradoraRefFromRow,
   clienteCoreFromRow,
@@ -46,18 +47,19 @@ function toCoberturaRef(c: { id: number; nombre: string }): CoberturaRef {
   return { id: c.id, nombre: c.nombre };
 }
 
-function toListItem(row: PolizaRow): PolizaListItem {
+function toListItem(row: PolizaRow, now: Date): PolizaListItem {
+  const fin = row.fecha_fin_vigencia ?? null;
   return {
     id: row.id,
     numero: row.numero_poliza,
     tipo: row.tipo_seguro?.nombre ?? "",
     cobertura: row.cobertura ? toCoberturaRef(row.cobertura) : { id: 0, nombre: "" },
     inicio: isoDate(row.fecha_inicio_vigencia ?? null),
-    fin: isoDate(row.fecha_fin_vigencia ?? null),
+    fin: isoDate(fin),
     suma: Number(row.suma_asegurada ?? 0),
     prima: Number(row.prima_mensual ?? 0),
-    estado: row.estado,
-    diasHastaVencimiento: vencimientoDays(row.fecha_fin_vigencia ?? null),
+    estado: derivePolizaEstado(row.estado, fin, now),
+    diasHastaVencimiento: vencimientoDays(fin),
     cliente: clienteRefFromRow(row.cliente),
     aseguradora: aseguradoraRefFromRow(row.aseguradora),
   };
@@ -65,7 +67,8 @@ function toListItem(row: PolizaRow): PolizaListItem {
 
 async function getAllPolizas(): Promise<PolizaListItem[]> {
   const rows = await findPolizas();
-  return rows.map(toListItem);
+  const now = new Date();
+  return rows.map((r) => toListItem(r, now));
 }
 
 const getAllPolizasCached = createCachedGetter(
@@ -74,10 +77,9 @@ const getAllPolizasCached = createCachedGetter(
   CACHE_TAGS.polizas,
 );
 
+// Con derivePolizaEstado, "proxima" ya implica 0 ≤ días ≤ 60.
 function isPorVencer(p: PolizaListItem): boolean {
-  if (p.estado !== "vigente" && p.estado !== "proxima") return false;
-  if (p.diasHastaVencimiento === null) return false;
-  return p.diasHastaVencimiento >= 0 && p.diasHastaVencimiento <= 60;
+  return p.estado === "proxima";
 }
 
 function matchesTab(p: PolizaListItem, tab: PolizaTab | undefined): boolean {
@@ -167,7 +169,7 @@ export async function getPolizaById(id: number): Promise<PolizaFull | null> {
   });
   if (!row) return null;
   return {
-    ...toListItem(row),
+    ...toListItem(row, new Date()),
     tipoSeguroId: row.tipo_seguro_id,
     dominio: row.dominio ?? null,
   };

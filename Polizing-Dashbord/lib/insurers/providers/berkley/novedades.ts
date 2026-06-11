@@ -1,16 +1,13 @@
 /**
- * Orquestación del sync diario de Berkley (iteración 1: infra + detección).
+ * Orquestación del sync diario de Berkley (iteración 2: enriquecimiento completo).
  *
  * Patrón "diario incremental" del manual §2.8 / §6.1:
  *  1. FechaDesde = max(ultimaCorrida-1, hoy-7) (overlap de seguridad).
  *  2. apwsnovedades → lista de archivos + links.
  *  3. Descargar cada archivo, loguear (hash, tamaño) en berkley_sync_archivos.
- *  4. Parsear los archivos clave; detectar altas/cambios (berkley_novedades) y
- *     hacer upsert a las tablas de dominio (clientes / polizas).
- *  5. Avanzar ultimaCorrida SOLO si todo el pipeline tuvo éxito (idempotente).
- *
- * No hace upsert a las tablas de dominio (polizas/clientes): eso queda para una
- * iteración posterior.
+ *  4. Parsear asegur, polizas2, movimi, rieaut, ramas, cobert.
+ *  5. Upsert a clientes y pólizas con prima/suma/dominio/tipo/cobertura.
+ *  6. Avanzar ultimaCorrida SOLO si todo el pipeline tuvo éxito (idempotente).
  */
 
 import "server-only";
@@ -19,17 +16,32 @@ import { unzipSync } from "fflate";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/app/generated/prisma/client";
 import { loadBerkleyConfig } from "../../config";
-import { parseFechaAAAAMMDD, parseFixedWidth } from "../../fixed-width";
+import {
+  parseDecimalGD,
+  parseFechaAAAAMMDD,
+  parseFixedWidth,
+} from "../../fixed-width";
 import type { Novedad, NovedadesRequest, NovedadesResult } from "../../types";
 import { apwsnovedades, downloadFile } from "./client";
 import {
   ASEGUR_LAYOUT,
+  COBERT_LAYOUT,
+  MOVIMI_LAYOUT,
   POLIZAS2_LAYOUT,
+  RAMAS_LAYOUT,
+  RIEAUT_LAYOUT,
   layoutKeyFromFilename,
 } from "./layouts";
 
 /** Archivos GD que sí parseamos a tablas de dominio. */
-const PARSED_KEYS = new Set(["asegur", "polizas2"]);
+const PARSED_KEYS = new Set([
+  "asegur",
+  "polizas2",
+  "movimi",
+  "rieaut",
+  "ramas",
+  "cobert",
+]);
 
 /** Magic bytes de un ZIP (`PK\x03\x04`). */
 function isZip(buf: Buffer): boolean {
@@ -39,8 +51,7 @@ function isZip(buf: Buffer): boolean {
 /**
  * Los archivos de novedades de Berkley (`GDxxxxxx.NNNN`) son ZIPs que contienen
  * los archivos lógicos (`asegur.txt`, `polizas2.txt`, etc.). Devuelve los
- * contenidos que nos interesan como pares [clave_layout, buffer]. Si el archivo
- * no es un ZIP, se trata como archivo único con su propio nombre.
+ * contenidos que nos interesan como pares [clave_layout, buffer].
  */
 function extractParsedFiles(buf: Buffer, archivo: string): Array<[string, Buffer]> {
   if (isZip(buf)) {
@@ -86,9 +97,197 @@ function parseFechaFlexible(value: string): Date | null {
   return Number.isFinite(d.getTime()) ? d : null;
 }
 
+// ---------------------------------------------------------------------------
+// Mapas de enriquecimiento construidos en memoria por corrida
+// ---------------------------------------------------------------------------
+
+type MovimiEntry = { premio: string | null };
+type RieautEntry = {
+  suma_asegurada: string | null;
+  dominio: string | null;
+  codigo_cobertura: string | null;
+};
+
+/** Clave de póliza: rama + poliza (sin suplemento, para cruzar con polizas2). */
+function polizaKey(rama: string, poliza: string): string {
+  return `${rama.trim()}-${poliza.trim()}`;
+}
+
+/**
+ * Construye un mapa { rama-poliza → movimi con mayor endoso }.
+ * El movimiento de mayor endoso representa el estado actual de la póliza.
+ */
+function buildMovimiMap(buf: Buffer): Map<string, MovimiEntry> {
+  const rows = parseFixedWidth(buf, MOVIMI_LAYOUT);
+  const map = new Map<string, { endoso: number; premio: string | null }>();
+  for (const r of rows) {
+    if (!r.rama || !r.poliza) continue;
+    const key = polizaKey(r.rama, r.poliza);
+    const endoso = Number(r.numero_endoso ?? 0) || 0;
+    const existing = map.get(key);
+    if (!existing || endoso > existing.endoso) {
+      map.set(key, {
+        endoso,
+        premio: parseDecimalGD(r.premio ?? ""),
+      });
+    }
+  }
+  // Convertir al tipo de retorno limpio.
+  const result = new Map<string, MovimiEntry>();
+  for (const [k, v] of map) {
+    result.set(k, { premio: v.premio });
+  }
+  return result;
+}
+
+/**
+ * Construye un mapa { rama-poliza → datos del vehículo }.
+ * Solo considera riesgos activos (estado_riesgo = 'A').
+ * Para flotas (múltiples riesgos) dominio queda null.
+ */
+function buildRieautMap(buf: Buffer): Map<string, RieautEntry> {
+  const rows = parseFixedWidth(buf, RIEAUT_LAYOUT);
+  const accumulator = new Map<
+    string,
+    { sumaTotal: number; patentes: string[]; cobertura: string | null }
+  >();
+
+  for (const r of rows) {
+    if (!r.rama || !r.poliza) continue;
+    // Solo riesgos activos.
+    if (String(r.estado_riesgo ?? "").trim().toUpperCase() !== "A") continue;
+    const key = polizaKey(r.rama, r.poliza);
+    const valorNum = Number((r.valor_asegurado ?? "").trim()) || 0;
+    const patente = String(r.patente ?? "").trim();
+    const cobertura = String(r.codigo_cobertura ?? "").trim() || null;
+    const entry = accumulator.get(key) ?? { sumaTotal: 0, patentes: [], cobertura: null };
+    entry.sumaTotal += valorNum;
+    if (patente) entry.patentes.push(patente);
+    if (!entry.cobertura && cobertura) entry.cobertura = cobertura;
+    accumulator.set(key, entry);
+  }
+
+  const result = new Map<string, RieautEntry>();
+  for (const [k, v] of accumulator) {
+    const sumaStr = v.sumaTotal > 0
+      ? (v.sumaTotal / 100).toFixed(2)
+      : null;
+    // Dominio solo si hay un único vehículo; flotas quedan null.
+    const dominio = v.patentes.length === 1 ? v.patentes[0] : null;
+    result.set(k, {
+      suma_asegurada: sumaStr,
+      dominio,
+      codigo_cobertura: v.cobertura,
+    });
+  }
+  return result;
+}
+
+/** Mapa de rama (código) → descripción, construido desde ramas.txt. */
+function buildRamasMap(buf: Buffer): Map<string, string> {
+  const rows = parseFixedWidth(buf, RAMAS_LAYOUT);
+  const map = new Map<string, string>();
+  for (const r of rows) {
+    const codigo = String(r.codigo ?? "").trim();
+    const desc = String(r.descripcion ?? "").trim();
+    if (codigo && desc) map.set(codigo, desc);
+  }
+  return map;
+}
+
+/** Mapa de código cobertura → descripción, construido desde cobert.txt. */
+function buildCobertMap(buf: Buffer): Map<string, string> {
+  const rows = parseFixedWidth(buf, COBERT_LAYOUT);
+  const map = new Map<string, string>();
+  for (const r of rows) {
+    const codigo = String(r.codigo ?? "").trim();
+    const desc = String(r.descripcion ?? "").trim();
+    if (codigo && desc) map.set(codigo, desc);
+  }
+  return map;
+}
+
+// ---------------------------------------------------------------------------
+// Mapeo de rama → tipo de seguro (mapa estático de códigos conocidos)
+// ---------------------------------------------------------------------------
+
+/**
+ * Códigos de rama Berkley conocidos → nombre canónico en tipos_seguro y categoría.
+ * Los nombres deben coincidir con los del seed para no crear duplicados.
+ */
+const RAMA_A_TIPO: Record<string, { nombre: string; categoria: string }> = {
+  "01": { nombre: "Automotor",           categoria: "auto"     },
+  "07": { nombre: "Flota Automotor",     categoria: "auto"     },
+  "02": { nombre: "Hogar",              categoria: "hogar"    },
+  "03": { nombre: "ART",               categoria: "art"      },
+  "05": { nombre: "Incendio",           categoria: "hogar"    },
+  "13": { nombre: "Integral de Comercio", categoria: "comercio" },
+  "16": { nombre: "Vida Individual",    categoria: "vida"     },
+};
+
+/** Cache de tipo_seguro_id por nombre para un mismo run. */
+const tipoSeguroCache = new Map<string, number>();
+
+async function resolveTipoSeguroId(
+  rama: string,
+  ramasMap: Map<string, string>,
+): Promise<number | null> {
+  const ramaCode = rama.trim().padStart(2, "0");
+  const known = RAMA_A_TIPO[ramaCode];
+  const nombre = known?.nombre ?? `Rama ${ramaCode}`;
+  const categoria = (known?.categoria ?? "otros") as
+    | "auto" | "vida" | "hogar" | "salud" | "comercio" | "art" | "agricola" | "otros";
+
+  if (tipoSeguroCache.has(nombre)) return tipoSeguroCache.get(nombre)!;
+
+  // Usar descripción de ramas.txt cuando el código no está en el mapa estático.
+  const descripcionFallback = ramasMap.get(ramaCode) ?? null;
+  const row = await prisma.tipos_seguro.upsert({
+    where: { nombre },
+    create: { nombre, categoria, descripcion: descripcionFallback },
+    update: {},
+    select: { id: true },
+  });
+  tipoSeguroCache.set(nombre, row.id);
+  return row.id;
+}
+
+/** Cache de cobertura_id por "tipoId:nombre" para un mismo run. */
+const coberturaCache = new Map<string, number>();
+
+async function resolveCoberturaId(
+  tipoSeguroId: number,
+  codigoCobertura: string | null,
+  cobertMap: Map<string, string>,
+): Promise<number | null> {
+  if (!codigoCobertura) return null;
+  const codigo = codigoCobertura.trim();
+  const nombre = cobertMap.get(codigo) ?? `Cobertura ${codigo}`;
+  const cacheKey = `${tipoSeguroId}:${nombre}`;
+
+  if (coberturaCache.has(cacheKey)) return coberturaCache.get(cacheKey)!;
+
+  const row = await prisma.coberturas.upsert({
+    where: { tipo_seguro_id_nombre: { tipo_seguro_id: tipoSeguroId, nombre } },
+    create: { tipo_seguro_id: tipoSeguroId, nombre },
+    update: {},
+    select: { id: true },
+  });
+  coberturaCache.set(cacheKey, row.id);
+  return row.id;
+}
+
+// ---------------------------------------------------------------------------
+// Punto de entrada principal
+// ---------------------------------------------------------------------------
+
 export async function runBerkleySync(
   req: NovedadesRequest = {},
 ): Promise<NovedadesResult> {
+  // Limpiar caches de resolución para que el run sea idempotente.
+  tipoSeguroCache.clear();
+  coberturaCache.clear();
+
   const config = loadBerkleyConfig();
   const state = await prisma.berkley_sync_state.findUnique({ where: { id: 1 } });
   const fechaDesde = req.fechaDesde ?? computeFechaDesde(state?.ultima_corrida ?? null);
@@ -113,14 +312,26 @@ export async function runBerkleySync(
       },
     });
 
-    // El GD es un ZIP: extraemos los archivos lógicos que parseamos a dominio.
-    // Primero asegur (crea clientes), luego polizas2 (linkea por codigo_asegurado).
     const archivosInternos = extractParsedFiles(buf, a.archivo);
-    const asegur = archivosInternos.find(([k]) => k === "asegur");
-    const polizas2 = archivosInternos.find(([k]) => k === "polizas2");
-    if (asegur) await syncAsegur(asegur[1], novedades);
-    if (polizas2) await syncPolizas2(polizas2[1], novedades);
-    // movimi/cdp/pagos y demás: quedan dentro del ZIP, sin parsear en esta iteración.
+
+    // Construir mapas de enriquecimiento desde los archivos auxiliares.
+    const movimiEntry = archivosInternos.find(([k]) => k === "movimi");
+    const rieautEntry = archivosInternos.find(([k]) => k === "rieaut");
+    const ramasEntry  = archivosInternos.find(([k]) => k === "ramas");
+    const cobertEntry = archivosInternos.find(([k]) => k === "cobert");
+
+    const movimiMap = movimiEntry ? buildMovimiMap(movimiEntry[1]) : new Map<string, MovimiEntry>();
+    const rieautMap = rieautEntry ? buildRieautMap(rieautEntry[1]) : new Map<string, RieautEntry>();
+    const ramasMap  = ramasEntry  ? buildRamasMap(ramasEntry[1])   : new Map<string, string>();
+    const cobertMap = cobertEntry ? buildCobertMap(cobertEntry[1]) : new Map<string, string>();
+
+    // Procesar clientes primero (para que polizas2 pueda linkearse por código).
+    const asegurEntry = archivosInternos.find(([k]) => k === "asegur");
+    const polizas2Entry = archivosInternos.find(([k]) => k === "polizas2");
+    if (asegurEntry) await syncAsegur(asegurEntry[1], novedades);
+    if (polizas2Entry) {
+      await syncPolizas2(polizas2Entry[1], novedades, movimiMap, rieautMap, ramasMap, cobertMap);
+    }
   }
 
   if (novedades.length > 0) {
@@ -149,6 +360,10 @@ export async function runBerkleySync(
     novedades,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Sync de clientes (asegur)
+// ---------------------------------------------------------------------------
 
 /** DNI a usar para una persona: el documento real, o el código Berkley si viene
  * vacío/"0" (en asegur el documento suele ser "0"). El código es único en asegur. */
@@ -212,7 +427,12 @@ async function syncAsegur(buf: Buffer, novedades: Novedad[]): Promise<void> {
     const codigo = r.codigo_asegurado;
     if (!codigo) continue;
 
-    const esCorporativo = !!(r.cuit && String(r.cuit).trim());
+    // Usar el clasificador oficial F/J; fallback a heurística por CUIT si viene vacío.
+    const tipoPersona = String(r.tipo_persona ?? "").trim().toUpperCase();
+    const esCorporativo = tipoPersona
+      ? tipoPersona === "J"
+      : !!(r.cuit && String(r.cuit).trim());
+
     const raw = r as unknown as Prisma.InputJsonValue;
     const email = r.email || null;
     const telefono = r.telefono || null;
@@ -284,6 +504,10 @@ async function syncAsegur(buf: Buffer, novedades: Novedad[]): Promise<void> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Sync de pólizas (polizas2 + enriquecimiento desde movimi/rieaut)
+// ---------------------------------------------------------------------------
+
 /** Resuelve (y cachea en el run) el ID de la aseguradora Berkley. */
 async function getBerkleyAseguradoraId(): Promise<number | null> {
   const row = await prisma.empresas_aseguradoras.findFirst({
@@ -293,11 +517,17 @@ async function getBerkleyAseguradoraId(): Promise<number | null> {
   return row?.id ?? null;
 }
 
-async function syncPolizas2(buf: Buffer, novedades: Novedad[]): Promise<void> {
+async function syncPolizas2(
+  buf: Buffer,
+  novedades: Novedad[],
+  movimiMap: Map<string, MovimiEntry>,
+  rieautMap: Map<string, RieautEntry>,
+  ramasMap: Map<string, string>,
+  cobertMap: Map<string, string>,
+): Promise<void> {
   const rows = parseFixedWidth(buf, POLIZAS2_LAYOUT);
   const aseguradoraId = await getBerkleyAseguradoraId();
   if (!aseguradoraId) {
-    // Sin aseguradora Berkley configurada en la BD, no se pueden insertar pólizas.
     novedades.push({
       tipo: "alta",
       archivo: "polizas2",
@@ -319,10 +549,16 @@ async function syncPolizas2(buf: Buffer, novedades: Novedad[]): Promise<void> {
     const numeroPoliza = `${rama}-${poliza}-${suplemento}`;
     const existing = await prisma.polizas.findUnique({
       where: { numero_poliza: numeroPoliza },
-      select: { id: true, raw_berkley: true },
+      select: {
+        id: true,
+        raw_berkley: true,
+        prima_mensual: true,
+        suma_asegurada: true,
+        dominio: true,
+      },
     });
 
-    // Resolver cliente_id por codigo_asegurado_berkley (puede ser null si no synced aún).
+    // Resolver cliente_id por codigo_asegurado_berkley.
     let clienteId: number | null = null;
     if (r.asegurado) {
       const cli = await prisma.clientes.findUnique({
@@ -332,19 +568,40 @@ async function syncPolizas2(buf: Buffer, novedades: Novedad[]): Promise<void> {
       clienteId = cli?.id ?? null;
     }
 
-    const estado: "vigente" | "anulada" = r.anulada?.toUpperCase() === "S" ? "anulada" : "vigente";
+    // Estado: anulada si la poliza viene marcada; vigente en caso contrario.
+    // (vigente/vencida/proxima se derivan en tiempo de lectura desde fecha_fin_vigencia)
+    const estado: "vigente" | "anulada" =
+      r.anulada?.toUpperCase() === "S" ? "anulada" : "vigente";
+
+    // Datos de enriquecimiento desde los archivos complementarios.
+    const key = polizaKey(rama, poliza);
+    const movimi = movimiMap.get(key);
+    const rieaut = rieautMap.get(key);
+
+    const tipoSeguroId = await resolveTipoSeguroId(rama, ramasMap);
+    const coberturaId = rieaut?.codigo_cobertura && tipoSeguroId
+      ? await resolveCoberturaId(tipoSeguroId, rieaut.codigo_cobertura, cobertMap)
+      : null;
+
     const polizaData = {
       rama,
       suplemento,
       raw_berkley: r as unknown as Prisma.InputJsonValue,
       estado,
       fecha_inicio_vigencia: parseFechaAAAAMMDD(r.vig_inicial) ?? undefined,
-      fecha_fin_vigencia: parseFechaAAAAMMDD(r.vig_final) ?? undefined,
+      fecha_fin_vigencia:    parseFechaAAAAMMDD(r.vig_final)   ?? undefined,
+      // Enriquecimiento — se setea si viene del archivo complementario, se deja
+      // sin cambios (undefined) si no llegó en este ZIP para no sobrescribir datos
+      // válidos de una corrida anterior.
+      ...(movimi?.premio != null    && { prima_mensual:   movimi.premio    }),
+      ...(rieaut?.suma_asegurada    && { suma_asegurada:  rieaut.suma_asegurada }),
+      ...(rieaut?.dominio           && { dominio:         rieaut.dominio   }),
+      ...(tipoSeguroId              && { tipo_seguro_id:  tipoSeguroId     }),
+      ...(coberturaId               && { cobertura_id:    coberturaId      }),
     };
 
     if (!existing) {
       if (!clienteId) {
-        // Sin cliente match: registrar novedad para revisión manual y continuar.
         novedades.push({
           tipo: "alta",
           archivo: "polizas2",
@@ -356,7 +613,6 @@ async function syncPolizas2(buf: Buffer, novedades: Novedad[]): Promise<void> {
         });
         continue;
       }
-      // Alta de póliza parcial (tipo/cobertura/suma/prima quedan null hasta completarse a mano).
       await prisma.polizas.create({
         data: {
           numero_poliza: numeroPoliza,
@@ -375,10 +631,16 @@ async function syncPolizas2(buf: Buffer, novedades: Novedad[]): Promise<void> {
         detectadaEn: new Date().toISOString(),
       });
     } else {
-      // Actualización: solo campos que la cartera provee.
+      // Actualizar si: el raw de polizas2 cambió O si la póliza existente aún le
+      // faltan datos de enriquecimiento (backfill de corridas anteriores incompletas).
       const rawAnterior = JSON.stringify(existing.raw_berkley);
-      const rawNuevo = JSON.stringify(r);
-      if (rawAnterior !== rawNuevo) {
+      const rawNuevo    = JSON.stringify(r);
+      const needsEnrich =
+        (existing.prima_mensual == null && movimi?.premio != null) ||
+        (existing.suma_asegurada == null && rieaut?.suma_asegurada != null) ||
+        (existing.dominio == null && rieaut?.dominio != null);
+
+      if (rawAnterior !== rawNuevo || needsEnrich) {
         await prisma.polizas.update({
           where: { id: existing.id },
           data: polizaData,
