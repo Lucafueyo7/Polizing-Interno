@@ -212,18 +212,45 @@ function buildCobertMap(buf: Buffer): Map<string, string> {
 // ---------------------------------------------------------------------------
 
 /**
- * Códigos de rama Berkley conocidos → nombre canónico en tipos_seguro y categoría.
- * Los nombres deben coincidir con los del seed para no crear duplicados.
+ * Códigos de rama Berkley conocidos → nombre canónico en tipos_seguro, categoría
+ * y código de rama genérica. Los nombres deben coincidir con los del seed para no
+ * crear duplicados. `rama` es el slug provider-agnostic (codigo de ramas_genericas)
+ * con el que otras aseguradoras mapean su propio código interno al mismo tipo_seguro.
  */
-const RAMA_A_TIPO: Record<string, { nombre: string; categoria: string }> = {
-  "01": { nombre: "Automotor",           categoria: "auto"     },
-  "07": { nombre: "Flota Automotor",     categoria: "auto"     },
-  "02": { nombre: "Hogar",              categoria: "hogar"    },
-  "03": { nombre: "ART",               categoria: "art"      },
-  "05": { nombre: "Incendio",           categoria: "hogar"    },
-  "13": { nombre: "Integral de Comercio", categoria: "comercio" },
-  "16": { nombre: "Vida Individual",    categoria: "vida"     },
+const RAMA_A_TIPO: Record<
+  string,
+  { nombre: string; categoria: string; rama: string }
+> = {
+  "01": { nombre: "Automotor",           categoria: "auto",     rama: "automotor"         },
+  "07": { nombre: "Flota Automotor",     categoria: "auto",     rama: "flota_automotor"   },
+  "02": { nombre: "Hogar",              categoria: "hogar",    rama: "hogar"             },
+  "03": { nombre: "ART",               categoria: "art",      rama: "art"               },
+  "05": { nombre: "Incendio",           categoria: "hogar",    rama: "incendio"          },
+  "13": { nombre: "Integral de Comercio", categoria: "comercio", rama: "integral_comercio" },
+  "16": { nombre: "Vida Individual",    categoria: "vida",     rama: "vida_individual"   },
 };
+
+/**
+ * Resuelve (creando si hace falta) la rama genérica para un código Berkley.
+ * Para ramas conocidas usa el slug curado de RAMA_A_TIPO; para una rama nueva
+ * que Berkley agregue, crea la fila al vuelo con codigo `rama_NN` y la descripción
+ * del archivo ramas.txt — sin migración. Un admin puede renombrarla/fusionarla luego.
+ */
+async function resolveRamaGenericaId(
+  ramaCode: string,
+  known: { nombre: string; rama: string } | undefined,
+  descripcion: string | null,
+): Promise<number> {
+  const codigo = known?.rama ?? `rama_${ramaCode}`;
+  const nombre = known?.nombre ?? descripcion ?? `Rama ${ramaCode}`;
+  const row = await prisma.ramas_genericas.upsert({
+    where: { codigo },
+    create: { codigo, nombre, descripcion },
+    update: {},
+    select: { id: true },
+  });
+  return row.id;
+}
 
 /** Cache de tipo_seguro_id por nombre para un mismo run. */
 const tipoSeguroCache = new Map<string, number>();
@@ -242,13 +269,47 @@ async function resolveTipoSeguroId(
 
   // Usar descripción de ramas.txt cuando el código no está en el mapa estático.
   const descripcionFallback = ramasMap.get(ramaCode) ?? null;
+  const ramaId = await resolveRamaGenericaId(ramaCode, known, descripcionFallback);
   const row = await prisma.tipos_seguro.upsert({
     where: { nombre },
-    create: { nombre, categoria, descripcion: descripcionFallback },
+    create: { nombre, categoria, rama_id: ramaId, descripcion: descripcionFallback },
     update: {},
     select: { id: true },
   });
   tipoSeguroCache.set(nombre, row.id);
+  return row.id;
+}
+
+/** Normaliza un texto a un slug estable: minúsculas, sin acentos, `_` por separador. */
+function slugify(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+/** Cache de cobertura_generica_id por codigo para un mismo run. */
+const coberturaGenericaCache = new Map<string, number>();
+
+/**
+ * Resuelve (creando si hace falta) la cobertura genérica para una cobertura
+ * Berkley. La clave canónica es el slug de la descripción de cobert.txt, así dos
+ * aseguradoras con el mismo nombre de cobertura mapean a la misma fila genérica.
+ * No hay mapa estático de códigos Berkley: todas se crean al vuelo como dato.
+ */
+async function resolveCoberturaGenericaId(nombre: string): Promise<number> {
+  const codigo = slugify(nombre) || "sin_clasificar";
+  if (coberturaGenericaCache.has(codigo)) return coberturaGenericaCache.get(codigo)!;
+  const row = await prisma.coberturas_genericas.upsert({
+    where: { codigo },
+    create: { codigo, nombre },
+    update: {},
+    select: { id: true },
+  });
+  coberturaGenericaCache.set(codigo, row.id);
   return row.id;
 }
 
@@ -267,9 +328,10 @@ async function resolveCoberturaId(
 
   if (coberturaCache.has(cacheKey)) return coberturaCache.get(cacheKey)!;
 
+  const coberturaGenericaId = await resolveCoberturaGenericaId(nombre);
   const row = await prisma.coberturas.upsert({
     where: { tipo_seguro_id_nombre: { tipo_seguro_id: tipoSeguroId, nombre } },
-    create: { tipo_seguro_id: tipoSeguroId, nombre },
+    create: { tipo_seguro_id: tipoSeguroId, nombre, cobertura_generica_id: coberturaGenericaId },
     update: {},
     select: { id: true },
   });
@@ -287,6 +349,7 @@ export async function runBerkleySync(
   // Limpiar caches de resolución para que el run sea idempotente.
   tipoSeguroCache.clear();
   coberturaCache.clear();
+  coberturaGenericaCache.clear();
 
   const config = loadBerkleyConfig();
   const state = await prisma.berkley_sync_state.findUnique({ where: { id: 1 } });

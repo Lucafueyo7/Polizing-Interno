@@ -47,9 +47,22 @@ export type CategoriaSeguroSeed =
   | "agricola"
   | "otros";
 
+export type RamaGenericaCodigo =
+  | "automotor"
+  | "flota_automotor"
+  | "hogar"
+  | "art"
+  | "incendio"
+  | "integral_comercio"
+  | "vida_individual";
+
+export type RamaGenericaSeed = { codigo: RamaGenericaCodigo; nombre: string };
+
 export type TipoSeguroSeed = {
   nombre: string;
   categoria: CategoriaSeguroSeed;
+  /** Codigo de la rama genérica con la que las aseguradoras mapean su código interno. */
+  rama?: RamaGenericaCodigo;
   descripcion?: string;
   /** Catálogo de coberturas válidas para este tipo de seguro. */
   coberturas: { nombre: string; descripcion?: string }[];
@@ -108,6 +121,34 @@ export type PagoSeed = {
 };
 
 // =============================================================================
+// RAMAS GENÉRICAS (las 7 conocidas de Berkley) — catálogo provider-agnostic
+// =============================================================================
+
+export const RAMAS_GENERICAS: RamaGenericaSeed[] = [
+  { codigo: "automotor",         nombre: "Automotor"            },
+  { codigo: "flota_automotor",   nombre: "Flota Automotor"      },
+  { codigo: "hogar",             nombre: "Hogar"                },
+  { codigo: "art",               nombre: "ART"                  },
+  { codigo: "incendio",          nombre: "Incendio"             },
+  { codigo: "integral_comercio", nombre: "Integral de Comercio" },
+  { codigo: "vida_individual",   nombre: "Vida Individual"      },
+];
+
+export type CoberturaGenericaSeed = { codigo: string; nombre: string };
+
+/**
+ * Coberturas genéricas (provider-agnostic). El `codigo` coincide con el `nombre`
+ * (slug) de las coberturas del seed, así cada cobertura se conecta a la suya.
+ */
+export const COBERTURAS_GENERICAS: CoberturaGenericaSeed[] = [
+  { codigo: "responsabilidad_civil", nombre: "Responsabilidad Civil" },
+  { codigo: "terceros_completo",     nombre: "Terceros Completo"      },
+  { codigo: "todo_riesgo",           nombre: "Todo Riesgo"            },
+  { codigo: "basica",                nombre: "Básica"                 },
+  { codigo: "integral",              nombre: "Integral"               },
+];
+
+// =============================================================================
 // TIPOS DE SEGURO + CATÁLOGO DE COBERTURAS
 // =============================================================================
 
@@ -115,6 +156,7 @@ export const TIPOS_SEGURO: TipoSeguroSeed[] = [
   {
     nombre: "Automotor",
     categoria: "auto",
+    rama: "automotor",
     descripcion: "Seguro de vehículo particular",
     coberturas: [
       { nombre: "responsabilidad_civil", descripcion: "Solo daños a terceros" },
@@ -125,6 +167,7 @@ export const TIPOS_SEGURO: TipoSeguroSeed[] = [
   {
     nombre: "Flota Automotor",
     categoria: "auto",
+    rama: "flota_automotor",
     descripcion: "Seguro para flotas comerciales",
     coberturas: [
       { nombre: "responsabilidad_civil", descripcion: "Solo daños a terceros (flota)" },
@@ -134,6 +177,7 @@ export const TIPOS_SEGURO: TipoSeguroSeed[] = [
   {
     nombre: "Hogar",
     categoria: "hogar",
+    rama: "hogar",
     descripcion: "Seguro de vivienda",
     coberturas: [
       { nombre: "basica",   descripcion: "Incendio + responsabilidad civil" },
@@ -143,6 +187,7 @@ export const TIPOS_SEGURO: TipoSeguroSeed[] = [
   {
     nombre: "ART",
     categoria: "art",
+    rama: "art",
     descripcion: "Aseguradora de Riesgos del Trabajo",
     coberturas: [
       { nombre: "basica", descripcion: "Cobertura legal obligatoria de ART" },
@@ -151,6 +196,7 @@ export const TIPOS_SEGURO: TipoSeguroSeed[] = [
   {
     nombre: "Integral de Comercio",
     categoria: "comercio",
+    rama: "integral_comercio",
     descripcion: "Seguro para locales comerciales",
     coberturas: [
       { nombre: "integral", descripcion: "Incendio, robo, cristales y responsabilidad civil" },
@@ -159,6 +205,7 @@ export const TIPOS_SEGURO: TipoSeguroSeed[] = [
   {
     nombre: "Vida Individual",
     categoria: "vida",
+    rama: "vida_individual",
     descripcion: "Seguro de vida personal",
     coberturas: [
       { nombre: "basica",   descripcion: "Cobertura por muerte" },

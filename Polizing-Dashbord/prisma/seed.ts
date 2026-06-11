@@ -7,8 +7,10 @@ import { normalizeTelefono } from "../lib/format/telefono";
 import {
   ASEGURADORAS,
   CLIENTES,
+  COBERTURAS_GENERICAS,
   PAGOS,
   POLIZAS,
+  RAMAS_GENERICAS,
   SINIESTROS,
   TIPOS_SEGURO,
 } from "./seed-data";
@@ -24,6 +26,8 @@ async function main() {
 
   try {
     await reset(prisma);
+    await seedRamasGenericas(prisma);
+    await seedCoberturasGenericas(prisma);
     const { tipoSeguroIdMap, coberturaIdMap } = await seedTiposSeguro(prisma);
     const clienteIdMap = await seedClientes(prisma);
     const aseguradoraIdMap = await seedAseguradoras(prisma);
@@ -51,12 +55,30 @@ async function reset(prisma: PrismaClient) {
   await prisma.siniestros.deleteMany();
   await prisma.polizas.deleteMany();
   await prisma.coberturas.deleteMany();
+  await prisma.coberturas_genericas.deleteMany();
   await prisma.pagos.deleteMany();
   await prisma.clientes_corporativos.deleteMany();
   await prisma.clientes_no_corporativos.deleteMany();
   await prisma.clientes.deleteMany();
   await prisma.empresas_aseguradoras.deleteMany();
   await prisma.tipos_seguro.deleteMany();
+  await prisma.ramas_genericas.deleteMany();
+}
+
+async function seedRamasGenericas(prisma: PrismaClient) {
+  for (const r of RAMAS_GENERICAS) {
+    await prisma.ramas_genericas.create({
+      data: { codigo: r.codigo, nombre: r.nombre },
+    });
+  }
+}
+
+async function seedCoberturasGenericas(prisma: PrismaClient) {
+  for (const c of COBERTURAS_GENERICAS) {
+    await prisma.coberturas_genericas.create({
+      data: { codigo: c.codigo, nombre: c.nombre },
+    });
+  }
 }
 
 async function seedTiposSeguro(prisma: PrismaClient): Promise<{
@@ -72,15 +94,17 @@ async function seedTiposSeguro(prisma: PrismaClient): Promise<{
         nombre: t.nombre,
         categoria: t.categoria,
         descripcion: t.descripcion ?? null,
+        ...(t.rama ? { rama: { connect: { codigo: t.rama } } } : {}),
       },
     });
     tipoSeguroIdMap.set(t.nombre, created.id);
     for (const cob of t.coberturas) {
       const c = await prisma.coberturas.create({
         data: {
-          tipo_seguro_id: created.id,
+          tipo_seguro: { connect: { id: created.id } },
           nombre: cob.nombre,
           descripcion: cob.descripcion ?? null,
+          cobertura_generica: { connect: { codigo: cob.nombre } },
         },
       });
       coberturaIdMap.set(`${t.nombre}|${cob.nombre}`, c.id);

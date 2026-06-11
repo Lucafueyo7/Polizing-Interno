@@ -72,9 +72,14 @@ model empresas_aseguradoras {
 }
 
 model tipos_seguro {
-  id          Int             @id @default(autoincrement())
-  nombre      String          @unique
+  id          Int              @id @default(autoincrement())
+  nombre      String           @unique
   categoria   CategoriaSeguro
+  /// FK a la rama genérica (provider-agnostic). Es la clave canónica con la que
+  /// cada aseguradora mapea su código de rama interno a un tipo de seguro común.
+  /// Unique: una sola fila de tipos_seguro por rama genérica.
+  rama_id     Int?             @unique
+  rama        ramas_genericas? @relation(fields: [rama_id], references: [id])
   descripcion String?
   coberturas  coberturas[]
   polizas     polizas[]
@@ -82,16 +87,50 @@ model tipos_seguro {
   @@index([categoria])
 }
 
+/// Catálogo de ramas de seguro genéricas (provider-agnostic). Cada aseguradora
+/// mapea su código de rama interno a una fila de esta tabla. Reemplaza al enum
+/// fijo para poder agregar ramas nuevas como dato (INSERT) sin migración: si
+/// Berkley (u otra) manda una rama desconocida, el sync la crea acá al vuelo.
+model ramas_genericas {
+  id           Int           @id @default(autoincrement())
+  /// Slug estable y único (ej. "automotor", "flota_automotor"). Clave canónica
+  /// con la que se conectan los tipos_seguro y los mapeos por aseguradora.
+  codigo       String        @unique
+  nombre       String
+  descripcion  String?
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  tipos_seguro tipos_seguro?
+}
+
 model coberturas {
-  id             Int          @id @default(autoincrement())
-  tipo_seguro_id Int
-  nombre         String
-  descripcion    String?
-  tipo_seguro    tipos_seguro @relation(fields: [tipo_seguro_id], references: [id], onDelete: Cascade)
-  polizas        polizas[]
+  id                    Int                   @id @default(autoincrement())
+  tipo_seguro_id        Int
+  nombre                String
+  descripcion           String?
+  /// FK a la cobertura genérica (provider-agnostic). Permite que coberturas de
+  /// distintas aseguradoras/tipos mapeen a una misma cobertura canónica.
+  cobertura_generica_id Int?
+  cobertura_generica    coberturas_genericas? @relation(fields: [cobertura_generica_id], references: [id])
+  tipo_seguro           tipos_seguro          @relation(fields: [tipo_seguro_id], references: [id], onDelete: Cascade)
+  polizas               polizas[]
 
   @@unique([tipo_seguro_id, nombre])
   @@index([tipo_seguro_id])
+  @@index([cobertura_generica_id])
+}
+
+/// Catálogo de coberturas genéricas (provider-agnostic). Cada aseguradora mapea
+/// su cobertura interna a una fila de esta tabla. Igual que ramas_genericas: una
+/// cobertura nueva entra como dato (INSERT) sin migración; el sync la crea al vuelo
+/// a partir de la descripción de cobert.txt.
+model coberturas_genericas {
+  id          Int          @id @default(autoincrement())
+  /// Slug estable y único (ej. "todo_riesgo", "responsabilidad_civil").
+  codigo      String       @unique
+  nombre      String
+  descripcion String?
+  created_at  DateTime     @default(now()) @db.Timestamptz(6)
+  coberturas  coberturas[]
 }
 
 model polizas {
