@@ -20,6 +20,7 @@ import type {
   PolizaListItem,
   SiniestroListItem,
 } from "./types";
+import type { SiniestroEstado } from "@/lib/domain/poliza-status";
 
 const POLIZA_VIGENTES = ["vigente", "proxima"] as const;
 
@@ -264,7 +265,7 @@ export async function getClienteSiniestros(
     titulo: row.titulo,
     cliente: clienteRefFromRow(row.poliza.cliente),
     fechaReporte: isoDateTime(row.fecha_reporte),
-    estado: row.estado,
+    estado: row.estado as unknown as SiniestroEstado,
     leidoPorMi: false,
     docsCount: row.documentos.length,
   }));

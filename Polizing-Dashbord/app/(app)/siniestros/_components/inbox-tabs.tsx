@@ -8,10 +8,8 @@ import type { SiniestroCounts, SiniestroTab } from "@/lib/data/types";
 const TABS: ReadonlyArray<{ value: SiniestroTab; label: string }> = [
   { value: "all", label: "Todos" },
   { value: "nuevo", label: "Nuevos" },
-  { value: "pendiente_documentacion", label: "Pend. docs." },
   { value: "en_tramite", label: "En trámite" },
   { value: "cerrado", label: "Cerrados" },
-  { value: "rechazado", label: "Rechazados" },
 ];
 
 export function InboxTabs({ counts }: { counts: SiniestroCounts }) {

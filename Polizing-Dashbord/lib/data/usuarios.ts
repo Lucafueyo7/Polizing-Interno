@@ -5,8 +5,8 @@ export type UsuarioListItem = {
   id: number;
   nombreCompleto: string;
   email: string;
-  dni: string;
-  rol: "productor" | "administrativo";
+  dni: string | null;
+  rol: "productor" | "administrativo" | "sin_acceso";
 };
 
 export async function getUsuarioById(
@@ -21,7 +21,7 @@ export async function getUsuarioById(
     id: row.id,
     nombreCompleto: row.nombre_completo,
     email: row.email,
-    dni: row.dni,
+    dni: row.dni ?? null,
     rol: row.rol,
   };
 }

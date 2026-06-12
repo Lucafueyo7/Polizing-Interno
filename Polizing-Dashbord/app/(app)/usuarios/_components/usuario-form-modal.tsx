@@ -114,7 +114,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
 
 // ── Edit form ─────────────────────────────────────────────────────────────────
 
-type EditShape = { nombreCompleto: string; rol: "productor" | "administrativo" };
+type EditShape = { nombreCompleto: string; rol: "productor" | "administrativo" | "sin_acceso" };
 
 function EditForm({
   usuario,
@@ -173,6 +173,7 @@ function EditForm({
           <SelectContent>
             <SelectItem value="productor">Productor</SelectItem>
             <SelectItem value="administrativo">Administrativo</SelectItem>
+            <SelectItem value="sin_acceso">Sin acceso</SelectItem>
           </SelectContent>
         </Select>
       </Field>

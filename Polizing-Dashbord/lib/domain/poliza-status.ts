@@ -42,18 +42,14 @@ export const POLIZA_STATUS: Record<
 
 export type SiniestroEstado =
   | "nuevo"
-  | "pendiente_documentacion"
   | "en_tramite"
-  | "cerrado"
-  | "rechazado";
+  | "cerrado";
 
 export const SINIESTRO_STATUS: Record<
   SiniestroEstado,
   { label: string; tone: StatusTone }
 > = {
-  nuevo:                   { label: "Nuevo",                 tone: "info"    },
-  pendiente_documentacion: { label: "Pend. documentación",   tone: "warn"    },
-  en_tramite:              { label: "En trámite",            tone: "warn"    },
-  cerrado:                 { label: "Cerrado",               tone: "neutral" },
-  rechazado:               { label: "Rechazado",             tone: "danger"  },
+  nuevo:      { label: "Nuevo",      tone: "info"    },
+  en_tramite: { label: "En trámite", tone: "warn"    },
+  cerrado:    { label: "Cerrado",    tone: "neutral" },
 };

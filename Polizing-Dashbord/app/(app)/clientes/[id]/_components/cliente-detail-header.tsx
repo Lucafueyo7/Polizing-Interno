@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft, Edit, Mail, Plus, WhatsApp } from "@/components/icons";
+import { ChevronLeft, Edit, Mail, Plus } from "@/components/icons";
 import { ClienteAvatar } from "@/components/shared/cliente-avatar";
 import { ClienteTipoBadge } from "@/components/shared/status-badges/cliente-tipo-badge";
 import { EstadoClienteBadge } from "@/components/shared/status-badges/estado-cliente-badge";
@@ -41,16 +41,6 @@ export function ClienteDetailHeader({ cliente }: { cliente: ClienteFull }) {
               <Mail className="w-3.5 h-3.5" />
               Email
             </a>
-          )}
-          {cliente.telefono && (
-            <button
-              type="button"
-              disabled
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              <WhatsApp className="w-3.5 h-3.5" />
-              WhatsApp
-            </button>
           )}
           <Link
             href={`/clientes/${cliente.id}?modal=edit`}

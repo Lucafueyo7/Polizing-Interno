@@ -11,10 +11,8 @@ type SearchParams = { tab?: string; q?: string };
 const TAB_VALUES: ReadonlyArray<SiniestroTab> = [
   "all",
   "nuevo",
-  "pendiente_documentacion",
   "en_tramite",
   "cerrado",
-  "rechazado",
 ];
 
 function parseTab(raw: string | undefined): SiniestroTab {

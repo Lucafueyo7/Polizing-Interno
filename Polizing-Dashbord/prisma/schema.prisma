@@ -276,7 +276,7 @@ model pagos {
 
 model usuarios {
   id                       Int                     @id @default(autoincrement())
-  dni                      String                  @unique
+  dni                      String?                 @unique
   email                    String                  @unique
   password_hash            String
   nombre_completo          String
@@ -435,6 +435,7 @@ enum PagoEstado {
 enum Rol {
   productor
   administrativo
+  sin_acceso
 }
 
 enum TipoSeguroSolicitud {

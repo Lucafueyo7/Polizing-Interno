@@ -11,7 +11,7 @@ import type {
 } from "./types";
 
 const ACTIVE_POLIZAS = ["vigente", "proxima"] as const;
-const PENDING_SINIESTROS = ["nuevo", "pendiente_documentacion", "en_tramite"] as const;
+const PENDING_SINIESTROS = ["nuevo", "en_tramite"] as const;
 const COMPUTABLE_POLIZAS = ["vigente", "proxima", "renovada"] as const;
 
 const getDashboardKPIsCached = createCachedGetter(

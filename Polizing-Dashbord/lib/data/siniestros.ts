@@ -13,6 +13,7 @@ import {
   isoDate,
   isoDateTime,
 } from "./_mappers";
+import type { SiniestroEstado } from "@/lib/domain/poliza-status";
 import type {
   CoberturaRef,
   FormCliente,
@@ -87,7 +88,7 @@ function toListItemBase(row: SiniestroListRow): Omit<SiniestroListItem, "leidoPo
     titulo: row.titulo,
     cliente: clienteRefFromRow(row.poliza.cliente),
     fechaReporte: isoDateTime(row.fecha_reporte),
-    estado: row.estado,
+    estado: row.estado as unknown as SiniestroEstado,
     docsCount: row.documentos.length,
   };
 }
@@ -219,19 +220,15 @@ export async function getSiniestroCounts(): Promise<SiniestroCounts> {
   return {
     all: all.length,
     nuevo: all.filter((s) => s.estado === "nuevo").length,
-    pendiente_documentacion: all.filter((s) => s.estado === "pendiente_documentacion").length,
-    en_tramite: all.filter((s) => s.estado === "en_tramite").length,
-    cerrado: all.filter((s) => s.estado === "cerrado").length,
-    rechazado: all.filter((s) => s.estado === "rechazado").length,
+    en_tramite: all.filter((s) => s.estado === "en_tramite" || s.estado === "pendiente_documentacion" as unknown as SiniestroEstado).length,
+    cerrado: all.filter((s) => s.estado === "cerrado" || s.estado === "rechazado" as unknown as SiniestroEstado).length,
   };
 }
 
 const SIN_PRIORITY: Record<SiniestroListItem["estado"], number> = {
   nuevo: 0,
-  pendiente_documentacion: 1,
-  en_tramite: 2,
-  cerrado: 3,
-  rechazado: 4,
+  en_tramite: 1,
+  cerrado: 2,
 };
 
 export async function getPrimerSiniestro(

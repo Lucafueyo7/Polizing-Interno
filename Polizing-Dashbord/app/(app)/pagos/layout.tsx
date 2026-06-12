@@ -1,7 +1,6 @@
 import { PageHeader } from "@/components/shared/page-header";
 import { Card } from "@/components/ui/card";
 import { getPagoCounts, getPagosSummary } from "@/lib/data/pagos";
-import { PagosPageActions } from "./_components/pagos-page-actions";
 import { PagosSegmented } from "./_components/pagos-segmented";
 import { PagosSummary } from "./_components/pagos-summary";
 
@@ -24,7 +23,7 @@ export default async function PagosLayout({
       <PageHeader
         title="Pagos masivos"
         subtitle="Validación de comprobantes de pago — exclusivo clientes corporativos"
-        actions={<PagosPageActions />}
+        actions={null}
       />
 
       <PagosSummary summary={summary} />

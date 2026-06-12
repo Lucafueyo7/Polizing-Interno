@@ -10,8 +10,8 @@ import {
 import type { UsuarioListItem } from "@/lib/data/usuarios";
 import { UsuarioActions } from "./usuario-actions";
 
-function formatDni(dni: string): string {
-  if (dni.startsWith("clerk:")) return "—";
+function formatDni(dni: string | null): string {
+  if (dni === null || dni.startsWith("clerk:")) return "—";
   return dni;
 }
 
@@ -50,8 +50,8 @@ export function UsuariosTable({
               {formatDni(u.dni)}
             </TableCell>
             <TableCell>
-              <Badge variant={u.rol === "administrativo" ? "info" : "outline"}>
-                {u.rol === "administrativo" ? "Administrativo" : "Productor"}
+              <Badge variant={u.rol === "administrativo" ? "info" : u.rol === "sin_acceso" ? "neutral" : "outline"}>
+                {u.rol === "administrativo" ? "Administrativo" : u.rol === "sin_acceso" ? "Sin acceso" : "Productor"}
               </Badge>
             </TableCell>
             <TableCell className="w-10 text-right">

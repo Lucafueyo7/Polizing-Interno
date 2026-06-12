@@ -1,12 +1,13 @@
 "use client";
 
 import { useTransition } from "react";
-import { CheckCircle, Forward, Reply } from "@/components/icons";
+import { CheckCircle, XCircle, ArrowLeft } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { toastError, toastSuccess } from "@/lib/ui/toast";
 import type { SiniestroEstado } from "@/lib/domain/poliza-status";
 import { aprobarTramite } from "../../_actions/aprobar-tramite";
-import { derivarSiniestro } from "../../_actions/derivar-siniestro";
+import { cerrarSiniestro } from "../../_actions/cerrar-siniestro";
+import { retrocederSiniestro } from "../../_actions/retroceder-siniestro";
 
 export function DetailActions({
   id,
@@ -17,47 +18,41 @@ export function DetailActions({
 }) {
   const [isPending, startTransition] = useTransition();
 
-  const handleAprobar = () => {
+  const handleAction = (action: () => Promise<{ ok: boolean; error?: string }>, successMsg: string) => {
     startTransition(async () => {
-      const result = await aprobarTramite(id);
+      const result = await action();
       if (result.ok) {
-        toastSuccess("Trámite aprobado");
+        toastSuccess(successMsg);
       } else {
-        toastError(result.error);
-      }
-    });
-  };
-
-  const handleDerivar = () => {
-    startTransition(async () => {
-      const result = await derivarSiniestro(id);
-      if (result.ok) {
-        toastSuccess("Siniestro derivado");
-      } else {
-        toastError(result.error);
+        toastError(result.error ?? "Error");
       }
     });
   };
 
   return (
     <div className="flex items-center gap-1.5 flex-wrap">
-      <Button variant="outline" size="sm" disabled>
-        <Reply className="w-3 h-3" />
-        Responder
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleDerivar}
-        disabled={isPending}
-      >
-        <Forward className="w-3 h-3" />
-        Derivar
-      </Button>
       {estado === "nuevo" && (
-        <Button size="sm" onClick={handleAprobar} disabled={isPending}>
+        <Button size="sm" onClick={() => handleAction(() => aprobarTramite(id), "Trámite aprobado")} disabled={isPending}>
           <CheckCircle className="w-3 h-3" />
           Aprobar trámite
+        </Button>
+      )}
+      {estado === "en_tramite" && (
+        <>
+          <Button variant="outline" size="sm" onClick={() => handleAction(() => retrocederSiniestro(id, "en_tramite"), "Siniestro devuelto a nuevo")} disabled={isPending}>
+            <ArrowLeft className="w-3 h-3" />
+            Volver a nuevo
+          </Button>
+          <Button variant="destructive" size="sm" onClick={() => handleAction(() => cerrarSiniestro(id), "Siniestro cerrado")} disabled={isPending}>
+            <XCircle className="w-3 h-3" />
+            Cerrar siniestro
+          </Button>
+        </>
+      )}
+      {estado === "cerrado" && (
+        <Button variant="outline" size="sm" onClick={() => handleAction(() => retrocederSiniestro(id, "cerrado"), "Siniestro devuelto a en trámite")} disabled={isPending}>
+          <ArrowLeft className="w-3 h-3" />
+          Volver a en trámite
         </Button>
       )}
     </div>

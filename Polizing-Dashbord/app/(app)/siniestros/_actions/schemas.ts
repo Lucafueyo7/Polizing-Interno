@@ -19,10 +19,8 @@ export const SiniestroSchema = z.object({
   fechaOcurrencia: isoDateString,
   estado: z.enum([
     "nuevo",
-    "pendiente_documentacion",
     "en_tramite",
     "cerrado",
-    "rechazado",
   ]),
 });
 

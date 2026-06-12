@@ -149,7 +149,7 @@ export function NotificationPanel() {
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-destructive text-[10px] leading-4 text-white text-center font-semibold border-2 border-card">
+          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-destructive text-[10px] text-white font-semibold border-2 border-card flex items-center justify-center">
             {unreadCount}
           </span>
         )}

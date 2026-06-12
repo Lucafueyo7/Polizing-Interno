@@ -32,16 +32,17 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
 
   // El usuario debe estar sincronizado en la BD (lo crea el webhook de Clerk en
   // `user.created`). Si no existe, no tiene acceso → la UI muestra el cartel.
-  let dbUser: { id: number } | null = null;
+  let dbUser: { id: number; rol: string } | null = null;
   try {
     dbUser = await prisma.usuarios.findUnique({
       where: { email },
-      select: { id: true },
+      select: { id: true, rol: true },
     });
   } catch {
     return null;
   }
   if (!dbUser) return null;
+  if (dbUser.rol === "sin_acceso") return null;
 
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ");
   const name = fullName || deriveName(email);

@@ -1,11 +1,7 @@
-import { TODAY_ISO } from "./date";
-
-const REFERENCE_NOW = new Date(`${TODAY_ISO}T20:00:00`);
-
 export function timeAgo(iso: string | Date | null | undefined): string {
   if (!iso) return "—";
   const date = iso instanceof Date ? iso : new Date(iso);
-  const diffMin = Math.round((REFERENCE_NOW.getTime() - date.getTime()) / 60_000);
+  const diffMin = Math.round((Date.now() - date.getTime()) / 60_000);
   if (diffMin < 1) return "ahora";
   if (diffMin < 60) return `hace ${diffMin} min`;
   if (diffMin < 1440) return `hace ${Math.round(diffMin / 60)} h`;

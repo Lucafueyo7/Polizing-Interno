@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Paperclip, WhatsApp } from "@/components/icons";
 import { ClienteAvatar } from "@/components/shared/cliente-avatar";
 import { SiniestroBadge } from "@/components/shared/status-badges/siniestro-badge";
@@ -12,12 +12,13 @@ import type { SiniestroListItem } from "@/lib/data/types";
 
 export function InboxItem({ item }: { item: SiniestroListItem }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isActive = pathname === `/siniestros/${item.id}`;
   const unread = !item.leidoPorMi;
 
   return (
     <Link
-      href={`/siniestros/${item.id}`}
+      href={`/siniestros/${item.id}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`}
       data-active={isActive}
       data-unread={unread}
       className={cn(

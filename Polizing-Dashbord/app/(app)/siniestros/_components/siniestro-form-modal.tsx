@@ -26,10 +26,8 @@ import type { SiniestroInput } from "../_actions/schemas";
 
 type Estado =
   | "nuevo"
-  | "pendiente_documentacion"
   | "en_tramite"
-  | "cerrado"
-  | "rechazado";
+  | "cerrado";
 
 type FormShape = {
   clienteId: string;
@@ -267,12 +265,8 @@ export function SiniestroFormModal({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="nuevo">Nuevo</SelectItem>
-                    <SelectItem value="pendiente_documentacion">
-                      Pendiente de documentación
-                    </SelectItem>
                     <SelectItem value="en_tramite">En trámite</SelectItem>
                     <SelectItem value="cerrado">Cerrado</SelectItem>
-                    <SelectItem value="rechazado">Rechazado</SelectItem>
                   </SelectContent>
                 </Select>
               )}

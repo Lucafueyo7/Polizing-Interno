@@ -1,4 +1,4 @@
-export type Role = "Productor" | "Administrativo";
+export type Role = "Productor" | "Administrativo" | "sin_acceso";
 
 export type SessionUser = {
   id?: number;

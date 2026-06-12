@@ -169,10 +169,8 @@ export type SiniestroDoc = {
 export type SiniestroTab =
   | "all"
   | "nuevo"
-  | "pendiente_documentacion"
   | "en_tramite"
-  | "cerrado"
-  | "rechazado";
+  | "cerrado";
 
 export type SiniestrosFilters = {
   q?: string;
