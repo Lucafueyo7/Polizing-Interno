@@ -385,10 +385,7 @@ enum ClienteEstado {
 
 enum PolizaEstado {
   vigente
-  proxima
   vencida
-  anulada
-  renovada
 }
 
 enum SiniestroEstado {

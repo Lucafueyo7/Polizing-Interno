@@ -21,7 +21,7 @@ const polizaRow = {
 describe("listVigentesByClienteId", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("filtra por estado in [vigente,proxima], categoría auto, y ordena por dominio", async () => {
+  it("filtra por estado vigente, categoría auto, y ordena por dominio", async () => {
     (prisma.polizas.findMany as any).mockResolvedValue([polizaRow]);
     const out = await listVigentesByClienteId(1);
     expect(out).toHaveLength(1);
@@ -30,7 +30,7 @@ describe("listVigentesByClienteId", () => {
     expect(out[0].coverage).toBe("todo_riesgo");
     const call = (prisma.polizas.findMany as any).mock.calls[0][0];
     expect(call.where.cliente_id).toBe(1);
-    expect(call.where.estado).toEqual({ in: ["vigente", "proxima"] });
+    expect(call.where.estado).toEqual({ in: ["vigente"] });
     expect(call.where.tipo_seguro).toEqual({ categoria: "auto" });
     expect(call.orderBy).toEqual({ dominio: "asc" });
   });
@@ -63,7 +63,7 @@ describe("getOwnedById", () => {
     expect(call.where).toEqual({
       id: 7,
       cliente_id: 42,
-      estado: { in: ["vigente", "proxima"] },
+      estado: { in: ["vigente"] },
     });
   });
 });

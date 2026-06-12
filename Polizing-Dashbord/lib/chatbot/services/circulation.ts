@@ -16,7 +16,7 @@ export async function refreshAndGetCard(
     where: {
       id: policyId,
       cliente_id: clienteId,
-      estado: { in: ["vigente", "proxima"] },
+      estado: { in: ["vigente"] },
     },
     select: {
       id: true,

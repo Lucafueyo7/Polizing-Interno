@@ -2,8 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { aseguradoraColor } from "@/lib/domain/aseguradora-color";
 import type { AseguradoraListItem } from "./types";
 
-const ACTIVE_ESTADOS = ["vigente", "proxima"] as const;
-const COMPUTABLE_ESTADOS = ["vigente", "proxima", "renovada"] as const;
+const ACTIVE_ESTADOS = ["vigente"] as const;
+const COMPUTABLE_ESTADOS = ["vigente"] as const;
 
 function aseguradoraInitials(razonSocial: string): string {
   return (

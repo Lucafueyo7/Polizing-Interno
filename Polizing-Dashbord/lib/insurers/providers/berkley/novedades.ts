@@ -30,6 +30,8 @@ import {
   POLIZAS2_LAYOUT,
   RAMAS_LAYOUT,
   RIEAUT_LAYOUT,
+  RIEINC_LAYOUT,
+  RIECER_LAYOUT,
   layoutKeyFromFilename,
 } from "./layouts";
 
@@ -39,6 +41,8 @@ const PARSED_KEYS = new Set([
   "polizas2",
   "movimi",
   "rieaut",
+  "rieinc",
+  "riecer",
   "ramas",
   "cobert",
 ]);
@@ -181,6 +185,32 @@ function buildRieautMap(buf: Buffer): Map<string, RieautEntry> {
       dominio,
       codigo_cobertura: v.cobertura,
     });
+  }
+  return result;
+}
+
+type RieCapitalEntry = { suma_asegurada: string | null };
+
+/**
+ * Construye un mapa { rama-poliza → suma asegurada } a partir de un archivo
+ * multi-cobertura (rieinc, riecer). Suma todos los capital_cob_N del riesgo
+ * y divide por 100 para los 2 decimales implícitos.
+ */
+function buildRieCapitalMap(buf: Buffer, layout: typeof RIEINC_LAYOUT): Map<string, RieCapitalEntry> {
+  const rows = parseFixedWidth(buf, layout);
+  const totals = new Map<string, number>();
+  for (const r of rows) {
+    if (!r.rama || !r.poliza) continue;
+    const key = polizaKey(r.rama, r.poliza);
+    let total = totals.get(key) ?? 0;
+    for (let i = 1; i <= 12; i++) {
+      total += Number(String((r as Record<string, unknown>)[`capital_cob_${i}`] ?? "").trim()) || 0;
+    }
+    totals.set(key, total);
+  }
+  const result = new Map<string, RieCapitalEntry>();
+  for (const [k, total] of totals) {
+    result.set(k, { suma_asegurada: total > 0 ? (total / 100).toFixed(2) : null });
   }
   return result;
 }
@@ -424,22 +454,29 @@ export async function runBerkleySync(
     const archivosInternos = extractParsedFiles(buf, a.archivo);
 
     // Construir mapas de enriquecimiento desde los archivos auxiliares.
-    const movimiEntry = archivosInternos.find(([k]) => k === "movimi");
-    const rieautEntry = archivosInternos.find(([k]) => k === "rieaut");
-    const ramasEntry  = archivosInternos.find(([k]) => k === "ramas");
-    const cobertEntry = archivosInternos.find(([k]) => k === "cobert");
+    const movimiEntry   = archivosInternos.find(([k]) => k === "movimi");
+    const rieautEntry   = archivosInternos.find(([k]) => k === "rieaut");
+    const rieincEntry   = archivosInternos.find(([k]) => k === "rieinc");
+    const riecerEntry   = archivosInternos.find(([k]) => k === "riecer");
+    const ramasEntry    = archivosInternos.find(([k]) => k === "ramas");
+    const cobertEntry   = archivosInternos.find(([k]) => k === "cobert");
 
-    const movimiMap = movimiEntry ? buildMovimiMap(movimiEntry[1]) : new Map<string, MovimiEntry>();
-    const rieautMap = rieautEntry ? buildRieautMap(rieautEntry[1]) : new Map<string, RieautEntry>();
-    const ramasMap  = ramasEntry  ? buildRamasMap(ramasEntry[1])   : new Map<string, string>();
-    const cobertMap = cobertEntry ? buildCobertMap(cobertEntry[1]) : new Map<string, string>();
+    const movimiMap    = movimiEntry ? buildMovimiMap(movimiEntry[1])          : new Map<string, MovimiEntry>();
+    const rieautMap    = rieautEntry ? buildRieautMap(rieautEntry[1])          : new Map<string, RieautEntry>();
+    const ramasMap     = ramasEntry  ? buildRamasMap(ramasEntry[1])            : new Map<string, string>();
+    const cobertMap    = cobertEntry ? buildCobertMap(cobertEntry[1])          : new Map<string, string>();
+
+    // Suma asegurada para ramas no-auto (rieinc, riecer): combinar en un solo mapa.
+    const rieCapitalMap = new Map<string, RieCapitalEntry>();
+    if (rieincEntry) for (const [k, v] of buildRieCapitalMap(rieincEntry[1], RIEINC_LAYOUT)) rieCapitalMap.set(k, v);
+    if (riecerEntry) for (const [k, v] of buildRieCapitalMap(riecerEntry[1], RIECER_LAYOUT)) rieCapitalMap.set(k, v);
 
     // Procesar clientes primero (para que polizas2 pueda linkearse por código).
-    const asegurEntry = archivosInternos.find(([k]) => k === "asegur");
+    const asegurEntry   = archivosInternos.find(([k]) => k === "asegur");
     const polizas2Entry = archivosInternos.find(([k]) => k === "polizas2");
     if (asegurEntry) await syncAsegur(asegurEntry[1], novedades);
     if (polizas2Entry) {
-      await syncPolizas2(polizas2Entry[1], novedades, movimiMap, rieautMap, ramasMap, cobertMap);
+      await syncPolizas2(polizas2Entry[1], novedades, movimiMap, rieautMap, rieCapitalMap, ramasMap, cobertMap);
     }
   }
 
@@ -638,6 +675,7 @@ async function syncPolizas2(
   novedades: Novedad[],
   movimiMap: Map<string, MovimiEntry>,
   rieautMap: Map<string, RieautEntry>,
+  rieCapitalMap: Map<string, RieCapitalEntry>,
   ramasMap: Map<string, string>,
   cobertMap: Map<string, string>,
 ): Promise<void> {
@@ -665,7 +703,8 @@ async function syncPolizas2(
     // Rama y suplemento viven en columnas propias.
     const numeroPoliza = poliza.trim();
 
-    // Descartar pólizas vencidas antes de cualquier escritura.
+    // Descartar pólizas anuladas o vencidas antes de cualquier escritura.
+    if (r.anulada?.toUpperCase() === "S") continue;
     const fechaFin = parseFechaAAAAMMDD(r.vig_final ?? "");
     if (fechaFin && fechaFin.getTime() < startOfTodayUTC()) continue;
 
@@ -691,10 +730,8 @@ async function syncPolizas2(
       clienteId = cli?.id ?? null;
     }
 
-    // Estado: anulada si la poliza viene marcada; vigente en caso contrario.
-    // (vigente/vencida/proxima se derivan en tiempo de lectura desde fecha_fin_vigencia)
-    const estado: "vigente" | "anulada" =
-      r.anulada?.toUpperCase() === "S" ? "anulada" : "vigente";
+    // Toda póliza que llega aquí es vigente (las anuladas/vencidas se saltaron arriba).
+    const estado = "vigente" as const;
 
     // Datos de enriquecimiento desde los archivos complementarios.
     const key = polizaKey(rama, poliza);
@@ -706,6 +743,9 @@ async function syncPolizas2(
 
     const ramaCode = rama.trim().padStart(2, "0");
     const esRamaConDominio = RAMA_A_TIPO[ramaCode]?.categoria === "auto";
+
+    // Suma asegurada: rieaut para autos; rieinc/riecer para el resto.
+    const sumaAsegurada = rieaut?.suma_asegurada ?? rieCapitalMap.get(key)?.suma_asegurada ?? null;
 
     const tipoSeguroId = await resolveTipoSeguroId(rama, ramasMap);
     // Toda póliza debe tener cobertura: si Berkley no manda código, usamos el fallback.
@@ -725,12 +765,12 @@ async function syncPolizas2(
       // Enriquecimiento — se setea si viene del archivo complementario, se deja
       // sin cambios (undefined) si no llegó en este ZIP para no sobrescribir datos
       // válidos de una corrida anterior.
-      ...(movimi?.premio != null                       && { prima_mensual:  movimi.premio       }),
-      ...(rieaut?.suma_asegurada                       && { suma_asegurada: rieaut.suma_asegurada }),
+      ...(movimi?.premio != null                       && { prima_mensual:  movimi.premio    }),
+      ...(sumaAsegurada                                && { suma_asegurada: sumaAsegurada    }),
       // Dominio solo para ramas de la categoría "auto" (automotor, flota, etc.).
-      ...(rieaut?.dominio && esRamaConDominio          && { dominio:        rieaut.dominio      }),
-      ...(tipoSeguroId                                 && { tipo_seguro_id: tipoSeguroId        }),
-      ...(coberturaId                                  && { cobertura_id:   coberturaId         }),
+      ...(rieaut?.dominio && esRamaConDominio          && { dominio:        rieaut.dominio   }),
+      ...(tipoSeguroId                                 && { tipo_seguro_id: tipoSeguroId     }),
+      ...(coberturaId                                  && { cobertura_id:   coberturaId      }),
     };
 
     if (!existing) {
@@ -770,7 +810,7 @@ async function syncPolizas2(
       const rawNuevo    = JSON.stringify(r);
       const needsEnrich =
         (existing.prima_mensual == null && movimi?.premio != null) ||
-        (existing.suma_asegurada == null && rieaut?.suma_asegurada != null) ||
+        (existing.suma_asegurada == null && sumaAsegurada != null) ||
         (existing.dominio == null && rieaut?.dominio != null && esRamaConDominio) ||
         (existing.cobertura_id == null && coberturaId != null);
 

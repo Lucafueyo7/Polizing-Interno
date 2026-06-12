@@ -84,14 +84,7 @@ export type PolizaAseguradoraRef = {
   color: string;
 };
 
-export type PolizaTab =
-  | "all"
-  | "vigente"
-  | "proxima"
-  | "porVencer"
-  | "renovada"
-  | "vencida"
-  | "anulada";
+export type PolizaTab = "all" | "vigente" | "vencida";
 
 export type PolizasFilters = {
   q?: string;
@@ -287,5 +280,4 @@ export type DistribucionAseguradora = {
 
 export type SidebarBadges = {
   siniestrosNuevos: number;
-  polizasPorVencer: number;
 };

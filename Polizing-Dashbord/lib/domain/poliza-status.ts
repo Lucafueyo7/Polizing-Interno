@@ -1,15 +1,8 @@
-export type PolizaEstado =
-  | "vigente"
-  | "proxima"
-  | "vencida"
-  | "anulada"
-  | "renovada";
+export type PolizaEstado = "vigente" | "vencida";
 
 /**
  * Deriva el estado real de una póliza en tiempo de lectura.
- * - "anulada" y "renovada" son estados manuales persistidos: se respetan siempre.
- * - Si hay fecha de fin de vigencia: calcula vigente/proxima/vencida contra `now`.
- *   Proxima = entre hoy y 60 días; Vencida = fecha ya pasó.
+ * - Si hay fecha de fin de vigencia y ya pasó → "vencida"; si no → "vigente".
  * - Sin fecha: devuelve el estado guardado.
  */
 export function derivePolizaEstado(
@@ -17,14 +10,11 @@ export function derivePolizaEstado(
   finVigencia: Date | null | undefined,
   now: Date = new Date(),
 ): PolizaEstado {
-  if (stored === "anulada" || stored === "renovada") return stored;
   if (!finVigencia) return stored;
-  const finMs = finVigencia.getTime();
-  const nowMs = now.getTime();
-  if (finMs < nowMs) return "vencida";
-  const diasRestantes = Math.round((finMs - nowMs) / 86_400_000);
-  if (diasRestantes <= 60) return "proxima";
-  return "vigente";
+  // Vencida solo si la fecha de fin es anterior a hoy (el día de vencimiento
+  // se considera vigente; el día siguiente pasa a vencida).
+  const startOfToday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return finVigencia.getTime() < startOfToday ? "vencida" : "vigente";
 }
 
 export type StatusTone = "success" | "warn" | "danger" | "neutral" | "info";
@@ -34,10 +24,7 @@ export const POLIZA_STATUS: Record<
   { label: string; tone: StatusTone }
 > = {
   vigente: { label: "Vigente", tone: "success" },
-  proxima: { label: "Próx. a vencer", tone: "warn" },
   vencida: { label: "Vencida", tone: "danger" },
-  anulada: { label: "Anulada", tone: "neutral" },
-  renovada: { label: "Renovada", tone: "info" },
 };
 
 export type SiniestroEstado =

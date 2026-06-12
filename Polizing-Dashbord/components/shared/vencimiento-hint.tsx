@@ -8,7 +8,7 @@ type VencimientoHintProps = {
 
 export function VencimientoHint({ dias, estado }: VencimientoHintProps) {
   if (dias === null) return null;
-  if (estado !== "vigente" && estado !== "proxima") return null;
+  if (estado !== "vigente") return null;
   if (dias < 0 || dias > 60) return null;
 
   const tone = dias <= 15 ? "text-brand-danger" : "text-brand-warn";

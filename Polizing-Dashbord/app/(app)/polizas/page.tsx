@@ -19,11 +19,8 @@ import { PolizasTable } from "./_components/polizas-table";
 
 const TABS: { key: PolizaTab; label: string }[] = [
   { key: "all", label: "Todas" },
-  { key: "vigente", label: "Activas" },
-  { key: "porVencer", label: "Próximas a vencer" },
+  { key: "vigente", label: "Vigentes" },
   { key: "vencida", label: "Vencidas" },
-  { key: "renovada", label: "Renovadas" },
-  { key: "anulada", label: "Anuladas" },
 ];
 
 type SortField = "numero" | "cliente" | "aseguradora";
@@ -42,7 +39,7 @@ type SearchParams = Promise<{
 }>;
 
 function parseTab(raw: string | undefined): PolizaTab {
-  if (raw === "vigente" || raw === "proxima" || raw === "porVencer" || raw === "renovada" || raw === "vencida" || raw === "anulada") return raw;
+  if (raw === "vigente" || raw === "vencida") return raw;
   return "all";
 }
 
@@ -114,7 +111,7 @@ export default async function PolizasPage({
     <>
       <PageHeader
         title="Pólizas"
-        subtitle={`${fmtNum(counts.all)} pólizas en cartera · ${fmtNum(counts.vigente)} vigentes · ${fmtNum(counts.porVencer)} próximas a vencer`}
+        subtitle={`${fmtNum(counts.all)} pólizas en cartera · ${fmtNum(counts.vigente)} vigentes`}
         actions={<PolizasPageActions />}
       />
 

@@ -1,6 +1,5 @@
 import { createCachedGetter, CACHE_TAGS } from "./cache";
 import { prisma } from "@/lib/prisma";
-import { TODAY_ISO } from "@/lib/format/date";
 import { aseguradoraColor } from "@/lib/domain/aseguradora-color";
 import { clienteRefFromRow, isoDateTime } from "./_mappers";
 import type {
@@ -10,9 +9,9 @@ import type {
   SiniestroPendiente,
 } from "./types";
 
-const ACTIVE_POLIZAS = ["vigente", "proxima"] as const;
+const ACTIVE_POLIZAS = ["vigente"] as const;
 const PENDING_SINIESTROS = ["nuevo", "en_tramite"] as const;
-const COMPUTABLE_POLIZAS = ["vigente", "proxima", "renovada"] as const;
+const COMPUTABLE_POLIZAS = ["vigente"] as const;
 
 const getDashboardKPIsCached = createCachedGetter(
   getDashboardKPIsImpl,
@@ -57,20 +56,8 @@ export async function getSidebarBadges(): Promise<SidebarBadges> {
 }
 
 async function getSidebarBadgesImpl(): Promise<SidebarBadges> {
-  const today = new Date(TODAY_ISO);
-  const limit = new Date(TODAY_ISO);
-  limit.setDate(limit.getDate() + 30);
-
-  const [siniestrosNuevos, polizasPorVencer] = await Promise.all([
-    prisma.siniestros.count({ where: { estado: "nuevo" } }),
-    prisma.polizas.count({
-      where: {
-        estado: { in: [...ACTIVE_POLIZAS] },
-        fecha_fin_vigencia: { gte: today, lte: limit },
-      },
-    }),
-  ]);
-  return { siniestrosNuevos, polizasPorVencer };
+  const siniestrosNuevos = await prisma.siniestros.count({ where: { estado: "nuevo" } });
+  return { siniestrosNuevos };
 }
 
 const getSiniestrosPendientesCached = createCachedGetter(

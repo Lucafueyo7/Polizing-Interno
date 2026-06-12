@@ -20,7 +20,6 @@ export default async function DashboardLayout({
         user={user}
         badges={{
           siniestros: badges.siniestrosNuevos,
-          polizas: badges.polizasPorVencer,
         }}
       />
       <main className="flex flex-col min-w-0">

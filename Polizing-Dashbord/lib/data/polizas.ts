@@ -77,14 +77,8 @@ const getAllPolizasCached = createCachedGetter(
   CACHE_TAGS.polizas,
 );
 
-// Con derivePolizaEstado, "proxima" ya implica 0 ≤ días ≤ 60.
-function isPorVencer(p: PolizaListItem): boolean {
-  return p.estado === "proxima";
-}
-
 function matchesTab(p: PolizaListItem, tab: PolizaTab | undefined): boolean {
   if (!tab || tab === "all") return true;
-  if (tab === "porVencer") return isPorVencer(p);
   return p.estado === tab;
 }
 
@@ -154,11 +148,7 @@ export async function getPolizaCounts(
   return {
     all: scoped.length,
     vigente: scoped.filter((p) => p.estado === "vigente").length,
-    proxima: scoped.filter((p) => p.estado === "proxima").length,
-    porVencer: scoped.filter(isPorVencer).length,
-    renovada: scoped.filter((p) => p.estado === "renovada").length,
     vencida: scoped.filter((p) => p.estado === "vencida").length,
-    anulada: scoped.filter((p) => p.estado === "anulada").length,
   };
 }
 

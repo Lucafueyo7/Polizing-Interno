@@ -20,9 +20,9 @@ import type {
   PolizaListItem,
   SiniestroListItem,
 } from "./types";
-import type { SiniestroEstado } from "@/lib/domain/poliza-status";
+import { derivePolizaEstado, type SiniestroEstado } from "@/lib/domain/poliza-status";
 
-const POLIZA_VIGENTES = ["vigente", "proxima"] as const;
+const POLIZA_VIGENTES = ["vigente"] as const;
 
 type ClienteRow = Awaited<ReturnType<typeof findClientes>>[number];
 
@@ -186,7 +186,7 @@ export async function getClienteById(id: number): Promise<ClienteFull | null> {
 
   const base = toListItem(row);
   const primaAnualizada = row.polizas
-    .filter((p) => p.estado !== "anulada" && p.estado !== "vencida")
+    .filter((p) => p.estado !== "vencida")
     .reduce((s, p) => s + Number(p.prima_mensual ?? 0) * 12, 0);
 
   return {
@@ -231,7 +231,7 @@ export async function getClienteContrataciones(
     fin: isoDate(row.fecha_fin_vigencia ?? null),
     suma: Number(row.suma_asegurada ?? 0),
     prima: Number(row.prima_mensual ?? 0),
-    estado: row.estado,
+    estado: derivePolizaEstado(row.estado, row.fecha_fin_vigencia ?? null),
     diasHastaVencimiento: vencimientoDays(row.fecha_fin_vigencia),
     cliente: clienteRefFromRow(row.cliente),
     aseguradora: aseguradoraRefFromRow(row.aseguradora),

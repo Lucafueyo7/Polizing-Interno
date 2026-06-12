@@ -26,14 +26,11 @@ type Mode =
   | { mode: "create"; refs: PolizaFormRefs; newForCliente?: number }
   | { mode: "edit"; refs: PolizaFormRefs; poliza: PolizaFull };
 
-type Estado = "vigente" | "proxima" | "vencida" | "anulada" | "renovada";
+type Estado = "vigente" | "vencida";
 
 const ESTADO_OPTIONS: ReadonlyArray<FormSelectOption> = [
   { value: "vigente", label: "Vigente" },
-  { value: "proxima", label: "Próx. a vencer" },
-  { value: "renovada", label: "Renovada" },
   { value: "vencida", label: "Vencida" },
-  { value: "anulada", label: "Anulada" },
 ];
 
 type FormShape = {

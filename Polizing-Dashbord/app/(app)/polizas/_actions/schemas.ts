@@ -21,7 +21,7 @@ export const PolizaSchema = z
     aseguradoraId: z.number().int().positive("Aseguradora requerida"),
     tipoSeguroId: z.number().int().positive("Tipo de seguro requerido"),
     coberturaId: z.number().int().positive("Cobertura requerida"),
-    estado: z.enum(["vigente", "proxima", "vencida", "anulada", "renovada"]),
+    estado: z.enum(["vigente", "vencida"]),
     fechaInicio: isoDateString,
     fechaFin: isoDateString,
     sumaAsegurada: positiveDecimal("Suma asegurada"),

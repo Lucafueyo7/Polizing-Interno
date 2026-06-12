@@ -7,7 +7,7 @@ const POLIZA_INCLUDE = {
   aseguradora: { select: { razon_social: true } },
 } as const;
 
-const ACTIVE_STATES = ["vigente", "proxima"] as const;
+const ACTIVE_STATES = ["vigente"] as const;
 
 export async function listVigentesByClienteId(clienteId: number): Promise<PolicyChatbotShape[]> {
   const polizas = await prisma.polizas.findMany({

@@ -273,7 +273,7 @@ export async function getSiniestroFormRefs(): Promise<SiniestroFormRefs> {
       },
     }),
     prisma.polizas.findMany({
-      where: { estado: { in: ["vigente", "proxima", "renovada"] } },
+      where: { estado: { in: ["vigente"] } },
       orderBy: { numero_poliza: "asc" },
       include: {
         tipo_seguro: { select: { nombre: true } },

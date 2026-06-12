@@ -80,7 +80,7 @@ export type PolizaSeed = {
   fin: string;
   suma: number;
   prima: number;
-  estado: "vigente" | "proxima" | "vencida" | "anulada" | "renovada";
+  estado: "vigente" | "vencida";
 };
 
 export type SiniestroDocSeed = {
@@ -259,19 +259,19 @@ export const ASEGURADORAS: AseguradoraSeed[] = [
 
 export const POLIZAS: PolizaSeed[] = [
   { id: "P-2024-0918", numero: "AUT-918274", clienteId: "C002", aseguradoraId: "A01", tipo: "Automotor",            cobertura: "todo_riesgo",          inicio: "2025-09-01", fin: "2026-08-31", suma: 18500000,  prima:    38400, estado: "vigente"  },
-  { id: "P-2024-1145", numero: "HOG-441098", clienteId: "C002", aseguradoraId: "A04", tipo: "Hogar",                cobertura: "integral",             inicio: "2025-05-01", fin: "2026-05-15", suma: 42000000,  prima:    45900, estado: "proxima"  },
+  { id: "P-2024-1145", numero: "HOG-441098", clienteId: "C002", aseguradoraId: "A04", tipo: "Hogar",                cobertura: "integral",             inicio: "2025-05-01", fin: "2026-05-15", suma: 42000000,  prima:    45900, estado: "vigente"  },
   { id: "P-2023-7782", numero: "FLO-220011", clienteId: "C001", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "responsabilidad_civil",inicio: "2025-02-01", fin: "2026-01-31", suma: 580000000, prima:  2840000, estado: "vigente"  },
   { id: "P-2024-2231", numero: "ART-885672", clienteId: "C001", aseguradoraId: "A03", tipo: "ART",                  cobertura: "basica",               inicio: "2025-07-01", fin: "2026-06-30", suma: 0,         prima:  1280000, estado: "vigente"  },
   { id: "P-2024-0011", numero: "INT-103298", clienteId: "C003", aseguradoraId: "A05", tipo: "Integral de Comercio", cobertura: "integral",             inicio: "2025-04-01", fin: "2026-03-31", suma: 1240000000,prima:  5210000, estado: "vigente"  },
-  { id: "P-2024-0334", numero: "AUT-552108", clienteId: "C004", aseguradoraId: "A01", tipo: "Automotor",            cobertura: "terceros_completo",    inicio: "2025-10-01", fin: "2026-05-22", suma: 9800000,   prima:    28100, estado: "proxima"  },
-  { id: "P-2024-0902", numero: "VID-008712", clienteId: "C004", aseguradoraId: "A04", tipo: "Vida Individual",      cobertura: "integral",             inicio: "2024-12-01", fin: "2025-11-30", suma: 60000000,  prima:    67800, estado: "renovada" },
+  { id: "P-2024-0334", numero: "AUT-552108", clienteId: "C004", aseguradoraId: "A01", tipo: "Automotor",            cobertura: "terceros_completo",    inicio: "2025-10-01", fin: "2026-05-22", suma: 9800000,   prima:    28100, estado: "vigente"  },
+  { id: "P-2024-0902", numero: "VID-008712", clienteId: "C004", aseguradoraId: "A04", tipo: "Vida Individual",      cobertura: "integral",             inicio: "2024-12-01", fin: "2025-11-30", suma: 60000000,  prima:    67800, estado: "vigente"  },
   { id: "P-2025-0188", numero: "ART-993341", clienteId: "C005", aseguradoraId: "A03", tipo: "ART",                  cobertura: "basica",               inicio: "2025-03-01", fin: "2026-02-28", suma: 0,         prima:  4120000, estado: "vigente"  },
-  { id: "P-2025-0210", numero: "FLO-771820", clienteId: "C005", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "todo_riesgo",          inicio: "2025-06-01", fin: "2026-05-31", suma: 980000000, prima:  3700000, estado: "proxima"  },
+  { id: "P-2025-0210", numero: "FLO-771820", clienteId: "C005", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "todo_riesgo",          inicio: "2025-06-01", fin: "2026-05-31", suma: 980000000, prima:  3700000, estado: "vigente"  },
   { id: "P-2024-1530", numero: "HOG-228174", clienteId: "C007", aseguradoraId: "A01", tipo: "Hogar",                cobertura: "integral",             inicio: "2025-08-01", fin: "2026-07-31", suma: 95000000,  prima:    89200, estado: "vigente"  },
   { id: "P-2024-1531", numero: "AUT-882013", clienteId: "C007", aseguradoraId: "A02", tipo: "Automotor",            cobertura: "todo_riesgo",          inicio: "2025-08-01", fin: "2026-07-31", suma: 24700000,  prima:    49800, estado: "vigente"  },
-  { id: "P-2024-1532", numero: "VID-118472", clienteId: "C007", aseguradoraId: "A04", tipo: "Vida Individual",      cobertura: "integral",             inicio: "2024-09-01", fin: "2025-08-31", suma: 80000000,  prima:    79900, estado: "anulada"  },
+  { id: "P-2024-1532", numero: "VID-118472", clienteId: "C007", aseguradoraId: "A04", tipo: "Vida Individual",      cobertura: "integral",             inicio: "2024-09-01", fin: "2025-08-31", suma: 80000000,  prima:    79900, estado: "vencida"  },
   { id: "P-2024-2018", numero: "AGR-770251", clienteId: "C008", aseguradoraId: "A02", tipo: "Agrícola",             cobertura: "integral",             inicio: "2025-10-01", fin: "2026-09-30", suma: 320000000, prima:  1640000, estado: "vigente"  },
-  { id: "P-2024-2240", numero: "AUT-110289", clienteId: "C010", aseguradoraId: "A05", tipo: "Automotor",            cobertura: "todo_riesgo",          inicio: "2025-09-01", fin: "2026-05-18", suma: 32000000,  prima:    62400, estado: "proxima"  },
+  { id: "P-2024-2240", numero: "AUT-110289", clienteId: "C010", aseguradoraId: "A05", tipo: "Automotor",            cobertura: "todo_riesgo",          inicio: "2025-09-01", fin: "2026-05-18", suma: 32000000,  prima:    62400, estado: "vigente"  },
   { id: "P-2024-2241", numero: "AUT-110290", clienteId: "C010", aseguradoraId: "A05", tipo: "Automotor",            cobertura: "terceros_completo",    inicio: "2024-05-01", fin: "2025-04-30", suma: 12000000,  prima:    31200, estado: "vencida"  },
   { id: "P-2025-0044", numero: "INT-409812", clienteId: "C011", aseguradoraId: "A01", tipo: "Integral de Comercio", cobertura: "integral",             inicio: "2025-02-01", fin: "2026-01-31", suma: 480000000, prima:  1980000, estado: "vigente"  },
   { id: "P-2025-0045", numero: "FLO-208917", clienteId: "C011", aseguradoraId: "A02", tipo: "Flota Automotor",      cobertura: "todo_riesgo",          inicio: "2025-02-01", fin: "2026-01-31", suma: 380000000, prima:  1970000, estado: "vigente"  },

@@ -54,6 +54,29 @@ export const RIEAUT_LAYOUT: FixedLayout = [
   { name: "fecha_fin_vigencia",    desde: 415, longitud: 8  },
 ];
 
+/**
+ * §4.3.X rieinc / riecer — Riesgos multi-cobertura (incendio, cerramiento, etc.).
+ * Hasta 12 coberturas; cada una ocupa 4 chars (código) + 13 chars (capital).
+ * Los importes tienen 2 decimales implícitos (igual que rieaut).
+ */
+const RIE_CAPITAL_FIELDS: FixedLayout = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => ({
+  name: `capital_cob_${i}`,
+  desde: 62 + (i - 1) * 17 + 4,
+  longitud: 13,
+}));
+
+export const RIEINC_LAYOUT: FixedLayout = [
+  { name: "rama",   desde: 1, longitud: 2 },
+  { name: "poliza", desde: 3, longitud: 7 },
+  ...RIE_CAPITAL_FIELDS,
+];
+
+export const RIECER_LAYOUT: FixedLayout = [
+  { name: "rama",   desde: 1, longitud: 2 },
+  { name: "poliza", desde: 3, longitud: 7 },
+  ...RIE_CAPITAL_FIELDS,
+];
+
 /** §4.3.1 ramas — Tabla de ramas (tipos de seguro). */
 export const RAMAS_LAYOUT: FixedLayout = [
   { name: "codigo", desde: 1, longitud: 2  },
@@ -106,6 +129,8 @@ export const LAYOUTS_BY_FILE: Record<string, FixedLayout> = {
   polizas2: POLIZAS2_LAYOUT,
   movimi:   MOVIMI_LAYOUT,
   rieaut:   RIEAUT_LAYOUT,
+  rieinc:   RIEINC_LAYOUT,
+  riecer:   RIECER_LAYOUT,
   ramas:    RAMAS_LAYOUT,
   cobert:   COBERT_LAYOUT,
   cdp:      CDP_LAYOUT,
