@@ -45,10 +45,13 @@ async function getDashboardKPIsImpl(): Promise<DashboardKPIs> {
   };
 }
 
+// El único badge cuenta siniestros "nuevo": se etiqueta con el tag `siniestros`
+// (no `kpis`) para que CUALQUIER mutación de siniestros lo invalide al instante
+// y el número del sidebar quede siempre actualizado, sin esperar el TTL.
 const getSidebarBadgesCached = createCachedGetter(
   getSidebarBadgesImpl,
-  ["kpis", "sidebar-badges"],
-  CACHE_TAGS.kpis,
+  ["siniestros", "sidebar-badges"],
+  CACHE_TAGS.siniestros,
 );
 
 export async function getSidebarBadges(): Promise<SidebarBadges> {

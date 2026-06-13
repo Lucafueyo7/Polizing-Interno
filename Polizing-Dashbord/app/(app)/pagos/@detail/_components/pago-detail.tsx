@@ -1,3 +1,4 @@
+import { DocsGrid } from "@/components/shared/docs-grid";
 import { KvRow } from "@/components/shared/kv-row";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -80,6 +81,8 @@ export function PagoDetail({ pago }: { pago: PagoFull }) {
             <KvRow label="Método" value={metodoLabel(pago.metodoPago)} />
           </dl>
         </Card>
+
+        <DocsGrid docs={pago.docs} title="Comprobantes de pago" emptyLabel="Sin comprobantes adjuntos." />
 
         <PagoTotals pago={pago} />
 

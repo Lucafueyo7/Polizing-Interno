@@ -13,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { fmtAR } from "@/lib/format/currency";
 import { fmtDate } from "@/lib/format/date";
 import type { PolizaListItem } from "@/lib/data/types";
 
@@ -50,8 +49,6 @@ export function PolizasTable({
     );
   }
 
-  const primaTotal = rows.reduce((s, p) => s + p.prima, 0);
-
   return (
     <>
       <div className="overflow-x-hidden">
@@ -87,8 +84,6 @@ export function PolizasTable({
             </TableHead>
             <TableHead>Tipo / Cobertura</TableHead>
             <TableHead>Vigencia</TableHead>
-            <TableHead className="text-right">Suma asegurada</TableHead>
-            <TableHead className="text-right">Prima</TableHead>
             <TableHead>Estado</TableHead>
           </TableRow>
         </TableHeader>
@@ -143,12 +138,6 @@ export function PolizasTable({
                   />
                 </div>
               </TableCell>
-              <TableCell className="text-right font-mono">
-                {p.suma ? fmtAR(p.suma) : "—"}
-              </TableCell>
-              <TableCell className="text-right font-mono font-medium">
-                {fmtAR(p.prima)}
-              </TableCell>
               <TableCell>
                 <PolizaBadge estado={p.estado} />
               </TableCell>
@@ -162,10 +151,6 @@ export function PolizasTable({
           Mostrando <b className="text-foreground">{rows.length}</b> de {total}
         </span>
         <div className="flex items-center gap-4">
-          <span>
-            Prima total:{" "}
-            <b className="font-mono text-foreground">{fmtAR(primaTotal)}</b>
-          </span>
           {totalPages > 1 && (
             <div className="flex items-center gap-1">
               {prevHref ? (

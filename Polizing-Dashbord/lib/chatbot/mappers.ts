@@ -11,6 +11,8 @@ export type ClienteChatbotShape = {
   phone: string;
   full_name: string;
   active: true;
+  // Adjuntar comprobantes de pago es exclusivo de clientes corporativos.
+  is_corporate: boolean;
 };
 
 export function mapClienteToChatbot(c: ClienteRow): ClienteChatbotShape {
@@ -24,6 +26,7 @@ export function mapClienteToChatbot(c: ClienteRow): ClienteChatbotShape {
     phone: c.telefono ?? "",
     full_name,
     active: true,
+    is_corporate: c.tipo === "corporativo",
   };
 }
 

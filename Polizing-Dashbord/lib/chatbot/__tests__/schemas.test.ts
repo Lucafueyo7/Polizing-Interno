@@ -40,21 +40,37 @@ describe("circulationCardBodySchema", () => {
 });
 
 describe("paymentReceiptBodySchema", () => {
-  it("happy", () => {
+  it("happy con varias pólizas y archivos", () => {
     const r = paymentReceiptBodySchema.safeParse({
       phone: "5491112345678",
-      policy: validPolicy,
-      file: validFile,
+      policies: [validPolicy, { ...validPolicy, id: 99 }],
+      files: [validFile, validFile],
     });
     expect(r.success).toBe(true);
   });
   it("rechaza base64 inválido", () => {
     const r = paymentReceiptBodySchema.safeParse({
       phone: "5491112345678",
-      policy: validPolicy,
-      file: { ...validFile, content_base64: "no es base64 ?!" },
+      policies: [validPolicy],
+      files: [{ ...validFile, content_base64: "no es base64 ?!" }],
     });
     expect(r.success).toBe(false);
+  });
+  it("rechaza sin pólizas o sin archivos", () => {
+    expect(
+      paymentReceiptBodySchema.safeParse({
+        phone: "5491112345678",
+        policies: [],
+        files: [validFile],
+      }).success,
+    ).toBe(false);
+    expect(
+      paymentReceiptBodySchema.safeParse({
+        phone: "5491112345678",
+        policies: [validPolicy],
+        files: [],
+      }).success,
+    ).toBe(false);
   });
 });
 

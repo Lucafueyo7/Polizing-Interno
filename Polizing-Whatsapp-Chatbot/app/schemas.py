@@ -20,8 +20,8 @@ class CirculationCardPayload(BaseModel):
 
 class PaymentReceiptPayload(BaseModel):
     phone: str
-    policy_id: int | None = None
-    file: dict
+    policies: list[dict] = []
+    files: list[dict] = []
 
 
 class ClaimPayload(BaseModel):

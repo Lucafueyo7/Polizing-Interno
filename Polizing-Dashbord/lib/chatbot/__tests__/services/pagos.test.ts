@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const tx = {
   pagos: { create: vi.fn() },
-  polizas: { update: vi.fn() },
+  pago_documentos: { createMany: vi.fn() },
+  polizas: { updateMany: vi.fn() },
 };
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -10,34 +11,45 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
+vi.mock("@/lib/storage/supabase", () => ({
+  uploadPagoDoc: vi.fn(async (path: string) => path),
+}));
 
-import { createFromReceipt } from "../../services/pagos";
+import { createFromReceipts } from "../../services/pagos";
 import { revalidateTag } from "next/cache";
+import { uploadPagoDoc } from "@/lib/storage/supabase";
 
-const file = { bytes: Buffer.from("data"), size: 4, mime: "application/pdf", filename: "r.pdf" };
+const pdf = { bytes: Buffer.from("data"), size: 4, mime: "application/pdf", filename: "r.pdf" };
+const img = { bytes: Buffer.from("img"), size: 3, mime: "image/png", filename: "foto.png" };
 
-describe("createFromReceipt", () => {
+describe("createFromReceipts", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    tx.pagos.create.mockReset();
-    tx.polizas.update.mockReset();
+    tx.pagos.create.mockResolvedValue({ id: 42 });
+    tx.pago_documentos.createMany.mockResolvedValue({});
+    tx.polizas.updateMany.mockResolvedValue({});
   });
 
-  it("crea pago con monto=0 estado=pendiente y vincula póliza", async () => {
-    tx.pagos.create.mockResolvedValue({ id: 42 });
-    tx.polizas.update.mockResolvedValue({});
-    const out = await createFromReceipt({ clienteId: 1, policyId: 7, file });
+  it("sube los archivos, crea el pago, los documentos y vincula varias pólizas", async () => {
+    const out = await createFromReceipts({
+      clienteId: 1,
+      policyIds: [7, 8],
+      files: [pdf, img],
+    });
     expect(out).toEqual({ reference: "PAY-00042", status: "ok" });
-    const call = (tx.pagos.create as any).mock.calls[0][0];
-    expect(call.data.cliente_id).toBe(1);
-    expect(call.data.monto).toBe(0);
-    expect(call.data.estado).toBe("pendiente");
-    expect(call.data.comprobante_nombre).toBe("r.pdf");
-    expect(call.data.comprobante_mime).toBe("application/pdf");
-    expect(Buffer.from(call.data.comprobante_contenido).toString()).toBe("data");
-    expect(call.select).toEqual({ id: true });
-    expect(tx.polizas.update).toHaveBeenCalledWith({
-      where: { id: 7 },
+
+    expect(uploadPagoDoc).toHaveBeenCalledTimes(2);
+
+    const pagoCall = (tx.pagos.create as any).mock.calls[0][0];
+    expect(pagoCall.data).toEqual({ cliente_id: 1, monto: 0, estado: "pendiente" });
+
+    const docsCall = (tx.pago_documentos.createMany as any).mock.calls[0][0];
+    expect(docsCall.data).toHaveLength(2);
+    expect(docsCall.data[0]).toMatchObject({ pago_id: 42, tipo: "pdf", nombre: "r.pdf" });
+    expect(docsCall.data[1]).toMatchObject({ pago_id: 42, tipo: "img", nombre: "foto.png" });
+
+    expect(tx.polizas.updateMany).toHaveBeenCalledWith({
+      where: { id: { in: [7, 8] } },
       data: { pago_id: 42 },
     });
     expect(revalidateTag).toHaveBeenCalledWith("pagos", "minutes");

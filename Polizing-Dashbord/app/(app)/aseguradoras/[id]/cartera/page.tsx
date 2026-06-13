@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft } from "@/components/icons";
+import { ChevronLeft, ChevronRight } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -16,12 +17,22 @@ import { getProviderForAseguradora } from "@/lib/insurers/registry";
 import { InsurerError } from "@/lib/insurers/errors";
 import type { Cartera } from "@/lib/insurers/types";
 
+const PAGE_SIZE = 20;
+
+function parsePage(raw: string | undefined): number {
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n - 1 : 0;
+}
+
 export default async function CarteraPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ cp?: string; pp?: string }>;
 }) {
   const { id: idRaw } = await params;
+  const { cp, pp } = await searchParams;
   const id = Number(idRaw);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
@@ -80,7 +91,12 @@ export default async function CarteraPage({
         </Card>
       ) : cartera ? (
         <div className="flex flex-col gap-6">
-          {cartera.clientes.length > 0 && (
+          {cartera.clientes.length > 0 && (() => {
+            const page = parsePage(cp);
+            const totalPages = Math.ceil(cartera.clientes.length / PAGE_SIZE);
+            const rows = cartera.clientes.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+            const href = (p: number) => `?cp=${p + 1}${pp ? `&pp=${pp}` : ""}`;
+            return (
             <Card className="overflow-hidden p-0 gap-0">
               <div className="px-5 py-4 border-b border-border">
                 <h3 className="text-[14.5px] font-semibold tracking-[-0.01em]">
@@ -97,8 +113,8 @@ export default async function CarteraPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {cartera.clientes.map((c, i) => (
-                    <TableRow key={`${c.documento ?? c.cuit ?? "c"}-${i}`}>
+                  {rows.map((c, i) => (
+                    <TableRow key={`${c.documento ?? c.cuit ?? "c"}-${page}-${i}`}>
                       <TableCell>{c.nombre ?? "—"}</TableCell>
                       <TableCell className="font-mono">{c.documento ?? "—"}</TableCell>
                       <TableCell className="font-mono">{c.cuit ?? "—"}</TableCell>
@@ -107,10 +123,24 @@ export default async function CarteraPage({
                   ))}
                 </TableBody>
               </Table>
+              <Pager
+                shown={rows.length}
+                total={cartera.clientes.length}
+                page={page}
+                totalPages={totalPages}
+                prevHref={page > 0 ? href(page - 1) : null}
+                nextHref={page < totalPages - 1 ? href(page + 1) : null}
+              />
             </Card>
-          )}
+            );
+          })()}
 
-          {cartera.polizas.length > 0 && (
+          {cartera.polizas.length > 0 && (() => {
+            const page = parsePage(pp);
+            const totalPages = Math.ceil(cartera.polizas.length / PAGE_SIZE);
+            const rows = cartera.polizas.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+            const href = (p: number) => `?pp=${p + 1}${cp ? `&cp=${cp}` : ""}`;
+            return (
             <Card className="overflow-hidden p-0 gap-0">
               <div className="px-5 py-4 border-b border-border">
                 <h3 className="text-[14.5px] font-semibold tracking-[-0.01em]">
@@ -126,8 +156,8 @@ export default async function CarteraPage({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {cartera.polizas.map((p, i) => (
-                    <TableRow key={`${p.numeroPoliza}-${i}`}>
+                  {rows.map((p, i) => (
+                    <TableRow key={`${p.numeroPoliza}-${page}-${i}`}>
                       <TableCell className="font-mono">{p.numeroPoliza}</TableCell>
                       <TableCell>{p.estado ?? "—"}</TableCell>
                       <TableCell className="font-mono text-[12px]">
@@ -137,8 +167,17 @@ export default async function CarteraPage({
                   ))}
                 </TableBody>
               </Table>
+              <Pager
+                shown={rows.length}
+                total={cartera.polizas.length}
+                page={page}
+                totalPages={totalPages}
+                prevHref={page > 0 ? href(page - 1) : null}
+                nextHref={page < totalPages - 1 ? href(page + 1) : null}
+              />
             </Card>
-          )}
+            );
+          })()}
 
           {cartera.clientes.length === 0 && cartera.polizas.length === 0 && (
             <Card className="px-5 py-8 text-center text-[13.5px] text-muted-foreground">
@@ -155,4 +194,51 @@ function formatVigencia(inicio?: string, fin?: string): string {
   const fmt = (s?: string) => (s ? s.slice(0, 10) : "—");
   if (!inicio && !fin) return "—";
   return `${fmt(inicio)} → ${fmt(fin)}`;
+}
+
+function Pager({
+  shown,
+  total,
+  page,
+  totalPages,
+  prevHref,
+  nextHref,
+}: {
+  shown: number;
+  total: number;
+  page: number;
+  totalPages: number;
+  prevHref: string | null;
+  nextHref: string | null;
+}) {
+  return (
+    <div className="flex items-center justify-between px-5 py-3 border-t border-border bg-brand-surface-2 text-[12.5px] text-muted-foreground">
+      <span>
+        Mostrando <b className="text-foreground">{shown}</b> de {total}
+      </span>
+      {totalPages > 1 && (
+        <div className="flex items-center gap-1">
+          {prevHref ? (
+            <Link href={prevHref} className={buttonVariants({ variant: "ghost", size: "sm" })}>
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Link>
+          ) : (
+            <span className={buttonVariants({ variant: "ghost", size: "sm" }) + " opacity-40 pointer-events-none"}>
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </span>
+          )}
+          <span className="font-mono px-1">{page + 1} / {totalPages}</span>
+          {nextHref ? (
+            <Link href={nextHref} className={buttonVariants({ variant: "ghost", size: "sm" })}>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          ) : (
+            <span className={buttonVariants({ variant: "ghost", size: "sm" }) + " opacity-40 pointer-events-none"}>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }

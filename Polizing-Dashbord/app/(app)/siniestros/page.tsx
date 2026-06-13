@@ -4,9 +4,18 @@ import {
   getSiniestroFormRefs,
   nextSiniestroNumero,
 } from "@/lib/data/siniestros";
+import type { SiniestroTab } from "@/lib/data/types";
 import { SiniestroFormModal } from "./_components/siniestro-form-modal";
 
 type SearchParams = Promise<{ modal?: string; tab?: string; q?: string }>;
+
+const TAB_VALUES: ReadonlyArray<SiniestroTab> = ["all", "nuevo", "en_tramite", "cerrado"];
+
+function parseTab(raw: string | undefined): SiniestroTab | undefined {
+  return (TAB_VALUES as ReadonlyArray<string>).includes(raw ?? "")
+    ? (raw as SiniestroTab)
+    : undefined;
+}
 
 export default async function SiniestrosIndexPage({
   searchParams,
@@ -23,7 +32,7 @@ export default async function SiniestrosIndexPage({
     return <SiniestroFormModal refs={refs} defaultNumero={defaultNumero} />;
   }
 
-  const primero = await getPrimerSiniestro();
+  const primero = await getPrimerSiniestro(parseTab(sp.tab));
   if (primero) {
     const params = new URLSearchParams();
     if (sp.tab) params.set("tab", sp.tab);

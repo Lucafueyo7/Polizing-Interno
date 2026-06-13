@@ -38,8 +38,8 @@ export const circulationCardBodySchema = z.object({
 
 export const paymentReceiptBodySchema = z.object({
   phone: phoneSchema,
-  policy: policyShapeSchema,
-  file: mediaFileSchema,
+  policies: z.array(policyShapeSchema).min(1, "Debe indicar al menos una póliza"),
+  files: z.array(mediaFileSchema).min(1, "Debe adjuntar al menos un archivo"),
 });
 
 export const claimBodySchema = z.object({

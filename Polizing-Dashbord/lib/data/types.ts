@@ -148,7 +148,10 @@ export type PolizaFull = PolizaListItem & {
   dominio: string | null;
 };
 
-export type SiniestroDoc = {
+/** Documento adjunto genérico (siniestros, comprobantes de pago, …) con
+ * signed URLs para previsualizar y descargar. Reutilizado por el visor
+ * compartido `components/shared/docs-grid`. */
+export type AttachmentDoc = {
   id: number;
   tipo: "img" | "pdf";
   nombre: string;
@@ -156,8 +159,14 @@ export type SiniestroDoc = {
   /** Signed URL que fuerza la descarga (Content-Disposition: attachment). */
   downloadUrl: string;
   tamano: string | null;
+  procesadoIA?: boolean;
+};
+
+export type SiniestroDoc = AttachmentDoc & {
   procesadoIA: boolean;
 };
+
+export type PagoDoc = AttachmentDoc;
 
 export type SiniestroTab =
   | "all"
@@ -235,12 +244,14 @@ export type PagoPolizaRef = {
 
 export type PagoFull = PagoListItem & {
   polizas: PagoPolizaRef[];
+  docs: PagoDoc[];
 };
 
 export type PagoTab = "all" | "pendiente" | "validado" | "rechazado";
 
 export type PagosFilters = {
   tab?: PagoTab;
+  q?: string;
 };
 
 export type PagoCounts = Record<PagoTab, number>;

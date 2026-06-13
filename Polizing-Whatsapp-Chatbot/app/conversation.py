@@ -58,12 +58,12 @@ class ConversationEngine:
             return
 
         if not conversation.current_flow:
-            await self._handle_main_menu(conversation, text)
+            await self._handle_main_menu(conversation, text, client)
             return
 
         await self._handlers[conversation.current_flow].handle(conversation, inbound)
 
-    async def _handle_main_menu(self, conversation: Conversation, text: str) -> None:
+    async def _handle_main_menu(self, conversation: Conversation, text: str, client: dict) -> None:
         option = normalize_option(text)
         if not option:
             await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
@@ -71,6 +71,11 @@ class ConversationEngine:
         if option == "1":
             await self._start_policy_selection(conversation, "circulation_card", "select_policy", "policy_list_prompt")
         elif option == "2":
+            # Adjuntar comprobantes es exclusivo de clientes corporativos.
+            if not client.get("is_corporate"):
+                await self.whatsapp.send_text(conversation.phone, get_message(self.db, "payment_not_corporate"))
+                await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
+                return
             await self._start_policy_selection(conversation, "payment_receipt", "select_policy", "payment_policy_prompt")
         elif option == "3":
             await self._start_policy_selection(conversation, "claim", "select_policy", "claim_policy_prompt")

@@ -65,9 +65,11 @@ export default async function DashboardPage() {
         <KpiGridWrapper />
       </Suspense>
 
-      <Suspense fallback={<GenericCardSkeleton className="mt-5" />}>
-        <SiniestrosPendientesWrapper />
-      </Suspense>
+      <div className="mt-5">
+        <Suspense fallback={<GenericCardSkeleton />}>
+          <SiniestrosPendientesWrapper />
+        </Suspense>
+      </div>
 
       <section className="mt-5 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
         <Suspense fallback={<GenericCardSkeleton />}>

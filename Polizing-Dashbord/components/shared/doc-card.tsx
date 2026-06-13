@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import { FileText, ImageIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
-import type { SiniestroDoc } from "@/lib/data/types";
+import type { AttachmentDoc } from "@/lib/data/types";
 
-export function DocCard({ doc }: { doc: SiniestroDoc }) {
+export function DocCard({ doc }: { doc: AttachmentDoc }) {
   const Icon = doc.tipo === "img" ? ImageIcon : FileText;
   const showImage = doc.tipo === "img" && doc.url.length > 0;
 

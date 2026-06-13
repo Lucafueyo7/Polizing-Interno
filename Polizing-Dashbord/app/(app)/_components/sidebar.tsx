@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { SignOutButton } from "@clerk/nextjs";
 import { ChevronsLeft, ChevronsRight, Settings, Logout } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/lib/theme/theme-provider";
 import type { SessionUser } from "@/lib/auth/types";
 import { NAV_ITEMS, type NavItemId } from "./sidebar-nav";
 import {
@@ -47,6 +48,7 @@ export function Sidebar({ user, badges = {} }: SidebarProps) {
   const mobileOpen = useMobileOpen();
   const isDesktop = useIsDesktop();
   const pathname = usePathname();
+  const { theme } = useTheme();
 
   const collapsed = isDesktop && rawCollapsed;
 
@@ -72,11 +74,16 @@ export function Sidebar({ user, badges = {} }: SidebarProps) {
           "max-md:data-[mobile-open=false]:-translate-x-full max-md:data-[mobile-open=true]:translate-x-0",
         )}
       >
-        <div className="flex items-center gap-2.5 px-[18px] py-4 border-b border-border min-h-16">
+        <div
+          className={cn(
+            "flex items-center gap-2.5 py-4 border-b border-border min-h-16",
+            collapsed ? "flex-col px-2" : "px-[18px]",
+          )}
+        >
           {collapsed ? (
             <div className="w-[30px] h-[30px] rounded-lg grid place-items-center overflow-hidden shrink-0 bg-card">
               <Image
-                src="/favicon-dark.png"
+                src={theme === "dark" ? "/favicon-dark.png" : "/favicon-light.png"}
                 alt="Polizing"
                 width={30}
                 height={30}
@@ -84,7 +91,14 @@ export function Sidebar({ user, badges = {} }: SidebarProps) {
               />
             </div>
           ) : (
-            <div className="flex-1 min-w-0">
+            <div
+              className={cn(
+                "flex-1 min-w-0",
+                // El logo horizontal no contrasta sobre fondo oscuro: le damos
+                // un fondo claro en modo oscuro.
+                theme === "dark" && "bg-white rounded-md px-2 py-1",
+              )}
+            >
               <Image
                 src="/logo-horizontal.png"
                 alt="Polizing"
@@ -98,9 +112,16 @@ export function Sidebar({ user, badges = {} }: SidebarProps) {
           <button
             onClick={toggleCollapsed}
             aria-label={collapsed ? "Expandir" : "Colapsar"}
-            className="ml-auto w-7 h-7 hidden md:grid place-items-center border border-border bg-card rounded-md text-muted-foreground hover:bg-brand-surface-hover hover:text-foreground shrink-0"
+            className={cn(
+              "hidden md:grid place-items-center border border-border bg-card rounded-md text-muted-foreground hover:bg-brand-surface-hover hover:text-foreground shrink-0",
+              collapsed ? "w-10 h-10" : "ml-auto w-7 h-7",
+            )}
           >
-            {collapsed ? <ChevronsRight className="w-3.5 h-3.5" /> : <ChevronsLeft className="w-3.5 h-3.5" />}
+            {collapsed ? (
+              <ChevronsRight className="w-5 h-5" />
+            ) : (
+              <ChevronsLeft className="w-3.5 h-3.5" />
+            )}
           </button>
         </div>
 

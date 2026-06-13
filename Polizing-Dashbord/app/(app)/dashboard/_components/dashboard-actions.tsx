@@ -1,23 +1,26 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Refresh } from "@/components/icons";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { useTransition } from "react";
+import { Refresh } from "@/components/icons";
+import { Button } from "@/components/ui/button";
+import { refreshDashboard } from "../_actions/refresh";
 
 export function DashboardActions() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const handleRefresh = () => {
+    startTransition(async () => {
+      await refreshDashboard();
+      router.refresh();
+    });
+  };
 
   return (
-    <>
-      <Button variant="outline" size="sm" onClick={() => router.refresh()}>
-        <Refresh className="w-3.5 h-3.5" />
-        Actualizar
-      </Button>
-      <Link href="/polizas?modal=create" className={buttonVariants({ size: "sm" })}>
-        <Plus className="w-3.5 h-3.5" />
-        Nueva póliza
-      </Link>
-    </>
+    <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isPending}>
+      <Refresh className="w-3.5 h-3.5" />
+      Actualizar
+    </Button>
   );
 }

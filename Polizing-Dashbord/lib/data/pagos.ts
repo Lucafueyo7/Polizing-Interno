@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { PAGOS_BUCKET, signedUrlForDoc } from "@/lib/storage/supabase";
+import { fmtBytes } from "@/lib/format/bytes";
 import { createCachedGetter, CACHE_TAGS } from "./cache";
 import {
   aseguradoraRefFromRow,
@@ -8,6 +10,7 @@ import {
 import type {
   CoberturaRef,
   PagoCounts,
+  PagoDoc,
   PagoFull,
   PagoListItem,
   PagoPolizaRef,
@@ -40,6 +43,7 @@ const FULL_INCLUDE = {
       cobertura: true,
     },
   },
+  documentos: true,
 } as const;
 
 type PagoListRow = Awaited<ReturnType<typeof findPagos>>[number];
@@ -107,12 +111,21 @@ function matchesTab(p: PagoListItem, tab: PagoTab | undefined): boolean {
   return p.estado === tab;
 }
 
+function matchesQuery(p: PagoListItem, q: string | undefined): boolean {
+  if (!q) return true;
+  const needle = q.toLowerCase();
+  const reference = `PAY-${String(p.id).padStart(5, "0")}`;
+  const haystack = `${reference} ${p.cliente.label} ${p.cliente.ident}`.toLowerCase();
+  return haystack.includes(needle);
+}
+
 export async function getPagos(
   filters: PagosFilters = {},
 ): Promise<PagoListItem[]> {
   const all = await getAllPagos();
-  if (!filters.tab || filters.tab === "all") return all;
-  return all.filter((p) => matchesTab(p, filters.tab));
+  return all.filter(
+    (p) => matchesTab(p, filters.tab) && matchesQuery(p, filters.q?.trim() || undefined),
+  );
 }
 
 export async function getPagoCounts(): Promise<PagoCounts> {
@@ -146,12 +159,49 @@ const PAGO_PRIORITY: Record<PagoListItem["estado"], number> = {
   rechazado: 2,
 };
 
-export async function getPrimerPago(): Promise<PagoListItem | null> {
-  const all = await getAllPagos();
+export async function getPrimerPago(tab?: PagoTab): Promise<PagoListItem | null> {
+  const all = await getPagos({ tab });
   if (all.length === 0) return null;
   return [...all].sort(
     (a, b) => PAGO_PRIORITY[a.estado] - PAGO_PRIORITY[b.estado],
   )[0];
+}
+
+async function resolvePagoDocs(row: PagoFullRow): Promise<PagoDoc[]> {
+  // Comprobantes nuevos viven en Supabase Storage (bucket pagos).
+  const docs = await Promise.all(
+    row.documentos.map(async (d): Promise<PagoDoc> => {
+      const [view, download] = d.url
+        ? await Promise.all([
+            signedUrlForDoc(d.url, { bucket: PAGOS_BUCKET }),
+            signedUrlForDoc(d.url, { bucket: PAGOS_BUCKET, download: d.nombre }),
+          ])
+        : [null, null];
+      return {
+        id: d.id,
+        tipo: d.tipo,
+        nombre: d.nombre,
+        url: view ?? (d.url || ""),
+        downloadUrl: download ?? view ?? (d.url || ""),
+        tamano: fmtBytes(d.tamano_bytes),
+      };
+    }),
+  );
+
+  // Compatibilidad: pagos antiguos guardaban un único comprobante inline como
+  // BLOB en la tabla. Se sirve por un route que streamea los bytes.
+  if (docs.length === 0 && row.comprobante_contenido) {
+    const href = `/api/pagos/${row.id}/comprobante`;
+    docs.push({
+      id: 0,
+      tipo: row.comprobante_mime?.startsWith("image/") ? "img" : "pdf",
+      nombre: row.comprobante_nombre ?? `comprobante-${row.id}`,
+      url: href,
+      downloadUrl: href,
+      tamano: fmtBytes(row.comprobante_contenido.length),
+    });
+  }
+  return docs;
 }
 
 export async function getPagoById(id: number): Promise<PagoFull | null> {
@@ -169,5 +219,6 @@ export async function getPagoById(id: number): Promise<PagoFull | null> {
   return {
     ...base,
     polizas: row.polizas.map(toPolizaRef),
+    docs: await resolvePagoDocs(row),
   };
 }

@@ -24,8 +24,23 @@ DEFAULT_MESSAGES = {
     "card_success": ("Tarjeta enviada", "Encontramos la tarjeta de circulacion. Se la enviaremos por este medio."),
     "card_link": ("Tarjeta enviada", "Su tarjeta de circulacion: {link}"),
     "card_not_found": ("Tarjeta no encontrada", "No se pudo obtener la tarjeta de circulacion solicitada."),
-    "payment_policy_prompt": ("Poliza pago", "Seleccione la poliza a la que corresponde el comprobante:\n\n{policies}"),
-    "payment_file_prompt": ("Archivo pago", "Adjunte el comprobante de pago en imagen o PDF."),
+    "payment_not_corporate": (
+        "Pago no disponible",
+        "La carga de comprobantes de pago esta disponible unicamente para clientes corporativos. Comuniquese con su productor de seguros.",
+    ),
+    "payment_policy_prompt": (
+        "Poliza pago",
+        "Seleccione la o las polizas a las que corresponde el comprobante. Si son varias, separelas con coma (por ejemplo: 1,3):\n\n{policies}",
+    ),
+    "payment_file_prompt": (
+        "Archivo pago",
+        "Adjunte el comprobante de pago en imagen o PDF. Puede enviar varios; cuando termine responda FINALIZAR.",
+    ),
+    "payment_more_files_prompt": (
+        "Mas comprobantes",
+        "Comprobante recibido. Adjunte otro archivo o responda FINALIZAR para terminar.",
+    ),
+    "payment_no_files": ("Sin comprobantes", "Debe adjuntar al menos un comprobante antes de FINALIZAR."),
     "payment_invalid_file": ("Archivo pago invalido", "El archivo recibido no es valido. Envie una imagen o PDF."),
     "payment_success": ("Pago recibido", "El comprobante fue recibido correctamente. Numero de recepcion: {reference}."),
     "claim_policy_prompt": ("Poliza siniestro", "Seleccione la poliza asociada al siniestro:\n\n{policies}"),

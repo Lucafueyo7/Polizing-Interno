@@ -267,11 +267,26 @@ model pagos {
   cliente               clientes    @relation(fields: [cliente_id], references: [id])
   modificado_por        usuarios?   @relation("PagoModificadoPor", fields: [modificado_por_id], references: [id])
   polizas               polizas[]
+  documentos            pago_documentos[]
 
   @@index([cliente_id])
   @@index([estado])
   @@index([fecha_pago(sort: Desc)])
   @@index([cliente_id, estado])
+}
+
+model pago_documentos {
+  id           Int           @id @default(autoincrement())
+  pago_id      Int
+  tipo         DocumentoTipo
+  nombre       String
+  url          String?
+  mime_type    String
+  tamano_bytes Int?
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  pago         pagos         @relation(fields: [pago_id], references: [id], onDelete: Cascade)
+
+  @@index([pago_id])
 }
 
 model usuarios {

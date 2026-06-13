@@ -11,7 +11,13 @@ def get_client_by_phone(db: Session, phone: str) -> dict | None:
     client = db.query(MockClient).filter(MockClient.phone == phone, MockClient.active.is_(True)).first()
     if not client:
         return None
-    return {"id": client.id, "phone": client.phone, "full_name": client.full_name, "active": client.active}
+    return {
+        "id": client.id,
+        "phone": client.phone,
+        "full_name": client.full_name,
+        "active": client.active,
+        "is_corporate": client.is_corporate,
+    }
 
 
 def list_policies(db: Session, phone: str) -> list[dict]:

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { CheckCircle, Close, Download, Eye } from "@/components/icons";
+import { CheckCircle, Close } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { toastError, toastSuccess } from "@/lib/ui/toast";
 import { rechazarPago } from "../../_actions/rechazar-pago";
@@ -30,14 +30,6 @@ export function PagoActions({ id }: { id: number }) {
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <Button variant="outline" size="sm" disabled>
-        <Eye className="w-3 h-3" />
-        Ver comprobante
-      </Button>
-      <Button variant="outline" size="sm" disabled>
-        <Download className="w-3 h-3" />
-        Descargar
-      </Button>
       <div className="flex-1" />
       <Button
         variant="destructive"

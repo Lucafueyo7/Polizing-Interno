@@ -72,6 +72,23 @@ def parse_index(text: str) -> int | None:
     return int(text) - 1
 
 
+def parse_indices(text: str) -> list[int] | None:
+    """Parsea indices separados por coma/espacio (base 1) a indices base 0.
+
+    Devuelve None si algun token no es un numero. Quita duplicados conservando
+    el orden de aparicion.
+    """
+    tokens = [t for t in re.split(r"[\s,]+", text.strip()) if t]
+    if not tokens or any(not t.isdigit() for t in tokens):
+        return None
+    seen: list[int] = []
+    for t in tokens:
+        idx = int(t) - 1
+        if idx not in seen:
+            seen.append(idx)
+    return seen
+
+
 def format_policies(policies: list[dict]) -> str:
     return "\n".join(
         f"{index}. {policy['policy_number']} - {policy['domain']} - {policy['description']}"

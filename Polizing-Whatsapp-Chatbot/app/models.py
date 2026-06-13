@@ -63,6 +63,7 @@ class MockClient(Base):
     phone: Mapped[str] = mapped_column(String(40), unique=True, index=True)
     full_name: Mapped[str] = mapped_column(String(180))
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_corporate: Mapped[bool] = mapped_column(Boolean, default=True)
     policies: Mapped[list["MockPolicy"]] = relationship(back_populates="client")
 
 

@@ -232,9 +232,12 @@ const SIN_PRIORITY: Record<SiniestroListItem["estado"], number> = {
 };
 
 export async function getPrimerSiniestro(
+  tab?: SiniestroTab,
   userId?: number,
 ): Promise<SiniestroListItem | null> {
-  const all = await getEnrichedSiniestros(userId);
+  // Solo entre los siniestros de la tab activa: así el detalle nunca muestra un
+  // caso ajeno a la pestaña seleccionada (y queda vacío si la tab no tiene casos).
+  const all = await getSiniestros({ tab }, userId);
   if (all.length === 0) return null;
   return [...all].sort((a, b) => {
     const pa = SIN_PRIORITY[a.estado] - SIN_PRIORITY[b.estado];
