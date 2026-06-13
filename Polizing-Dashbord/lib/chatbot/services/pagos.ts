@@ -48,6 +48,14 @@ export async function createFromReceipts(args: {
       where: { id: { in: policyIds } },
       data: { pago_id: created.id },
     });
+    // Histórico many-to-many: preserva la relación aunque la misma póliza se
+    // pague múltiples veces (polizas.pago_id solo guarda el último pago).
+    await tx.pago_polizas.createMany({
+      data: policyIds.map((poliza_id) => ({
+        pago_id: created.id,
+        poliza_id,
+      })),
+    });
     return created;
   });
 

@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const tx = {
   pagos: { create: vi.fn() },
   pago_documentos: { createMany: vi.fn() },
+  pago_polizas: { createMany: vi.fn() },
   polizas: { updateMany: vi.fn() },
 };
 vi.mock("@/lib/prisma", () => ({
@@ -27,6 +28,7 @@ describe("createFromReceipts", () => {
     vi.clearAllMocks();
     tx.pagos.create.mockResolvedValue({ id: 42 });
     tx.pago_documentos.createMany.mockResolvedValue({});
+    tx.pago_polizas.createMany.mockResolvedValue({});
     tx.polizas.updateMany.mockResolvedValue({});
   });
 
@@ -51,6 +53,12 @@ describe("createFromReceipts", () => {
     expect(tx.polizas.updateMany).toHaveBeenCalledWith({
       where: { id: { in: [7, 8] } },
       data: { pago_id: 42 },
+    });
+    expect(tx.pago_polizas.createMany).toHaveBeenCalledWith({
+      data: [
+        { pago_id: 42, poliza_id: 7 },
+        { pago_id: 42, poliza_id: 8 },
+      ],
     });
     expect(revalidateTag).toHaveBeenCalledWith("pagos", "minutes");
     expect(revalidateTag).toHaveBeenCalledWith("polizas", "minutes");

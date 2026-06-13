@@ -171,6 +171,7 @@ model polizas {
   cobertura                coberturas?           @relation(fields: [cobertura_id], references: [id])
   modificado_por           usuarios?             @relation("PolizaModificadaPor", fields: [modificado_por_id], references: [id])
   pago                     pagos?                @relation(fields: [pago_id], references: [id])
+  pago_polizas             pago_polizas[]
   tipo_seguro              tipos_seguro?         @relation(fields: [tipo_seguro_id], references: [id])
   siniestros               siniestros[]
 
@@ -269,6 +270,7 @@ model pagos {
   cliente               clientes    @relation(fields: [cliente_id], references: [id])
   modificado_por        usuarios?   @relation("PagoModificadoPor", fields: [modificado_por_id], references: [id])
   polizas               polizas[]
+  pago_polizas          pago_polizas[]
   documentos            pago_documentos[]
 
   @@index([cliente_id])
@@ -289,6 +291,21 @@ model pago_documentos {
   pago         pagos         @relation(fields: [pago_id], references: [id], onDelete: Cascade)
 
   @@index([pago_id])
+}
+
+/// Junción many-to-many entre pagos y pólizas. Una póliza puede aparecer en
+/// varios pagos (ej. pago recurrente mensual). Un pago puede cubrir varias
+/// pólizas. Reemplaza semánticamente a polizas.pago_id (que solo guarda el
+/// último pago) preservando el histórico completo.
+model pago_polizas {
+  pago_id    Int
+  poliza_id  Int
+  created_at DateTime      @default(now()) @db.Timestamptz(6)
+  pago       pagos         @relation(fields: [pago_id], references: [id], onDelete: Cascade)
+  poliza     polizas       @relation(fields: [poliza_id], references: [id], onDelete: Cascade)
+
+  @@id([pago_id, poliza_id])
+  @@index([poliza_id])
 }
 
 model usuarios {
@@ -403,6 +420,9 @@ enum ClienteEstado {
 enum PolizaEstado {
   vigente
   vencida
+  proxima
+  anulada
+  renovada
 }
 
 enum SiniestroEstado {
