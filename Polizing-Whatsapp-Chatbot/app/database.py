@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.config import get_settings
@@ -42,3 +42,31 @@ def init_db() -> None:
     from app import models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
+    _run_lightweight_migrations()
+
+
+# `create_all` crea tablas faltantes pero NO agrega columnas nuevas a tablas ya
+# existentes. Como el chatbot no usa un framework de migraciones, aplicamos acá
+# parches aditivos idempotentes (sólo ADD COLUMN). Portable Postgres/SQLite.
+#
+# Formato: (tabla, columna, "ALTER ... ADD COLUMN ...").
+_COLUMN_MIGRATIONS: list[tuple[str, str, str]] = [
+    (
+        "mock_clients",
+        "is_corporate",
+        "ALTER TABLE mock_clients ADD COLUMN is_corporate BOOLEAN NOT NULL DEFAULT TRUE",
+    ),
+]
+
+
+def _run_lightweight_migrations() -> None:
+    schema = "chatbot" if _is_postgres else None
+    inspector = inspect(engine)
+    for table, column, ddl in _COLUMN_MIGRATIONS:
+        if not inspector.has_table(table, schema=schema):
+            continue
+        existing = {col["name"] for col in inspector.get_columns(table, schema=schema)}
+        if column in existing:
+            continue
+        with engine.begin() as conn:
+            conn.execute(text(ddl))

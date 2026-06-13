@@ -20,7 +20,7 @@ def get_client_by_phone(db: Session, phone: str) -> dict | None:
     }
 
 
-def list_policies(db: Session, phone: str) -> list[dict]:
+def list_policies(db: Session, phone: str, scope: str = "vehiculos") -> list[dict]:
     client = db.query(MockClient).filter(MockClient.phone == phone, MockClient.active.is_(True)).first()
     if not client:
         return []
@@ -30,6 +30,9 @@ def list_policies(db: Session, phone: str) -> list[dict]:
         .order_by(MockPolicy.policy_number)
         .all()
     )
+    if scope == "vehiculos":
+        # Igual que el panel: vehículo = categoría auto O con patente (dominio).
+        policies = [p for p in policies if p.category == "auto" or (p.domain or "").strip()]
     return [policy_to_dict(policy) for policy in policies]
 
 
@@ -57,16 +60,24 @@ def get_circulation_card(db: Session, phone: str, policy_id: int) -> dict | None
     }
 
 
+def get_policy_document(db: Session, phone: str, policy_id: int) -> dict | None:
+    policy = get_policy_for_phone(db, phone, policy_id)
+    if not policy:
+        return None
+    content = f"Poliza completa mock {policy['policy_number']} - {policy['description']}"
+    return {
+        "filename": f"poliza-{policy['policy_number']}.pdf",
+        "mime_type": "application/pdf",
+        "content_base64": base64.b64encode(content.encode("utf-8")).decode("ascii"),
+    }
+
+
 def register_payment_receipt(db: Session, phone: str, payload: dict) -> dict:
     return create_operation(db, "payment_receipt", phone, "PAY", payload)
 
 
 def register_claim(db: Session, phone: str, payload: dict) -> dict:
     return create_operation(db, "claim", phone, "SIN", payload)
-
-
-def register_policy_request(db: Session, phone: str, payload: dict) -> dict:
-    return create_operation(db, "policy_request", phone, "SOL", payload)
 
 
 def create_operation(db: Session, operation_type: str, phone: str, prefix: str, payload: dict) -> dict:

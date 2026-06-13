@@ -57,17 +57,8 @@ export const claimBodySchema = z.object({
 });
 export type ClaimBodyInput = z.infer<typeof claimBodySchema>;
 
-export const policyRequestBodySchema = z.object({
-  phone: phoneSchema,
-  insurance_type: z.enum(["auto", "moto"]),
-  domain: z.string().trim().min(1, "domain requerido"),
-  brand: z.string().trim().min(1, "brand requerido"),
-  model: z.string().trim().min(1, "model requerido"),
-  year: z.string().regex(/^\d{4}$/, "Año en formato AAAA"),
-  use: z.enum(["particular", "comercial"]),
-  notes: z.string().default(""),
-});
-export type PolicyRequestBodyInput = z.infer<typeof policyRequestBodySchema>;
+// Obtener póliza completa: misma forma que la tarjeta de circulación.
+export const policyDocumentBodySchema = circulationCardBodySchema;
 
 export function formatZodIssues(error: z.ZodError): string {
   return error.issues

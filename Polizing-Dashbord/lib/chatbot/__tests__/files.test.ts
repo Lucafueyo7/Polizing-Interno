@@ -20,7 +20,14 @@ describe("decodeBase64File", () => {
     expect(out.filename).toBe("x.pdf");
   });
 
-  it("rechaza mime no permitido", () => {
+  it("acepta cualquier tipo de imagen (jpeg, png, heic, gif, …)", () => {
+    for (const mime of ["image/jpeg", "image/png", "image/webp", "image/heic", "image/gif"]) {
+      const out = decodeBase64File({ filename: "f", mime_type: mime, content_base64: b64("x") });
+      expect(out.mime).toBe(mime);
+    }
+  });
+
+  it("rechaza mime no permitido (ni imagen ni pdf)", () => {
     expect(() =>
       decodeBase64File({
         filename: "x.exe",

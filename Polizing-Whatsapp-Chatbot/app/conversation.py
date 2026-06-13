@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 from app.intents.circulation_card import CirculationCardHandler
 from app.intents.claim import ClaimHandler
 from app.intents.payment_receipt import PaymentReceiptHandler
-from app.intents.policy_request import PolicyRequestHandler
-from app.intents.utils import format_policies, normalize_option
+from app.intents.policy_document import PolicyDocumentHandler
+from app.intents.utils import format_policies
 from app.main_system_client import MainSystemClient
+from app.menu import MenuAction, available_actions, render_menu
 from app.messages import get_message
 from app.models import Conversation, ReceivedMessage
 from app.whatsapp import WhatsAppClient
@@ -26,7 +27,7 @@ class ConversationEngine:
             "circulation_card": CirculationCardHandler(db, self.whatsapp, self.main_system),
             "payment_receipt": PaymentReceiptHandler(db, self.whatsapp, self.main_system),
             "claim": ClaimHandler(db, self.whatsapp, self.main_system),
-            "policy_request": PolicyRequestHandler(db, self.whatsapp, self.main_system),
+            "policy_document": PolicyDocumentHandler(db, self.whatsapp, self.main_system),
         }
 
     async def process(self, inbound: dict) -> None:
@@ -40,6 +41,7 @@ class ConversationEngine:
         if not client:
             await self.whatsapp.send_text(phone, get_message(self.db, "client_not_found"))
             return
+        is_corporate = bool(client.get("is_corporate"))
 
         conversation = self._get_conversation(phone)
         expired = self._is_expired(conversation)
@@ -54,46 +56,41 @@ class ConversationEngine:
         if text == "0":
             self._reset(conversation)
             await self.whatsapp.send_text(phone, get_message(self.db, "cancelled"))
-            await self.whatsapp.send_text(phone, get_message(self.db, "welcome_menu"))
+            await self.whatsapp.send_text(phone, render_menu(self.db, is_corporate))
             return
 
         if not conversation.current_flow:
-            await self._handle_main_menu(conversation, text, client)
+            await self._handle_main_menu(conversation, text, is_corporate)
             return
 
-        await self._handlers[conversation.current_flow].handle(conversation, inbound)
+        await self._handlers[conversation.current_flow].handle(conversation, inbound, is_corporate)
 
-    async def _handle_main_menu(self, conversation: Conversation, text: str, client: dict) -> None:
-        option = normalize_option(text)
-        if not option:
-            await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
-            return
-        if option == "1":
-            await self._start_policy_selection(conversation, "circulation_card", "select_policy", "policy_list_prompt")
-        elif option == "2":
-            # Adjuntar comprobantes es exclusivo de clientes corporativos.
-            if not client.get("is_corporate"):
-                await self.whatsapp.send_text(conversation.phone, get_message(self.db, "payment_not_corporate"))
-                await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
+    async def _handle_main_menu(self, conversation: Conversation, text: str, is_corporate: bool) -> None:
+        actions = available_actions(is_corporate)
+        choice = text.strip()
+        if choice.isdigit():
+            index = int(choice) - 1
+            if 0 <= index < len(actions):
+                await self._start_policy_selection(conversation, actions[index], is_corporate)
                 return
-            await self._start_policy_selection(conversation, "payment_receipt", "select_policy", "payment_policy_prompt")
-        elif option == "3":
-            await self._start_policy_selection(conversation, "claim", "select_policy", "claim_policy_prompt")
-        else:
-            await self.whatsapp.send_text(conversation.phone, get_message(self.db, "invalid_option"))
-            await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
+        await self.whatsapp.send_text(conversation.phone, get_message(self.db, "invalid_option"))
+        await self.whatsapp.send_text(conversation.phone, render_menu(self.db, is_corporate))
 
-    async def _start_policy_selection(self, conversation: Conversation, flow: str, step: str, message_key: str) -> None:
-        policies = await self.main_system.list_policies(conversation.phone)
+    async def _start_policy_selection(
+        self, conversation: Conversation, action: MenuAction, is_corporate: bool
+    ) -> None:
+        policies = await self.main_system.list_policies(conversation.phone, action.scope)
         if not policies:
             await self.whatsapp.send_text(conversation.phone, get_message(self.db, "policy_list_empty"))
-            await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
+            await self.whatsapp.send_text(conversation.phone, render_menu(self.db, is_corporate))
             return
-        conversation.current_flow = flow
-        conversation.current_step = step
+        conversation.current_flow = action.flow
+        conversation.current_step = "select_policy"
         conversation.data_json = json.dumps({"policies": policies}, ensure_ascii=True)
         self.db.commit()
-        await self.whatsapp.send_text(conversation.phone, get_message(self.db, message_key, policies=format_policies(policies)))
+        await self.whatsapp.send_text(
+            conversation.phone, get_message(self.db, action.prompt, policies=format_policies(policies))
+        )
 
     def _get_conversation(self, phone: str) -> Conversation:
         conversation = self.db.query(Conversation).filter(Conversation.phone == phone).first()

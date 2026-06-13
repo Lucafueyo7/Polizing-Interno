@@ -52,20 +52,6 @@ def is_keyword(text: str, keyword: str) -> bool:
     return text.strip().upper() == keyword.upper()
 
 
-def normalize_option(text: str) -> str | None:
-    value = text.strip().lower()
-    aliases = {
-        "tarjeta": "1",
-        "tarjeta de circulacion": "1",
-        "comprobante": "2",
-        "pago": "2",
-        "siniestro": "3",
-    }
-    if value in {"1", "2", "3"}:
-        return value
-    return aliases.get(value)
-
-
 def parse_index(text: str) -> int | None:
     if not text.isdigit():
         return None

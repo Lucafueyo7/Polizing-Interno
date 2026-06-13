@@ -34,8 +34,9 @@ export type PolizaRow = {
   id: number;
   numero_poliza: string;
   dominio: string | null;
-  tipo_seguro: { nombre: string; categoria: string };
-  cobertura: { nombre: string };
+  // Pueden venir en null en pólizas importadas de Berkley aún sin completar.
+  tipo_seguro: { nombre: string; categoria: string } | null;
+  cobertura: { nombre: string } | null;
   aseguradora: { razon_social: string };
 };
 
@@ -50,13 +51,14 @@ export type PolicyChatbotShape = {
 };
 
 export function mapPolizaToChatbot(p: PolizaRow): PolicyChatbotShape {
+  const cobertura = p.cobertura?.nombre ?? "";
   return {
     id: p.id,
     policy_number: p.numero_poliza,
-    insurance_type: p.tipo_seguro.nombre,
-    category: p.tipo_seguro.categoria,
-    coverage: p.cobertura.nombre,
+    insurance_type: p.tipo_seguro?.nombre ?? "",
+    category: p.tipo_seguro?.categoria ?? "",
+    coverage: cobertura,
     domain: p.dominio ?? "",
-    description: `${p.aseguradora.razon_social} — ${p.cobertura.nombre}`,
+    description: `${p.aseguradora.razon_social} — ${cobertura || p.tipo_seguro?.nombre || "Póliza"}`,
   };
 }

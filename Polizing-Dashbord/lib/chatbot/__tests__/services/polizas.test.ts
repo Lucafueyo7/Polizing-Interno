@@ -21,7 +21,7 @@ const polizaRow = {
 describe("listVigentesByClienteId", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("filtra por estado vigente, categoría auto, y ordena por dominio", async () => {
+  it("scope vehiculos: vigente + (categoría auto O con patente), ordena por dominio", async () => {
     (prisma.polizas.findMany as any).mockResolvedValue([polizaRow]);
     const out = await listVigentesByClienteId(1);
     expect(out).toHaveLength(1);
@@ -31,8 +31,29 @@ describe("listVigentesByClienteId", () => {
     const call = (prisma.polizas.findMany as any).mock.calls[0][0];
     expect(call.where.cliente_id).toBe(1);
     expect(call.where.estado).toEqual({ in: ["vigente"] });
-    expect(call.where.tipo_seguro).toEqual({ categoria: "auto" });
+    // Autos y motos/cuatris por igual: categoría auto O patente cargada.
+    expect(call.where.OR).toEqual([
+      { tipo_seguro: { categoria: "auto" } },
+      { dominio: { not: null } },
+    ]);
     expect(call.orderBy).toEqual({ dominio: "asc" });
+  });
+
+  it("scope todas: no filtra por vehículo (pagos corporativos)", async () => {
+    (prisma.polizas.findMany as any).mockResolvedValue([polizaRow]);
+    await listVigentesByClienteId(1, "todas");
+    const call = (prisma.polizas.findMany as any).mock.calls[0][0];
+    expect(call.where.OR).toBeUndefined();
+    expect(call.where.estado).toEqual({ in: ["vigente"] });
+  });
+
+  it("mapea pólizas con tipo_seguro/cobertura en null sin romper", async () => {
+    (prisma.polizas.findMany as any).mockResolvedValue([
+      { ...polizaRow, tipo_seguro: null, cobertura: null },
+    ]);
+    const out = await listVigentesByClienteId(1, "todas");
+    expect(out[0].category).toBe("");
+    expect(out[0].coverage).toBe("");
   });
 
   it("devuelve [] si no hay pólizas", async () => {

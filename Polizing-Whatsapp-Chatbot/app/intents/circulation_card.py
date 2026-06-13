@@ -4,7 +4,7 @@ from app.models import Conversation
 
 
 class CirculationCardHandler(BaseFlowHandler):
-    async def handle(self, conversation: Conversation, inbound: dict) -> None:
+    async def handle(self, conversation: Conversation, inbound: dict, is_corporate: bool) -> None:
         policy = await self._selected_policy(conversation, inbound)
         if not policy:
             return
@@ -26,4 +26,4 @@ class CirculationCardHandler(BaseFlowHandler):
                 card["content_base64"],
                 caption="Tarjeta de circulacion",
             )
-        await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
+        await self._send_menu(conversation, is_corporate)

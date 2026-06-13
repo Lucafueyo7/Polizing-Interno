@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.intents.utils import format_policies, parse_index
 from app.main_system_client import MainSystemClient
+from app.menu import render_menu
 from app.messages import get_message
 from app.models import Conversation
 from app.whatsapp import WhatsAppClient
@@ -17,7 +18,10 @@ class BaseFlowHandler(ABC):
         self.main_system = main_system
 
     @abstractmethod
-    async def handle(self, conversation: Conversation, inbound: dict) -> None: ...
+    async def handle(self, conversation: Conversation, inbound: dict, is_corporate: bool) -> None: ...
+
+    async def _send_menu(self, conversation: Conversation, is_corporate: bool) -> None:
+        await self.whatsapp.send_text(conversation.phone, render_menu(self.db, is_corporate))
 
     def _data(self, conversation: Conversation) -> dict:
         return json.loads(conversation.data_json or "{}")

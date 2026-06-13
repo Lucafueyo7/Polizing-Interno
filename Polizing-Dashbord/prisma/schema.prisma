@@ -158,6 +158,8 @@ model polizas {
   dominio                  String?
   tarjeta_circulacion_mime String?
   tarjeta_circulacion_pdf  String?
+  poliza_mime              String?
+  poliza_pdf               String?
   /// Datos específicos de la cartera Berkley (sync diario). Null = póliza que no
   /// proviene de Berkley. La clave natural Berkley es rama + poliza + suplemento.
   rama                     String?

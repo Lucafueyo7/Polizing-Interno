@@ -9,12 +9,26 @@ const POLIZA_INCLUDE = {
 
 const ACTIVE_STATES = ["vigente"] as const;
 
-export async function listVigentesByClienteId(clienteId: number): Promise<PolicyChatbotShape[]> {
+/**
+ * `vehiculos` (default): pólizas de vehículo para tarjeta de circulación,
+ * siniestros y obtener póliza. Un vehículo es cualquier póliza de categoría
+ * `auto` O con patente (`dominio`) cargada — así autos y motos/cuatris se
+ * listan igual (las motos vienen de Berkley con patente pero sin categoría auto).
+ * `todas`: todas las pólizas vigentes (para comprobantes de pago corporativos).
+ */
+export type PolizaScope = "vehiculos" | "todas";
+
+export async function listVigentesByClienteId(
+  clienteId: number,
+  scope: PolizaScope = "vehiculos",
+): Promise<PolicyChatbotShape[]> {
   const polizas = await prisma.polizas.findMany({
     where: {
       cliente_id: clienteId,
       estado: { in: [...ACTIVE_STATES] },
-      tipo_seguro: { categoria: "auto" },
+      ...(scope === "vehiculos"
+        ? { OR: [{ tipo_seguro: { categoria: "auto" } }, { dominio: { not: null } }] }
+        : {}),
     },
     include: POLIZA_INCLUDE,
     orderBy: { dominio: "asc" },

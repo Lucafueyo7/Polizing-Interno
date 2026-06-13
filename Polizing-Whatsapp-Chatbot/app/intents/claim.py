@@ -6,7 +6,7 @@ from app.models import Conversation
 
 
 class ClaimHandler(BaseFlowHandler):
-    async def handle(self, conversation: Conversation, inbound: dict) -> None:
+    async def handle(self, conversation: Conversation, inbound: dict, is_corporate: bool) -> None:
         data = self._data(conversation)
         text = (inbound.get("text") or "").strip()
         step = conversation.current_step
@@ -72,7 +72,7 @@ class ClaimHandler(BaseFlowHandler):
                 result = await self.main_system.register_claim(conversation.phone, data)
                 self._reset(conversation)
                 await self.whatsapp.send_text(conversation.phone, get_message(self.db, "claim_success", reference=result["reference"]))
-                await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
+                await self._send_menu(conversation, is_corporate)
             elif valid_media(media):
                 data.setdefault("additional_files", []).append(media_payload(media, await self.whatsapp.download_media(media["id"])))
                 self._save_data(conversation, data)

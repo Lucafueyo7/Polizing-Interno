@@ -1,13 +1,12 @@
 export const MAX_FILE_BYTES = 8 * 1024 * 1024;
 export const MAX_TOTAL_BYTES = 25 * 1024 * 1024;
 
-export const ALLOWED_MIME: ReadonlySet<string> = new Set([
-  "application/pdf",
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-]);
+// Aceptamos PDF y CUALQUIER tipo de imagen (jpeg, png, webp, heic, gif, …),
+// alineado con `valid_media` del bot. Los clientes mandan comprobantes en
+// formatos variados, sobre todo desde el celular.
+export function isAllowedMime(mime: string): boolean {
+  return mime === "application/pdf" || mime.startsWith("image/");
+}
 
 export type RawMediaFile = {
   filename: string;
@@ -30,7 +29,7 @@ export class FileDecodeError extends Error {
 }
 
 export function decodeBase64File(file: RawMediaFile): DecodedFile {
-  if (!ALLOWED_MIME.has(file.mime_type)) {
+  if (!isAllowedMime(file.mime_type)) {
     throw new FileDecodeError(`MIME no permitido: ${file.mime_type}`);
   }
   let bytes: Buffer;

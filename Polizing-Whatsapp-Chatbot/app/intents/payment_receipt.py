@@ -6,7 +6,7 @@ from app.models import Conversation
 
 
 class PaymentReceiptHandler(BaseFlowHandler):
-    async def handle(self, conversation: Conversation, inbound: dict) -> None:
+    async def handle(self, conversation: Conversation, inbound: dict, is_corporate: bool) -> None:
         data = self._data(conversation)
         text = (inbound.get("text") or "").strip()
 
@@ -27,14 +27,14 @@ class PaymentReceiptHandler(BaseFlowHandler):
             return
 
         if conversation.current_step == "file":
-            if is_keyword(text, "FINALIZAR"):
+            if is_keyword(text, "LISTO"):
                 if not data.get("files"):
                     await self.whatsapp.send_text(conversation.phone, get_message(self.db, "payment_no_files"))
                     return
                 result = await self.main_system.register_payment_receipt(conversation.phone, data)
                 self._reset(conversation)
                 await self.whatsapp.send_text(conversation.phone, get_message(self.db, "payment_success", reference=result["reference"]))
-                await self.whatsapp.send_text(conversation.phone, get_message(self.db, "welcome_menu"))
+                await self._send_menu(conversation, is_corporate)
                 return
             media = inbound.get("media")
             if not valid_media(media):

@@ -12,9 +12,9 @@ _PATH_CLIENT_BY_PHONE  = "/clients/by-phone/{phone}"
 _PATH_POLICIES         = "/policies"
 _PATH_POLICY           = "/policies/{policy_id}"
 _PATH_CIRCULATION_CARD = "/circulation-card"
+_PATH_POLICY_DOCUMENT  = "/policy-document"
 _PATH_PAYMENT_RECEIPTS = "/payment-receipts"
 _PATH_CLAIMS           = "/claims"
-_PATH_POLICY_REQUESTS  = "/policy-requests"
 
 
 class MainSystemClient:
@@ -31,10 +31,10 @@ class MainSystemClient:
             return mock_system.get_client_by_phone(self.db, phone)
         return await self._get_optional(_PATH_CLIENT_BY_PHONE.format(phone=phone))
 
-    async def list_policies(self, phone: str) -> list[dict]:
+    async def list_policies(self, phone: str, scope: str = "vehiculos") -> list[dict]:
         if self.use_mock:
-            return mock_system.list_policies(self.db, phone)
-        data = await self._get(_PATH_POLICIES, params={"phone": phone})
+            return mock_system.list_policies(self.db, phone, scope)
+        data = await self._get(_PATH_POLICIES, params={"phone": phone, "scope": scope})
         return data.get("items", data if isinstance(data, list) else [])
 
     async def get_policy_for_phone(self, phone: str, policy_id: int) -> dict | None:
@@ -47,6 +47,11 @@ class MainSystemClient:
             return mock_system.get_circulation_card(self.db, phone, policy_id)
         return await self._post_optional(_PATH_CIRCULATION_CARD, {"phone": phone, "policy_id": policy_id})
 
+    async def get_policy_document(self, phone: str, policy_id: int) -> dict | None:
+        if self.use_mock:
+            return mock_system.get_policy_document(self.db, phone, policy_id)
+        return await self._post_optional(_PATH_POLICY_DOCUMENT, {"phone": phone, "policy_id": policy_id})
+
     async def register_payment_receipt(self, phone: str, payload: dict) -> dict:
         if self.use_mock:
             return mock_system.register_payment_receipt(self.db, phone, payload)
@@ -57,10 +62,6 @@ class MainSystemClient:
             return mock_system.register_claim(self.db, phone, payload)
         return await self._post(_PATH_CLAIMS, {"phone": phone, **payload})
 
-    async def register_policy_request(self, phone: str, payload: dict) -> dict:
-        if self.use_mock:
-            return mock_system.register_policy_request(self.db, phone, payload)
-        return await self._post(_PATH_POLICY_REQUESTS, {"phone": phone, **payload})
 
     @asynccontextmanager
     async def _http(self):

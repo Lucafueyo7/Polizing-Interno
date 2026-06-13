@@ -3,7 +3,6 @@ import {
   paymentReceiptBodySchema,
   claimBodySchema,
   circulationCardBodySchema,
-  policyRequestBodySchema,
   phoneSchema,
 } from "../schemas";
 
@@ -108,28 +107,3 @@ describe("claimBodySchema", () => {
   });
 });
 
-describe("policyRequestBodySchema", () => {
-  const base = {
-    phone: "5491112345678",
-    insurance_type: "auto",
-    domain: "AB123CD",
-    brand: "Renault",
-    model: "Sandero",
-    year: "2020",
-    use: "particular",
-    notes: "",
-  };
-
-  it("happy", () => {
-    expect(policyRequestBodySchema.safeParse(base).success).toBe(true);
-  });
-  it("rechaza year no 4 dígitos", () => {
-    expect(policyRequestBodySchema.safeParse({ ...base, year: "20" }).success).toBe(false);
-  });
-  it("rechaza use fuera del enum", () => {
-    expect(policyRequestBodySchema.safeParse({ ...base, use: "otra" }).success).toBe(false);
-  });
-  it("rechaza insurance_type fuera del enum", () => {
-    expect(policyRequestBodySchema.safeParse({ ...base, insurance_type: "vida" }).success).toBe(false);
-  });
-});
