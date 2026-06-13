@@ -26,7 +26,7 @@ const LIST_INCLUDE = {
       clientes_no_corporativos: true,
     },
   },
-  polizas: { select: { id: true } },
+  pago_polizas: { select: { poliza_id: true } },
 } as const;
 
 const FULL_INCLUDE = {
@@ -36,11 +36,15 @@ const FULL_INCLUDE = {
       clientes_no_corporativos: true,
     },
   },
-  polizas: {
+  pago_polizas: {
     include: {
-      aseguradora: true,
-      tipo_seguro: true,
-      cobertura: true,
+      poliza: {
+        include: {
+          aseguradora: true,
+          tipo_seguro: true,
+          cobertura: true,
+        },
+      },
     },
   },
   documentos: true,
@@ -75,11 +79,11 @@ function toListItem(row: PagoListRow): PagoListItem {
     estado: row.estado,
     metodoPago: row.metodo_pago,
     monto: Number(row.monto),
-    polizasCount: row.polizas.length,
+    polizasCount: row.pago_polizas.length,
   };
 }
 
-function toPolizaRef(p: PagoFullRow["polizas"][number]): PagoPolizaRef {
+function toPolizaRef(p: PagoFullRow["pago_polizas"][number]["poliza"]): PagoPolizaRef {
   return {
     id: p.id,
     numero: p.numero_poliza,
@@ -214,11 +218,11 @@ export async function getPagoById(id: number): Promise<PagoFull | null> {
     estado: row.estado,
     metodoPago: row.metodo_pago,
     monto: Number(row.monto),
-    polizasCount: row.polizas.length,
+    polizasCount: row.pago_polizas.length,
   };
   return {
     ...base,
-    polizas: row.polizas.map(toPolizaRef),
+    polizas: row.pago_polizas.map((pp) => toPolizaRef(pp.poliza)),
     docs: await resolvePagoDocs(row),
   };
 }
