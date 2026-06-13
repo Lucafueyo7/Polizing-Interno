@@ -764,78 +764,6 @@
 							}
 						},
 						{
-							"_type": "C4ContainerView",
-							"_id": "AAAAAAGdqyANi4amTWk=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGdqyANi4akrx0="
-							},
-							"subViews": [
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGdqyANi4anwds=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyANi4amTWk="
-									},
-									"fillColor": "#a3e0ff",
-									"font": "Arial;13;1",
-									"left": 2016,
-									"top": 368,
-									"width": 272,
-									"height": 13,
-									"text": "ChatWhatsapp(Frontend)",
-									"wordWrap": true
-								},
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGdqyANi4aoVPo=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyANi4amTWk="
-									},
-									"fillColor": "#a3e0ff",
-									"font": "Arial;13;0",
-									"left": 2016,
-									"top": 383,
-									"width": 272,
-									"height": 13,
-									"text": "[Container]",
-									"wordWrap": true
-								},
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGdqyANi4apXwg=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyANi4amTWk="
-									},
-									"fillColor": "#a3e0ff",
-									"font": "Arial;13;0",
-									"left": 2016,
-									"top": 406,
-									"width": 272,
-									"height": 26,
-									"text": "App de mensajeria whatsapp  que se comunica mediante peticiones asincronas",
-									"wordWrap": true
-								}
-							],
-							"fillColor": "#a3e0ff",
-							"font": "Arial;13;0",
-							"left": 2008,
-							"top": 360,
-							"width": 288,
-							"height": 224,
-							"nameLabel": {
-								"$ref": "AAAAAAGdqyANi4anwds="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGdqyANi4aoVPo="
-							},
-							"descriptionLabel": {
-								"$ref": "AAAAAAGdqyANi4apXwg="
-							}
-						},
-						{
 							"_type": "C4RelationshipView",
 							"_id": "AAAAAAGdqyE7Voa2zbs=",
 							"_parent": {
@@ -855,17 +783,17 @@
 										"$ref": "AAAAAAGdqyE7Voa0JxM="
 									},
 									"font": "Arial;13;0",
-									"left": 2157,
-									"top": 278,
+									"left": 1698,
+									"top": 280,
 									"width": 61.05810546875,
-									"height": 13,
+									"height": 39,
 									"alpha": 1.5540828599224992,
 									"distance": 42.01190307520001,
 									"hostEdge": {
 										"$ref": "AAAAAAGdqyE7Voa2zbs="
 									},
 									"edgePosition": 1,
-									"text": "Consulta\n",
+									"text": "Traslada la consulta",
 									"wordWrap": true
 								},
 								{
@@ -879,8 +807,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 2126,
-									"top": 279,
+									"left": 1696,
+									"top": 343,
 									"width": 8.658203125,
 									"height": 13,
 									"alpha": -1.5707963267948966,
@@ -895,164 +823,18 @@
 							],
 							"font": "Arial;13;0",
 							"head": {
-								"$ref": "AAAAAAGdqyANi4amTWk="
+								"$ref": "AAAAAAGeOtAfABK6JjU="
 							},
 							"tail": {
-								"$ref": "AAAAAAGdjgrGg9zc6ss="
+								"$ref": "AAAAAAGdjhOgk93RQB0="
 							},
 							"lineStyle": 1,
-							"points": "2143:212;2148:359",
+							"points": "1449:198;1967:475",
 							"descriptionLabel": {
 								"$ref": "AAAAAAGdqyE7Voa3fBM="
 							},
 							"technologyLabel": {
 								"$ref": "AAAAAAGdqyE7Voa4hXs="
-							}
-						},
-						{
-							"_type": "C4RelationshipView",
-							"_id": "AAAAAAGdqyT5+4bXYR4=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGdqyT5+4bVIY4="
-							},
-							"subViews": [
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqyT5+4bYYBw=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyT5+4bXYR4="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqyT5+4bVIY4="
-									},
-									"visible": false,
-									"font": "Arial;13;0",
-									"left": 2166,
-									"top": 647,
-									"alpha": 1.5707963267948966,
-									"distance": 15,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqyT5+4bXYR4="
-									},
-									"edgePosition": 1,
-									"wordWrap": true
-								},
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqyT5+4bZSO8=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyT5+4bXYR4="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqyT5+4bVIY4="
-									},
-									"visible": false,
-									"font": "Arial;13;0",
-									"left": 2133,
-									"top": 642,
-									"width": 8.658203125,
-									"height": 13,
-									"alpha": -1.5707963267948966,
-									"distance": 15,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqyT5+4bXYR4="
-									},
-									"edgePosition": 1,
-									"text": "[]",
-									"wordWrap": true
-								}
-							],
-							"font": "Arial;13;0",
-							"head": {
-								"$ref": "AAAAAAGeOtAfABK6JjU="
-							},
-							"tail": {
-								"$ref": "AAAAAAGdqyANi4amTWk="
-							},
-							"lineStyle": 1,
-							"points": "2152:585;2152:711",
-							"descriptionLabel": {
-								"$ref": "AAAAAAGdqyT5+4bYYBw="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGdqyT5+4bZSO8="
-							}
-						},
-						{
-							"_type": "C4RelationshipView",
-							"_id": "AAAAAAGdqybG74cKDQ8=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGdqybG74cIvPg="
-							},
-							"subViews": [
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqybG74cLMjE=",
-									"_parent": {
-										"$ref": "AAAAAAGdqybG74cKDQ8="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqybG74cIvPg="
-									},
-									"font": "Arial;13;0",
-									"left": 1716,
-									"top": 679,
-									"width": 104,
-									"height": 26,
-									"alpha": -0.9046925846005878,
-									"distance": 36.6742416417845,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqybG74cKDQ8="
-									},
-									"edgePosition": 1,
-									"text": "Envía datos crudos",
-									"wordWrap": true
-								},
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqybG74cMIWg=",
-									"_parent": {
-										"$ref": "AAAAAAGdqybG74cKDQ8="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqybG74cIvPg="
-									},
-									"visible": false,
-									"font": "Arial;13;0",
-									"left": 1783,
-									"top": 705,
-									"width": 8.658203125,
-									"height": 13,
-									"alpha": -1.5707963267948966,
-									"distance": 15,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqybG74cKDQ8="
-									},
-									"edgePosition": 1,
-									"text": "[]",
-									"wordWrap": true
-								}
-							],
-							"font": "Arial;13;0",
-							"head": {
-								"$ref": "AAAAAAGeOysfghM+PEo="
-							},
-							"tail": {
-								"$ref": "AAAAAAGeOtAfABK6JjU="
-							},
-							"lineStyle": 1,
-							"points": "2007:776;1561:677",
-							"descriptionLabel": {
-								"$ref": "AAAAAAGdqybG74cLMjE="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGdqybG74cMIWg="
 							}
 						},
 						{
@@ -1074,17 +856,18 @@
 									"model": {
 										"$ref": "AAAAAAGdqyfpCIc3Q+s="
 									},
-									"visible": false,
 									"font": "Arial;13;0",
-									"left": 1452,
-									"top": 1530,
+									"left": 808,
+									"top": 799,
 									"width": 55.63720703125,
-									"alpha": 1.5707963267948966,
-									"distance": 15,
+									"height": 39,
+									"alpha": -0.8066868409715511,
+									"distance": 949.649408992603,
 									"hostEdge": {
 										"$ref": "AAAAAAGdqyfpCIc5lY8="
 									},
 									"edgePosition": 1,
+									"text": "Usa HTTPS / JSON",
 									"wordWrap": true
 								},
 								{
@@ -1114,384 +897,18 @@
 							],
 							"font": "Arial;13;0",
 							"head": {
-								"$ref": "AAAAAAGeOtLTrxL7mdM="
+								"$ref": "AAAAAAGeOtN3QxMYn9w="
 							},
 							"tail": {
 								"$ref": "AAAAAAGeOtAfABK6JjU="
 							},
 							"lineStyle": 1,
-							"points": "2154:905;2168:1528;792:1504;795:969",
+							"points": "2118:649;2168:1528;792:1504;788:545",
 							"descriptionLabel": {
 								"$ref": "AAAAAAGdqyfpCIc6YIg="
 							},
 							"technologyLabel": {
 								"$ref": "AAAAAAGdqyfpCIc7C/c="
-							}
-						},
-						{
-							"_type": "C4RelationshipView",
-							"_id": "AAAAAAGdqyfvVIdGrrk=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGdqyfvVIdEhqE="
-							},
-							"subViews": [
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqyfvVIdHzfw=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyfvVIdGrrk="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqyfvVIdEhqE="
-									},
-									"font": "Arial;13;0",
-									"left": 802,
-									"top": 971,
-									"width": 32.8681640625,
-									"height": 13,
-									"alpha": -3.07498483424229,
-									"distance": 314.5155004129367,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqyfvVIdGrrk="
-									},
-									"edgePosition": 1,
-									"text": "Usa\n",
-									"wordWrap": true
-								},
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqyfvVIdI1/E=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyfvVIdGrrk="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqyfvVIdEhqE="
-									},
-									"font": "Arial;13;0",
-									"left": 798,
-									"top": 987,
-									"width": 68.63720703125,
-									"height": 13,
-									"alpha": -3.0355795467900504,
-									"distance": 331.54788492765266,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqyfvVIdGrrk="
-									},
-									"edgePosition": 1,
-									"text": "[Json/Https]",
-									"wordWrap": true
-								}
-							],
-							"font": "Arial;13;0",
-							"head": {
-								"$ref": "AAAAAAGeOtN3QxMYn9w="
-							},
-							"tail": {
-								"$ref": "AAAAAAGeOtLTrxL7mdM="
-							},
-							"lineStyle": 1,
-							"points": "794:783;790:545",
-							"descriptionLabel": {
-								"$ref": "AAAAAAGdqyfvVIdHzfw="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGdqyfvVIdI1/E="
-							}
-						},
-						{
-							"_type": "C4RelationshipView",
-							"_id": "AAAAAAGdqyyo+Ydmc7k=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGdqyyo+Idkius="
-							},
-							"subViews": [
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqyyo+Ydnd+U=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyyo+Ydmc7k="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqyyo+Idkius="
-									},
-									"font": "Arial;13;0",
-									"left": 1691,
-									"top": 410,
-									"width": 129,
-									"height": 26,
-									"alpha": 4.469113334551602,
-									"distance": 53.823786563191554,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqyyo+Ydmc7k="
-									},
-									"edgePosition": 1,
-									"text": "Envía mensajes usando",
-									"wordWrap": true
-								},
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqyyo+YdobZM=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyyo+Ydmc7k="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqyyo+Idkius="
-									},
-									"visible": false,
-									"font": "Arial;13;0",
-									"left": 1718,
-									"top": 438,
-									"width": 8.658203125,
-									"height": 13,
-									"alpha": -1.5707963267948966,
-									"distance": 15,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqyyo+Ydmc7k="
-									},
-									"edgePosition": 1,
-									"text": "[]",
-									"wordWrap": true
-								}
-							],
-							"font": "Arial;13;0",
-							"head": {
-								"$ref": "AAAAAAGdjhOgk93RQB0="
-							},
-							"tail": {
-								"$ref": "AAAAAAGeOtAfABK6JjU="
-							},
-							"lineStyle": 1,
-							"points": "2031:711;1396:201",
-							"descriptionLabel": {
-								"$ref": "AAAAAAGdqyyo+Ydnd+U="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGdqyyo+YdobZM="
-							}
-						},
-						{
-							"_type": "C4RelationshipView",
-							"_id": "AAAAAAGdqyyw1Ydz/mE=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGdqyyw1YdxFRg="
-							},
-							"subViews": [
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqyyw1Yd0IxE=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyyw1Ydz/mE="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqyyw1YdxFRg="
-									},
-									"font": "Arial;13;0",
-									"left": 1584,
-									"top": 112,
-									"width": 104,
-									"height": 26,
-									"alpha": -2.8144945022517067,
-									"distance": 59.135437767890075,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqyyw1Ydz/mE="
-									},
-									"edgePosition": 1,
-									"text": "Envía mensajes a",
-									"wordWrap": true
-								},
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqyyw1Yd1ryk=",
-									"_parent": {
-										"$ref": "AAAAAAGdqyyw1Ydz/mE="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqyyw1YdxFRg="
-									},
-									"visible": false,
-									"font": "Arial;13;0",
-									"left": 1688,
-									"top": 115,
-									"width": 8.658203125,
-									"height": 13,
-									"alpha": -1.5707963267948966,
-									"distance": 15,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqyyw1Ydz/mE="
-									},
-									"edgePosition": 1,
-									"text": "[]",
-									"wordWrap": true
-								}
-							],
-							"font": "Arial;13;0",
-							"head": {
-								"$ref": "AAAAAAGdjgrGg9zc6ss="
-							},
-							"tail": {
-								"$ref": "AAAAAAGdjhOgk93RQB0="
-							},
-							"lineStyle": 1,
-							"points": "1449:107;1935:106",
-							"descriptionLabel": {
-								"$ref": "AAAAAAGdqyyw1Yd0IxE="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGdqyyw1Yd1ryk="
-							}
-						},
-						{
-							"_type": "C4RelationshipView",
-							"_id": "AAAAAAGdqzAmiIfl+8s=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGdqzAmiIfjIsQ="
-							},
-							"subViews": [
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqzAmiIfmOxk=",
-									"_parent": {
-										"$ref": "AAAAAAGdqzAmiIfl+8s="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqzAmiIfjIsQ="
-									},
-									"font": "Arial;13;0",
-									"left": 1303,
-									"top": 775,
-									"width": 32.8681640625,
-									"height": 13,
-									"alpha": -2.108481571227289,
-									"distance": 26.832815729997478,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqzAmiIfl+8s="
-									},
-									"edgePosition": 1,
-									"text": "Usa\n",
-									"wordWrap": true
-								},
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqzAmiIfnw24=",
-									"_parent": {
-										"$ref": "AAAAAAGdqzAmiIfl+8s="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqzAmiIfjIsQ="
-									},
-									"font": "Arial;13;0",
-									"left": 1283,
-									"top": 791,
-									"width": 68.63720703125,
-									"height": 13,
-									"alpha": -1.7685511833615681,
-									"distance": 38.897300677553446,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqzAmiIfl+8s="
-									},
-									"edgePosition": 1,
-									"text": "[Json/Https]",
-									"wordWrap": true
-								}
-							],
-							"font": "Arial;13;0",
-							"head": {
-								"$ref": "AAAAAAGeOtFHaxLejD8="
-							},
-							"tail": {
-								"$ref": "AAAAAAGeOtN3QxMYn9w="
-							},
-							"lineStyle": 1,
-							"points": "951:545;1735:991",
-							"descriptionLabel": {
-								"$ref": "AAAAAAGdqzAmiIfmOxk="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGdqzAmiIfnw24="
-							}
-						},
-						{
-							"_type": "C4RelationshipView",
-							"_id": "AAAAAAGdqzA8dYf4xCU=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGdqzA8dYf2YkM="
-							},
-							"subViews": [
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqzA8dYf5f5U=",
-									"_parent": {
-										"$ref": "AAAAAAGdqzA8dYf4xCU="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqzA8dYf2YkM="
-									},
-									"visible": false,
-									"font": "Arial;13;0",
-									"left": 2013,
-									"top": 925,
-									"alpha": 1.5707963267948966,
-									"distance": 15,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqzA8dYf4xCU="
-									},
-									"edgePosition": 1,
-									"wordWrap": true
-								},
-								{
-									"_type": "EdgeLabelView",
-									"_id": "AAAAAAGdqzA8dYf6Lq4=",
-									"_parent": {
-										"$ref": "AAAAAAGdqzA8dYf4xCU="
-									},
-									"model": {
-										"$ref": "AAAAAAGdqzA8dYf2YkM="
-									},
-									"visible": false,
-									"font": "Arial;13;0",
-									"left": 2030,
-									"top": 940,
-									"width": 8.658203125,
-									"height": 13,
-									"alpha": -1.5707963267948966,
-									"distance": 15,
-									"hostEdge": {
-										"$ref": "AAAAAAGdqzA8dYf4xCU="
-									},
-									"edgePosition": 1,
-									"text": "[]",
-									"wordWrap": true
-								}
-							],
-							"font": "Arial;13;0",
-							"head": {
-								"$ref": "AAAAAAGeOtAfABK6JjU="
-							},
-							"tail": {
-								"$ref": "AAAAAAGeOtFHaxLejD8="
-							},
-							"lineStyle": 1,
-							"points": "1993:967;2055:905",
-							"descriptionLabel": {
-								"$ref": "AAAAAAGdqzA8dYf5f5U="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGdqzA8dYf6Lq4="
 							}
 						},
 						{
@@ -1585,8 +1002,8 @@
 									},
 									"fillColor": "#a3e0ff",
 									"font": "Arial;13;1",
-									"left": 2016,
-									"top": 720,
+									"left": 1976,
+									"top": 464,
 									"width": 272,
 									"height": 13,
 									"text": "Backend",
@@ -1600,8 +1017,8 @@
 									},
 									"fillColor": "#a3e0ff",
 									"font": "Arial;13;0",
-									"left": 2016,
-									"top": 735,
+									"left": 1976,
+									"top": 479,
 									"width": 272,
 									"height": 13,
 									"text": "[Container]",
@@ -1615,8 +1032,8 @@
 									},
 									"fillColor": "#a3e0ff",
 									"font": "Arial;13;0",
-									"left": 2016,
-									"top": 758,
+									"left": 1976,
+									"top": 502,
 									"width": 272,
 									"height": 39,
 									"text": "Se encarga de  procesar los pedidos y  realizar las peticiones a las apis que correspondan",
@@ -1625,8 +1042,8 @@
 							],
 							"fillColor": "#a3e0ff",
 							"font": "Arial;13;0",
-							"left": 2008,
-							"top": 712,
+							"left": 1968,
+							"top": 456,
 							"width": 288,
 							"height": 192,
 							"nameLabel": {
@@ -1637,150 +1054,6 @@
 							},
 							"descriptionLabel": {
 								"$ref": "AAAAAAGeOtAfABK9ceM="
-							}
-						},
-						{
-							"_type": "C4ContainerView",
-							"_id": "AAAAAAGeOtFHaxLejD8=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGeOtFHaxLcLpA="
-							},
-							"subViews": [
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGeOtFHaxLfBOo=",
-									"_parent": {
-										"$ref": "AAAAAAGeOtFHaxLejD8="
-									},
-									"fillColor": "#a3e0ff",
-									"font": "Arial;13;1",
-									"left": 1744,
-									"top": 976,
-									"width": 280,
-									"height": 13,
-									"text": "Api Chatbot",
-									"wordWrap": true
-								},
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGeOtFHaxLg53E=",
-									"_parent": {
-										"$ref": "AAAAAAGeOtFHaxLejD8="
-									},
-									"fillColor": "#a3e0ff",
-									"font": "Arial;13;0",
-									"left": 1744,
-									"top": 991,
-									"width": 280,
-									"height": 13,
-									"text": "[Container]",
-									"wordWrap": true
-								},
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGeOtFHaxLhLU0=",
-									"_parent": {
-										"$ref": "AAAAAAGeOtFHaxLejD8="
-									},
-									"fillColor": "#a3e0ff",
-									"font": "Arial;13;0",
-									"left": 1744,
-									"top": 1014,
-									"width": 280,
-									"height": 91,
-									"text": "Plataforma que actúa como intermediario para la comunicación bidireccional con el cliente. Emplea servicios REST para la transmisión de mensajes, alertas de vencimientos, notificaciones de pago y recepción de archivos adjuntos (comprobantes y denuncias de siniestros).",
-									"wordWrap": true
-								}
-							],
-							"fillColor": "#a3e0ff",
-							"font": "Arial;13;0",
-							"left": 1736,
-							"top": 968,
-							"width": 296,
-							"height": 216,
-							"nameLabel": {
-								"$ref": "AAAAAAGeOtFHaxLfBOo="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGeOtFHaxLg53E="
-							},
-							"descriptionLabel": {
-								"$ref": "AAAAAAGeOtFHaxLhLU0="
-							}
-						},
-						{
-							"_type": "C4ContainerView",
-							"_id": "AAAAAAGeOtLTrxL7mdM=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGeOtLTrxL5+og="
-							},
-							"subViews": [
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGeOtLTrxL8W7g=",
-									"_parent": {
-										"$ref": "AAAAAAGeOtLTrxL7mdM="
-									},
-									"fillColor": "#a3e0ff",
-									"font": "Arial;13;1",
-									"left": 680,
-									"top": 792,
-									"width": 232,
-									"height": 13,
-									"text": "Api Application",
-									"wordWrap": true
-								},
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGeOtLTrxL9yLQ=",
-									"_parent": {
-										"$ref": "AAAAAAGeOtLTrxL7mdM="
-									},
-									"fillColor": "#a3e0ff",
-									"font": "Arial;13;0",
-									"left": 680,
-									"top": 807,
-									"width": 232,
-									"height": 13,
-									"text": "[Container]",
-									"wordWrap": true
-								},
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGeOtLTsBL+rMw=",
-									"_parent": {
-										"$ref": "AAAAAAGeOtLTrxL7mdM="
-									},
-									"fillColor": "#a3e0ff",
-									"font": "Arial;13;0",
-									"left": 680,
-									"top": 830,
-									"width": 232,
-									"height": 26,
-									"text": "Endpoints expuestos por la aplicacion para recibir informacion ",
-									"wordWrap": true
-								}
-							],
-							"fillColor": "#a3e0ff",
-							"font": "Arial;13;0",
-							"left": 672,
-							"top": 784,
-							"width": 248,
-							"height": 184,
-							"nameLabel": {
-								"$ref": "AAAAAAGeOtLTrxL8W7g="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGeOtLTrxL9yLQ="
-							},
-							"descriptionLabel": {
-								"$ref": "AAAAAAGeOtLTsBL+rMw="
 							}
 						},
 						{
@@ -1834,8 +1107,8 @@
 									"left": 616,
 									"top": 406,
 									"width": 344,
-									"height": 52,
-									"text": "Contiene toda la lógica de negocio. Expone una API REST para la Web SPA y recibe los Webhooks del Chatbot\nTambién incluye el \"Timer\" interno para notificar vencimientos de pólizas",
+									"height": 65,
+									"text": "Contiene toda la lógica de negocio. Expone APIs REST para la transmisión de mensajes y recepción de archivos adjuntos (comprobantes y denuncias de siniestros). El chatbot dispara la consulta y recibe la respuesta a través de la misma",
 									"wordWrap": true
 								}
 							],
@@ -1853,78 +1126,6 @@
 							},
 							"descriptionLabel": {
 								"$ref": "AAAAAAGeOtN3QxMbzyM="
-							}
-						},
-						{
-							"_type": "C4ContainerView",
-							"_id": "AAAAAAGeOysfghM+PEo=",
-							"_parent": {
-								"$ref": "AAAAAAGIJ9MNFnaM7XY="
-							},
-							"model": {
-								"$ref": "AAAAAAGeOysfghM8DEc="
-							},
-							"subViews": [
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGeOysfghM/6Dk=",
-									"_parent": {
-										"$ref": "AAAAAAGeOysfghM+PEo="
-									},
-									"fillColor": "#949494",
-									"font": "Arial;13;1",
-									"left": 1400,
-									"top": 568,
-									"width": 152,
-									"height": 13,
-									"text": "API IA",
-									"wordWrap": true
-								},
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGeOysfghNA760=",
-									"_parent": {
-										"$ref": "AAAAAAGeOysfghM+PEo="
-									},
-									"fillColor": "#949494",
-									"font": "Arial;13;0",
-									"left": 1400,
-									"top": 583,
-									"width": 152,
-									"height": 13,
-									"text": "[Container]",
-									"wordWrap": true
-								},
-								{
-									"_type": "LabelView",
-									"_id": "AAAAAAGeOysfghNBnzA=",
-									"_parent": {
-										"$ref": "AAAAAAGeOysfghM+PEo="
-									},
-									"fillColor": "#949494",
-									"font": "Arial;13;0",
-									"left": 1400,
-									"top": 606,
-									"width": 152,
-									"height": 143,
-									"text": "Recibe los documentos físicos y comprobantes adjuntados por los clientes mediante WhatsApp. Ejecuta el procesamiento automatizado para extraer, estructurar y validar la información contenida, retornando los datos al Backend. \n",
-									"wordWrap": true
-								}
-							],
-							"fillColor": "#949494",
-							"font": "Arial;13;0",
-							"left": 1392,
-							"top": 560,
-							"width": 168,
-							"height": 197,
-							"nameLabel": {
-								"$ref": "AAAAAAGeOysfghM/6Dk="
-							},
-							"technologyLabel": {
-								"$ref": "AAAAAAGeOysfghNA760="
-							},
-							"descriptionLabel": {
-								"$ref": "AAAAAAGeOysfghNBnzA="
 							}
 						},
 						{
@@ -2070,6 +1271,374 @@
 							"descriptionLabel": {
 								"$ref": "AAAAAAGeOyyfkRN7M5U="
 							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGevvm4HUHFEpw=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGevvm4HEHDbAE="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGevvm4HUHGVs4=",
+									"_parent": {
+										"$ref": "AAAAAAGevvm4HUHFEpw="
+									},
+									"model": {
+										"$ref": "AAAAAAGevvm4HEHDbAE="
+									},
+									"font": "Arial;13;0",
+									"left": 1665,
+									"top": 107,
+									"width": 54.919921875,
+									"height": 26,
+									"alpha": 1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGevvm4HUHFEpw="
+									},
+									"edgePosition": 1,
+									"text": "Envia consultas",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGevvm4HUHHsC4=",
+									"_parent": {
+										"$ref": "AAAAAAGevvm4HUHFEpw="
+									},
+									"model": {
+										"$ref": "AAAAAAGevvm4HEHDbAE="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 1688,
+									"top": 85,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGevvm4HUHFEpw="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"head": {
+								"$ref": "AAAAAAGdjhOgk93RQB0="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjgrGg9zc6ss="
+							},
+							"lineStyle": 1,
+							"points": "1935:106;1449:107",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGevvm4HUHGVs4="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGevvm4HUHHsC4="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGevvtizEHpH7I=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGevvtiy0HnjtI="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGevvtizEHqZyk=",
+									"_parent": {
+										"$ref": "AAAAAAGevvtizEHpH7I="
+									},
+									"model": {
+										"$ref": "AAAAAAGevvtiy0HnjtI="
+									},
+									"font": "Arial;13;0",
+									"left": 1560,
+									"top": 343,
+									"width": 57.0908203125,
+									"height": 65,
+									"alpha": 0.25618431310547773,
+									"distance": 191.03926298015284,
+									"hostEdge": {
+										"$ref": "AAAAAAGevvtizEHpH7I="
+									},
+									"edgePosition": 1,
+									"text": "Traslada la respuesta la consulta ",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGevvtizEHr58E=",
+									"_parent": {
+										"$ref": "AAAAAAGevvtizEHpH7I="
+									},
+									"model": {
+										"$ref": "AAAAAAGevvtiy0HnjtI="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 1773,
+									"top": 421,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGevvtizEHpH7I="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"head": {
+								"$ref": "AAAAAAGdjhOgk93RQB0="
+							},
+							"tail": {
+								"$ref": "AAAAAAGeOtAfABK6JjU="
+							},
+							"lineStyle": 1,
+							"points": "1967:505;1768:440;1417:201",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGevvtizEHqZyk="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGevvtizEHr58E="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGevvwYyUH68rg=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGevvwYyEH4Pqo="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGevvwYyUH7DlE=",
+									"_parent": {
+										"$ref": "AAAAAAGevvwYyUH68rg="
+									},
+									"model": {
+										"$ref": "AAAAAAGevvwYyEH4Pqo="
+									},
+									"font": "Arial;13;0",
+									"left": 1776,
+									"top": 136,
+									"width": 57.0908203125,
+									"height": 65,
+									"alpha": 0.07393903083665858,
+									"distance": 108.29589096544707,
+									"hostEdge": {
+										"$ref": "AAAAAAGevvwYyUH68rg="
+									},
+									"edgePosition": 1,
+									"text": "Envia la respuesta generada por el backend",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGevvwYyUH8Xro=",
+									"_parent": {
+										"$ref": "AAAAAAGevvwYyUH68rg="
+									},
+									"model": {
+										"$ref": "AAAAAAGevvwYyEH4Pqo="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 1693,
+									"top": 185,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGevvwYyUH68rg="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"head": {
+								"$ref": "AAAAAAGdjgrGg9zc6ss="
+							},
+							"tail": {
+								"$ref": "AAAAAAGdjhOgk93RQB0="
+							},
+							"lineStyle": 1,
+							"points": "1449:158;1512:176;1880:176;1935:161",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGevvwYyUH7DlE="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGevvwYyUH8Xro="
+							}
+						},
+						{
+							"_type": "C4ContainerView",
+							"_id": "AAAAAAGevv13RUIfHDo=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGevv13REId6eI="
+							},
+							"subViews": [
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGevv13RUIgVVE=",
+									"_parent": {
+										"$ref": "AAAAAAGevv13RUIfHDo="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;1",
+									"left": 1720,
+									"top": 758,
+									"width": 192,
+									"height": 13,
+									"text": "DataBase",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGevv13RUIhv74=",
+									"_parent": {
+										"$ref": "AAAAAAGevv13RUIfHDo="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;0",
+									"left": 1720,
+									"top": 773,
+									"width": 192,
+									"height": 26,
+									"text": "[Container: Postgress Relacional]",
+									"wordWrap": true
+								},
+								{
+									"_type": "LabelView",
+									"_id": "AAAAAAGevv13RUIinbc=",
+									"_parent": {
+										"$ref": "AAAAAAGevv13RUIfHDo="
+									},
+									"fillColor": "#a3e0ff",
+									"font": "Arial;13;0",
+									"left": 1720,
+									"top": 809,
+									"width": 192,
+									"height": 52,
+									"text": "Almacena las conversaciones con cada cliente por 24hs. Es la misma base de datos de polizing pero un schema distinto",
+									"wordWrap": true
+								}
+							],
+							"fillColor": "#a3e0ff",
+							"font": "Arial;13;0",
+							"left": 1712,
+							"top": 712,
+							"width": 208,
+							"height": 157,
+							"nameLabel": {
+								"$ref": "AAAAAAGevv13RUIgVVE="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGevv13RUIhv74="
+							},
+							"descriptionLabel": {
+								"$ref": "AAAAAAGevv13RUIinbc="
+							}
+						},
+						{
+							"_type": "C4RelationshipView",
+							"_id": "AAAAAAGevv6+y0IwNaU=",
+							"_parent": {
+								"$ref": "AAAAAAGIJ9MNFnaM7XY="
+							},
+							"model": {
+								"$ref": "AAAAAAGevv6+y0IuEzM="
+							},
+							"subViews": [
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGevv6+y0IxI6c=",
+									"_parent": {
+										"$ref": "AAAAAAGevv6+y0IwNaU="
+									},
+									"model": {
+										"$ref": "AAAAAAGevv6+y0IuEzM="
+									},
+									"font": "Arial;13;0",
+									"left": 1904,
+									"top": 647,
+									"width": 41.9072265625,
+									"height": 26,
+									"alpha": -1.2804942277956841,
+									"distance": 33.83784863137726,
+									"hostEdge": {
+										"$ref": "AAAAAAGevv6+y0IwNaU="
+									},
+									"edgePosition": 1,
+									"text": "Lee y escribe",
+									"wordWrap": true
+								},
+								{
+									"_type": "EdgeLabelView",
+									"_id": "AAAAAAGevv6+y0Iy8SM=",
+									"_parent": {
+										"$ref": "AAAAAAGevv6+y0IwNaU="
+									},
+									"model": {
+										"$ref": "AAAAAAGevv6+y0IuEzM="
+									},
+									"visible": false,
+									"font": "Arial;13;0",
+									"left": 1939,
+									"top": 662,
+									"width": 7.2236328125,
+									"height": 13,
+									"alpha": -1.5707963267948966,
+									"distance": 15,
+									"hostEdge": {
+										"$ref": "AAAAAAGevv6+y0IwNaU="
+									},
+									"edgePosition": 1,
+									"text": "[]",
+									"wordWrap": true
+								}
+							],
+							"font": "Arial;13;0",
+							"head": {
+								"$ref": "AAAAAAGevv13RUIfHDo="
+							},
+							"tail": {
+								"$ref": "AAAAAAGeOtAfABK6JjU="
+							},
+							"lineStyle": 1,
+							"points": "1991:649;1914:711",
+							"descriptionLabel": {
+								"$ref": "AAAAAAGevv6+y0IxI6c="
+							},
+							"technologyLabel": {
+								"$ref": "AAAAAAGevv6+y0Iy8SM="
+							}
 						}
 					]
 				},
@@ -2149,12 +1718,26 @@
 								"$ref": "AAAAAAGdjgrGg9zaqt4="
 							},
 							"source": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"target": {
+								"$ref": "AAAAAAGeOtAe/xK46Es="
+							},
+							"description": "Traslada la consulta"
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGevvm4HEHDbAE=",
+							"_parent": {
+								"$ref": "AAAAAAGdjgrGg9zaqt4="
+							},
+							"source": {
 								"$ref": "AAAAAAGdjgrGg9zaqt4="
 							},
 							"target": {
-								"$ref": "AAAAAAGdqyANi4akrx0="
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
 							},
-							"description": "Consulta\n"
+							"description": "Envia consultas"
 						}
 					],
 					"description": "Persona que contrata un seguro"
@@ -2329,6 +1912,20 @@
 								"$ref": "AAAAAAGdjgrGg9zaqt4="
 							},
 							"description": "Envía mensajes a"
+						},
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGevvwYyEH4Pqo=",
+							"_parent": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"source": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjgrGg9zaqt4="
+							},
+							"description": "Envia la respuesta generada por el backend"
 						}
 					],
 					"technology": "Json/Https",
@@ -2469,7 +2066,23 @@
 					"_parent": {
 						"$ref": "AAAAAAGIJ9MNFXaLtCg="
 					},
-					"name": "Sistema de Chatbot"
+					"name": "Sistema de Chatbot",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGevvtiy0HnjtI=",
+							"_parent": {
+								"$ref": "AAAAAAGdqx2k5IZVsZI="
+							},
+							"source": {
+								"$ref": "AAAAAAGeOtAe/xK46Es="
+							},
+							"target": {
+								"$ref": "AAAAAAGdjhOgkt3PF7I="
+							},
+							"description": "Traslada la respuesta la consulta "
+						}
+					]
 				},
 				{
 					"_type": "C4Container",
@@ -2528,8 +2141,9 @@
 								"$ref": "AAAAAAGeOtAe/xK46Es="
 							},
 							"target": {
-								"$ref": "AAAAAAGeOtLTrxL5+og="
-							}
+								"$ref": "AAAAAAGeOtN3QxMWXXY="
+							},
+							"description": "Usa HTTPS / JSON"
 						},
 						{
 							"_type": "C4Relationship",
@@ -2664,6 +2278,22 @@
 						"$ref": "AAAAAAGIJ9MNFXaLtCg="
 					},
 					"name": "Backend",
+					"ownedElements": [
+						{
+							"_type": "C4Relationship",
+							"_id": "AAAAAAGevv6+y0IuEzM=",
+							"_parent": {
+								"$ref": "AAAAAAGeOtAe/xK46Es="
+							},
+							"source": {
+								"$ref": "AAAAAAGeOtAe/xK46Es="
+							},
+							"target": {
+								"$ref": "AAAAAAGevv13REId6eI="
+							},
+							"description": "Lee y escribe"
+						}
+					],
 					"description": "Se encarga de  procesar los pedidos y  realizar las peticiones a las apis que correspondan",
 					"kind": "etc"
 				},
@@ -2684,7 +2314,7 @@
 						"$ref": "AAAAAAGIJ9MNFXaLtCg="
 					},
 					"name": "Api Application",
-					"description": "Endpoints expuestos por la aplicacion para recibir informacion ",
+					"description": "Plataforma que actúa como intermediario para la comunicación bidireccional con el chatbot. Emplea servicios REST para la transmisión de mensajes y recepción de archivos adjuntos (comprobantes y denuncias de siniestros). El chatbot dispara la consulta y recibe la respuesta a través de la misma",
 					"kind": "etc"
 				},
 				{
@@ -2695,7 +2325,7 @@
 					},
 					"name": "Backend",
 					"technology": "Next.js",
-					"description": "Contiene toda la lógica de negocio. Expone una API REST para la Web SPA y recibe los Webhooks del Chatbot\nTambién incluye el \"Timer\" interno para notificar vencimientos de pólizas",
+					"description": "Contiene toda la lógica de negocio. Expone APIs REST para la transmisión de mensajes y recepción de archivos adjuntos (comprobantes y denuncias de siniestros). El chatbot dispara la consulta y recibe la respuesta a través de la misma",
 					"kind": "etc"
 				},
 				{
@@ -2727,6 +2357,17 @@
 					"name": "Api Berkley",
 					"description": "Sistema de datos fuente de la aseguradora\n",
 					"kind": "etc"
+				},
+				{
+					"_type": "C4Container",
+					"_id": "AAAAAAGevv13REId6eI=",
+					"_parent": {
+						"$ref": "AAAAAAGIJ9MNFXaLtCg="
+					},
+					"name": "DataBase",
+					"technology": "Postgress Relacional",
+					"description": "Almacena las conversaciones con cada cliente por 24hs. Es la misma base de datos de polizing pero un schema distinto",
+					"kind": "database"
 				}
 			]
 		}
