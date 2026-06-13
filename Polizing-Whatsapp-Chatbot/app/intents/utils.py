@@ -77,7 +77,7 @@ def parse_indices(text: str) -> list[int] | None:
 
 def format_policies(policies: list[dict]) -> str:
     return "\n".join(
-        f"{index}. {policy['policy_number']} - {policy['domain']} - {policy['description']}"
+        f"{index}. {policy['policy_number']} - {policy['domain'] or 'S/D'} - {policy['description']}"
         for index, policy in enumerate(policies, start=1)
     )
 

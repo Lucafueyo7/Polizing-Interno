@@ -38,13 +38,13 @@ DEFAULT_MESSAGES = {
     ),
     "payment_file_prompt": (
         "Archivo pago",
-        "Adjunte el o los comprobantes de pago (imagen o PDF), uno por mensaje. Cuando haya enviado todos, responda LISTO.",
+        "Adjunte el o los comprobantes de pago (imagen o PDF), uno por mensaje. Cuando haya enviado todos, responda FINALIZAR.",
     ),
     "payment_more_files_prompt": (
         "Mas comprobantes",
-        "Comprobante recibido. Adjunte otro archivo o responda LISTO para terminar.",
+        "Comprobante recibido. Adjunte otro archivo o responda FINALIZAR para terminar.",
     ),
-    "payment_no_files": ("Sin comprobantes", "Debe adjuntar al menos un comprobante antes de responder LISTO."),
+    "payment_no_files": ("Sin comprobantes", "Debe adjuntar al menos un comprobante antes de responder FINALIZAR."),
     "payment_invalid_file": ("Archivo pago invalido", "El archivo recibido no es valido. Envie una imagen o un PDF."),
     "payment_success": ("Pago recibido", "El comprobante fue recibido correctamente. Numero de recepcion: {reference}."),
     "claim_policy_prompt": ("Poliza siniestro", "Seleccione la poliza asociada al siniestro:\n\n{policies}"),

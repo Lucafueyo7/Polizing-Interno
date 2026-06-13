@@ -27,7 +27,7 @@ class PaymentReceiptHandler(BaseFlowHandler):
             return
 
         if conversation.current_step == "file":
-            if is_keyword(text, "LISTO"):
+            if is_keyword(text, "LISTO") or is_keyword(text, "FINALIZAR"):
                 if not data.get("files"):
                     await self.whatsapp.send_text(conversation.phone, get_message(self.db, "payment_no_files"))
                     return
