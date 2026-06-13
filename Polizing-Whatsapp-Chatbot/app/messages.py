@@ -34,7 +34,7 @@ DEFAULT_MESSAGES = {
     ),
     "payment_policy_prompt": (
         "Poliza pago",
-        "Seleccione la o las polizas a las que corresponde el comprobante. Si son varias, separelas con coma (por ejemplo: 1,3):\n\n{policies}",
+        "Seleccione la o las polizas a las que corresponde/n el/los comprobante/s. Envie 1,2,3,x para seleccionar varias, o bien envie de a un numero:\n\n{policies}",
     ),
     "payment_file_prompt": (
         "Archivo pago",
@@ -45,6 +45,7 @@ DEFAULT_MESSAGES = {
         "Comprobante recibido. Adjunte otro archivo o responda FINALIZAR para terminar.",
     ),
     "payment_no_files": ("Sin comprobantes", "Debe adjuntar al menos un comprobante antes de responder FINALIZAR."),
+    "payment_policy_assigned": ("Poliza asignada", "Poliza {policy_number} asignada. Adjunte los comprobantes de pago."),
     "payment_invalid_file": ("Archivo pago invalido", "El archivo recibido no es valido. Envie una imagen o un PDF."),
     "payment_success": ("Pago recibido", "El comprobante fue recibido correctamente. Numero de recepcion: {reference}."),
     "claim_policy_prompt": ("Poliza siniestro", "Seleccione la poliza asociada al siniestro:\n\n{policies}"),

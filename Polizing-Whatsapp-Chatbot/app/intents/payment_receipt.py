@@ -21,6 +21,7 @@ class PaymentReceiptHandler(BaseFlowHandler):
                     get_message(self.db, "payment_policy_prompt", policies=format_policies(policies)),
                 )
                 return
+            data["all_policies"] = policies
             data["policies"] = [policies[i] for i in indices]
             data["files"] = []
             await self._advance(conversation, data, "file", "payment_file_prompt")
@@ -36,6 +37,21 @@ class PaymentReceiptHandler(BaseFlowHandler):
                 await self.whatsapp.send_text(conversation.phone, get_message(self.db, "payment_success", reference=result["reference"]))
                 await self._send_menu(conversation, is_corporate)
                 return
+            if text.isdigit():
+                idx = int(text) - 1
+                all_policies = data.get("all_policies", data.get("policies", []))
+                if 0 <= idx < len(all_policies):
+                    policy = all_policies[idx]
+                    current = data["policies"]
+                    if policy not in current:
+                        current.append(policy)
+                        data["policies"] = current
+                        self._save_data(conversation, data)
+                        await self.whatsapp.send_text(
+                            conversation.phone,
+                            get_message(self.db, "payment_policy_assigned", policy_number=text),
+                        )
+                        return
             media = inbound.get("media")
             if not valid_media(media):
                 await self.whatsapp.send_text(conversation.phone, get_message(self.db, "payment_invalid_file"))
