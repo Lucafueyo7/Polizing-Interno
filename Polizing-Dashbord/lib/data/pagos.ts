@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { PAGOS_BUCKET, signedUrlForDoc } from "@/lib/storage/supabase";
 import { fmtBytes } from "@/lib/format/bytes";
-import { createCachedGetter, CACHE_TAGS } from "./cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import {
   aseguradoraRefFromRow,
   clienteRefFromRow,
@@ -95,19 +96,12 @@ function toPolizaRef(p: PagoFullRow["pago_polizas"][number]["poliza"]): PagoPoli
   };
 }
 
-const getAllPagosCached = createCachedGetter(
-  getAllPagosImpl,
-  ["pagos", "all"],
-  CACHE_TAGS.pagos,
-);
-
-async function getAllPagosImpl(): Promise<PagoListItem[]> {
+async function getAllPagos(): Promise<PagoListItem[]> {
+  "use cache";
+  cacheLife("short");
+  cacheTag(CACHE_TAGS.pagos);
   const rows = await findPagos();
   return rows.map(toListItem);
-}
-
-async function getAllPagos(): Promise<PagoListItem[]> {
-  return getAllPagosCached();
 }
 
 function matchesTab(p: PagoListItem, tab: PagoTab | undefined): boolean {

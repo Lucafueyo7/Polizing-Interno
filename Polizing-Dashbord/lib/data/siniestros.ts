@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { createCachedGetter, CACHE_TAGS } from "./cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
+import { cacheLife, cacheTag } from "next/cache";
 import { signedUrlForDoc } from "@/lib/storage/supabase";
 import {
   clienteIdent,
@@ -165,19 +166,12 @@ async function getLecturasByUser(userId: number | undefined): Promise<Set<number
   return new Set(rows.map((r) => r.siniestro_id));
 }
 
-const getAllSiniestrosCached = createCachedGetter(
-  getAllSiniestrosImpl,
-  ["siniestros", "all"],
-  CACHE_TAGS.siniestros,
-);
-
-async function getAllSiniestrosImpl(): Promise<Omit<SiniestroListItem, "leidoPorMi">[]> {
+async function getAllSiniestros(): Promise<Omit<SiniestroListItem, "leidoPorMi">[]> {
+  "use cache";
+  cacheLife("short");
+  cacheTag(CACHE_TAGS.siniestros);
   const rows = await findSiniestros();
   return rows.map(toListItemBase);
-}
-
-async function getAllSiniestros(): Promise<Omit<SiniestroListItem, "leidoPorMi">[]> {
-  return getAllSiniestrosCached();
 }
 
 async function getEnrichedSiniestros(

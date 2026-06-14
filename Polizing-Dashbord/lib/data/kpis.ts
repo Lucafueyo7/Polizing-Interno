@@ -1,4 +1,5 @@
-import { createCachedGetter, CACHE_TAGS } from "./cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { prisma } from "@/lib/prisma";
 import { aseguradoraColor } from "@/lib/domain/aseguradora-color";
 import { clienteRefFromRow, isoDateTime } from "./_mappers";
@@ -13,17 +14,11 @@ const ACTIVE_POLIZAS = ["vigente"] as const;
 const PENDING_SINIESTROS = ["nuevo", "en_tramite"] as const;
 const COMPUTABLE_POLIZAS = ["vigente"] as const;
 
-const getDashboardKPIsCached = createCachedGetter(
-  getDashboardKPIsImpl,
-  ["kpis", "dashboard"],
-  CACHE_TAGS.kpis,
-);
-
 export async function getDashboardKPIs(): Promise<DashboardKPIs> {
-  return getDashboardKPIsCached();
-}
+  "use cache";
+  cacheLife("medium");
+  cacheTag(CACHE_TAGS.kpis);
 
-async function getDashboardKPIsImpl(): Promise<DashboardKPIs> {
   const [clientesActivos, polizasVigentes, siniestrosTramite, primaAgg] =
     await Promise.all([
       prisma.clientes.count({ where: { estado: "activo" } }),
@@ -45,39 +40,27 @@ async function getDashboardKPIsImpl(): Promise<DashboardKPIs> {
   };
 }
 
-// El único badge cuenta siniestros "nuevo": se etiqueta con el tag `siniestros`
-// (no `kpis`) para que CUALQUIER mutación de siniestros lo invalide al instante
-// y el número del sidebar quede siempre actualizado, sin esperar el TTL.
-const getSidebarBadgesCached = createCachedGetter(
-  getSidebarBadgesImpl,
-  ["siniestros", "sidebar-badges"],
-  CACHE_TAGS.siniestros,
-);
-
+// El único badge cuenta siniestros "nuevo": se etiqueta con los tags `kpis` y
+// `siniestros` para invalidación cruzada: mutaciones de siniestros o de KPIs
+// lo refrescan al instante.
 export async function getSidebarBadges(): Promise<SidebarBadges> {
-  return getSidebarBadgesCached();
-}
+  "use cache";
+  cacheLife("short");
+  cacheTag(CACHE_TAGS.kpis, CACHE_TAGS.siniestros);
 
-async function getSidebarBadgesImpl(): Promise<SidebarBadges> {
-  const siniestrosNuevos = await prisma.siniestros.count({ where: { estado: "nuevo" } });
+  const siniestrosNuevos = await prisma.siniestros.count({
+    where: { estado: "nuevo" },
+  });
   return { siniestrosNuevos };
 }
-
-const getSiniestrosPendientesCached = createCachedGetter(
-  getSiniestrosPendientesImpl,
-  ["kpis", "siniestros-pendientes"],
-  CACHE_TAGS.kpis,
-);
 
 export async function getSiniestrosPendientes(
   limit = 5,
 ): Promise<SiniestroPendiente[]> {
-  return getSiniestrosPendientesCached(limit);
-}
+  "use cache";
+  cacheLife("medium");
+  cacheTag(CACHE_TAGS.kpis);
 
-async function getSiniestrosPendientesImpl(
-  limit = 5,
-): Promise<SiniestroPendiente[]> {
   const rows = await prisma.siniestros.findMany({
     where: { estado: "nuevo" },
     orderBy: { fecha_reporte: "desc" },
@@ -106,21 +89,13 @@ async function getSiniestrosPendientesImpl(
   }));
 }
 
-const getDistribucionAseguradorasCached = createCachedGetter(
-  getDistribucionAseguradorasImpl,
-  ["kpis", "distribucion"],
-  CACHE_TAGS.kpis,
-);
-
 export async function getDistribucionAseguradoras(): Promise<
   DistribucionAseguradora[]
 > {
-  return getDistribucionAseguradorasCached();
-}
+  "use cache";
+  cacheLife("medium");
+  cacheTag(CACHE_TAGS.kpis);
 
-async function getDistribucionAseguradorasImpl(): Promise<
-  DistribucionAseguradora[]
-> {
   const aseguradoras = await prisma.empresas_aseguradoras.findMany({
     orderBy: { id: "asc" },
     include: {

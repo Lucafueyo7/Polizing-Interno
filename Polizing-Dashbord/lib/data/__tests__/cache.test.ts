@@ -1,76 +1,84 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("next/cache", () => {
-  const unstable_cache = vi.fn((getter: any, _keyParts: string[], _options: any) => {
-    const store = new Map<string, unknown>();
-    return async (...args: unknown[]) => {
-      const key = JSON.stringify(args);
-      if (!store.has(key)) {
-        store.set(key, await getter(...args));
-      }
-      return store.get(key);
-    };
-  });
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    empresas_aseguradoras: { findMany: vi.fn() },
+    siniestros: { count: vi.fn() },
+  },
+}));
 
-  return {
-    unstable_cache,
-    revalidateTag: vi.fn(),
-  };
-});
+import { prisma } from "@/lib/prisma";
+import { getDistribucionAseguradoras, getSidebarBadges } from "../kpis";
 
-import { revalidateTag, unstable_cache } from "next/cache";
-import {
-  CACHE_TAGS,
-  DEFAULT_CACHE_TTL_SECONDS,
-  DOMAIN_CACHE_TTL_SECONDS,
-  createCachedGetter,
-} from "../cache";
-
-describe("createCachedGetter", () => {
+describe("data functions with next/cache mocked", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("caches async getters with the same input", async () => {
-    let counter = 0;
-    const getter = vi.fn(async (id: number) => {
-      counter += 1;
-      return { id, counter };
+  describe("getDistribucionAseguradoras", () => {
+    it("distribuye porcentajes según pólizas activas por aseguradora", async () => {
+      (prisma.empresas_aseguradoras.findMany as any).mockResolvedValue([
+        {
+          id: 1,
+          razon_social: "Aseguradora A",
+          polizas: [{ estado: "vigente" }, { estado: "vigente" }],
+        },
+        {
+          id: 2,
+          razon_social: "Aseguradora B",
+          polizas: [{ estado: "vigente" }],
+        },
+        {
+          id: 3,
+          razon_social: "Aseguradora C",
+          polizas: [{ estado: "cancelada" }],
+        },
+      ]);
+
+      const result = await getDistribucionAseguradoras();
+
+      expect(result).toHaveLength(3);
+      // totalActivas = 3 (2+1+0), denom = 3
+      expect(result[0]).toMatchObject({
+        id: 1,
+        razonSocial: "Aseguradora A",
+        polizasActivas: 2,
+        color: "#0f2744",
+      });
+      expect(result[0].pct).toBeCloseTo(66.67, 1);
+      expect(result[1]).toMatchObject({
+        id: 2,
+        razonSocial: "Aseguradora B",
+        polizasActivas: 1,
+        color: "#0d8a5f",
+      });
+      expect(result[1].pct).toBeCloseTo(33.33, 1);
+      expect(result[2]).toMatchObject({
+        id: 3,
+        razonSocial: "Aseguradora C",
+        polizasActivas: 0,
+        color: "#b6620a",
+      });
+      expect(result[2].pct).toBe(0);
     });
 
-    const cached = createCachedGetter(getter, ["polizas", "by-id", 1], CACHE_TAGS.polizas);
+    it("retorna arreglo vacío cuando no hay aseguradoras", async () => {
+      (prisma.empresas_aseguradoras.findMany as any).mockResolvedValue([]);
 
-    await expect(cached(1)).resolves.toEqual({ id: 1, counter: 1 });
-    await expect(cached(1)).resolves.toEqual({ id: 1, counter: 1 });
-    expect(counter).toBe(1);
-    expect(getter).toHaveBeenCalledTimes(1);
-    expect(unstable_cache).toHaveBeenCalledWith(
-      getter,
-      ["polizas", "by-id", "1"],
-      { tags: [CACHE_TAGS.polizas], revalidate: DEFAULT_CACHE_TTL_SECONDS },
-    );
+      const result = await getDistribucionAseguradoras();
+
+      expect(result).toEqual([]);
+    });
   });
 
-  it("uses domain TTL defaults and explicit overrides", async () => {
-    const getter = vi.fn(async () => "ok");
+  describe("getSidebarBadges", () => {
+    it("retorna la cantidad de siniestros nuevos", async () => {
+      (prisma.siniestros.count as any).mockResolvedValue(3);
 
-    createCachedGetter(getter, ["kpis", "summary"], CACHE_TAGS.kpis);
-    createCachedGetter(getter, ["clientes", "summary"], CACHE_TAGS.clientes, 45);
+      const result = await getSidebarBadges();
 
-    expect(unstable_cache).toHaveBeenNthCalledWith(
-      1,
-      getter,
-      ["kpis", "summary"],
-      { tags: [CACHE_TAGS.kpis], revalidate: DOMAIN_CACHE_TTL_SECONDS.kpis },
-    );
-    expect(unstable_cache).toHaveBeenNthCalledWith(
-      2,
-      getter,
-      ["clientes", "summary"],
-      { tags: [CACHE_TAGS.clientes], revalidate: 45 },
-    );
-  });
-
-  it("re-exports revalidateTag", () => {
-    revalidateTag(CACHE_TAGS.polizas, "max");
-    expect(revalidateTag).toHaveBeenCalledWith(CACHE_TAGS.polizas, "max");
+      expect(result).toEqual({ siniestrosNuevos: 3 });
+      expect(prisma.siniestros.count).toHaveBeenCalledWith({
+        where: { estado: "nuevo" },
+      });
+    });
   });
 });

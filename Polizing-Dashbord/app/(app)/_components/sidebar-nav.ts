@@ -33,6 +33,8 @@ export type NavItem = {
   matchPrefix: string;
   /** Si se especifica, solo se muestra a usuarios con estos roles. */
   roles?: Role[];
+  /** Precarga la página completa (incluyendo datos cacheados) al hacer hover. */
+  prefetch?: boolean;
 };
 
 export const NAV_ITEMS: ReadonlyArray<NavItem> = [
@@ -42,6 +44,7 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     href: "/dashboard",
     icon: Dashboard,
     matchPrefix: "/dashboard",
+    prefetch: true,
   },
   {
     id: "clientes",
@@ -49,6 +52,7 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     href: "/clientes",
     icon: Users,
     matchPrefix: "/clientes",
+    prefetch: true,
   },
   {
     id: "aseguradoras",
@@ -63,6 +67,7 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     href: "/polizas",
     icon: Shield,
     matchPrefix: "/polizas",
+    prefetch: true,
   },
   {
     id: "siniestros",

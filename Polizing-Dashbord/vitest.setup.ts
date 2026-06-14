@@ -1,11 +1,14 @@
 import { vi } from "vitest";
 
-// `unstable_cache` requires a server runtime with incrementalCache.
-// In tests, just call through directly (no caching).
+// `'use cache'` directives with `cacheTag()`/`cacheLife()` require a server
+// runtime. In tests, just no-op — we test data logic, not caching infra.
 vi.mock("next/cache", () => ({
+  // Fallback: `unstable_cache` needed until all modules are migrated to `use cache` (T4-T10).
   unstable_cache: <TArgs extends unknown[], TResult>(
     fn: (...args: TArgs) => Promise<TResult>,
   ): ((...args: TArgs) => Promise<TResult>) => fn,
+  cacheTag: vi.fn(),
+  cacheLife: vi.fn(),
   revalidateTag: vi.fn(),
 }));
 

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ChevronRight, WhatsApp } from "@/components/icons";
 import { EmptyState } from "@/components/shared/empty-state";

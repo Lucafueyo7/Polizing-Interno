@@ -14,6 +14,19 @@ const nextConfig: NextConfig = {
     // Remove when Next.js fixes upstream.
     ignoreBuildErrors: true,
   },
+  cacheComponents: true,
+  cacheLife: {
+    short: {
+      stale: 15,
+      revalidate: 120,
+      expire: 86400,
+    },
+    medium: {
+      stale: 30,
+      revalidate: 300,
+      expire: 86400,
+    },
+  },
 };
 
 export default nextConfig;

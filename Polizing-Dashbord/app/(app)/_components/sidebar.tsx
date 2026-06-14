@@ -139,6 +139,7 @@ export function Sidebar({ user, badges = {} }: SidebarProps) {
               <Link
                 key={item.id}
                 href={item.href}
+                prefetch={item.prefetch}
                 data-active={active}
                 title={collapsed ? item.label : undefined}
                 className={cn(

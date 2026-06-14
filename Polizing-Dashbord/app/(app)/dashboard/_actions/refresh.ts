@@ -1,7 +1,7 @@
 "use server";
 
 import { updateTag } from "next/cache";
-import { CACHE_TAGS } from "@/lib/data/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 // Invalida los tags de los getters que alimentan el dashboard para que el
 // botón "Actualizar" traiga datos frescos (no alcanza con router.refresh(),

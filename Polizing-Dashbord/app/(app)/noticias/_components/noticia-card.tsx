@@ -1,3 +1,5 @@
+"use client";
+
 import { ArrowUpRight, Calendar, Newspaper, Tag } from "@/components/icons";
 import { Card } from "@/components/ui/card";
 import { timeAgo } from "@/lib/format/time-ago";

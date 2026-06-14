@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { scrapeAsegurandoDigital } from "@/lib/scrapers/asegurando-digital";
+import { cacheLife, cacheTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 export type NoticiaListItem = {
   id: number;
@@ -15,6 +17,10 @@ export type NoticiaListItem = {
 const TAKE_LIMIT = 12;
 
 export async function getNoticias(): Promise<NoticiaListItem[]> {
+  'use cache';
+  cacheLife('short');
+  cacheTag(CACHE_TAGS.noticias);
+
   const rows = await prisma.noticias_scrapeadas.findMany({
     orderBy: [{ publicada_en: "desc" }, { scrapeada_en: "desc" }],
     take: TAKE_LIMIT,

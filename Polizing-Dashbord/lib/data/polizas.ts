@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { createCachedGetter, CACHE_TAGS } from "./cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
+import { cacheLife, cacheTag } from "next/cache";
 import { clienteIdent, clienteLabel } from "@/lib/domain/cliente-helpers";
 import { derivePolizaEstado } from "@/lib/domain/poliza-status";
 import {
@@ -66,16 +67,13 @@ function toListItem(row: PolizaRow, now: Date): PolizaListItem {
 }
 
 async function getAllPolizas(): Promise<PolizaListItem[]> {
+  "use cache";
+  cacheLife("short");
+  cacheTag(CACHE_TAGS.polizas);
   const rows = await findPolizas();
   const now = new Date();
   return rows.map((r) => toListItem(r, now));
 }
-
-const getAllPolizasCached = createCachedGetter(
-  getAllPolizas,
-  ["polizas", "all"],
-  CACHE_TAGS.polizas,
-);
 
 function matchesTab(p: PolizaListItem, tab: PolizaTab | undefined): boolean {
   if (!tab || tab === "all") return true;
@@ -108,7 +106,7 @@ export async function getPolizas(
   filters: PolizasFilters = {},
   page?: number,
 ): Promise<PolizasPage> {
-  const all = await getAllPolizasCached();
+  const all = await getAllPolizas();
   const isEmpty =
     !filters.q &&
     (!filters.tab || filters.tab === "all") &&
@@ -143,7 +141,7 @@ export async function getPolizas(
 export async function getPolizaCounts(
   filters: Omit<PolizasFilters, "tab"> = {},
 ): Promise<PolizaCounts> {
-  const all = await getAllPolizasCached();
+  const all = await getAllPolizas();
   const scoped = all.filter((p) => matchesFilters(p, { ...filters, tab: "all" }));
   return {
     all: scoped.length,
@@ -165,7 +163,10 @@ export async function getPolizaById(id: number): Promise<PolizaFull | null> {
   };
 }
 
-const getPolizaFormRefsUncached = async function (): Promise<PolizaFormRefs> {
+export async function getPolizaFormRefs(): Promise<PolizaFormRefs> {
+  "use cache";
+  cacheLife("short");
+  cacheTag(CACHE_TAGS.polizas);
   const [clientesRows, aseguradorasRows, tiposRows] = await Promise.all([
     prisma.clientes.findMany({
       where: { estado: "activo" },
@@ -224,9 +225,3 @@ const getPolizaFormRefsUncached = async function (): Promise<PolizaFormRefs> {
     coberturasPorTipo,
   };
 };
-
-export const getPolizaFormRefs = createCachedGetter(
-  getPolizaFormRefsUncached,
-  ["polizas", "form-refs"],
-  CACHE_TAGS.polizas,
-);
